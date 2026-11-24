@@ -289,7 +289,7 @@ function buildShell() {
         h('div', { class: 'key-pop', id: 'key-pop', role: 'dialog', 'aria-label': 'Type key', hidden: true }))),
     h('div', { class: 'sb-foot' },
       iconBtn('blackhole', 'Graph (Alt G)', () => openGraph(), 'btn-graph'),
-      h('button', { class: 'icon-btn', id: 'btn-review', title: 'Review flashcards (Alt R)', 'aria-label': 'Review', onclick: () => openReview(), html: icon('hourglass') }, h('span', { class: 'badge', id: 'due-badge', hidden: true })),
+      h('button', { class: 'icon-btn', id: 'btn-review', title: 'Review flashcards (Alt R). Right-click: statistics', 'aria-label': 'Review', onclick: () => openReview(), oncontextmenu: (e) => { e.preventDefault(); openStats(); }, html: icon('hourglass') }, h('span', { class: 'badge', id: 'due-badge', hidden: true })),
       iconBtn('gear', 'Settings', () => openSettings(), 'btn-settings'),
       h('span', { class: 'sb-status', id: 'side-foot' })));
 

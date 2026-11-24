@@ -123,6 +123,7 @@ function commands() {
     { label: 'Quick capture to inbox', keys: 'Alt+C', run: () => captureDialog() },
     { label: 'Open graph view', keys: 'Alt+G', run: () => openGraph() },
     { label: 'Review due flashcards', keys: 'Alt+R', run: () => openReview() },
+    { label: 'Review statistics', run: () => openStats() },
     { label: 'Random note (serendipity)', run: () => { const all = vault.all(); if (all.length) openNote(all[Math.floor(Math.random() * all.length)].id); } },
     { label: 'View: live preview', keys: modKey() + '+E', run: () => setMode('live') },
     { label: 'View: source (plain Markdown)', keys: modKey() + '+Shift+E', run: () => setMode('source') },
@@ -356,12 +357,13 @@ function ivlLabel(st, g) {
 
 function openReview(scope = {}) {
   let queue = dueQueue(scope);
-  let ov; let card = null; let shown = false; const stats = { done: 0, again: 0 };
+  let ov; let card = null; let shown = false; const stats = { done: 0, again: 0 }; let cardStart = Date.now(); let lastCard = null;
   const box = h('div', { class: 'review' });
   const render = () => {
     box.innerHTML = '';
     const head = h('div', { class: 'rv-head' }, h('b', null, scope.noteId ? 'Study: ' + vault.get(scope.noteId).title : 'Review'),
       h('span', { class: 'muted small' }, `${queue.length} left · ${stats.done} done`),
+      h('button', { class: 'link-btn rv-stats', title: 'Review statistics', onclick: () => { ov.close(); openStats(); } }, 'statistics'),
       h('button', { class: 'icon-btn', title: 'Close', html: icon('x', 18), onclick: () => ov.close() }));
     box.appendChild(head);
     card = queue[0];
@@ -370,12 +372,13 @@ function openReview(scope = {}) {
       box.appendChild(h('div', { class: 'rv-done' }, h('div', { class: 'empty-mark' }, '∎'),
         h('h3', null, stats.done ? 'Session complete' : 'Nothing is due'),
         h('p', { class: 'muted' }, stats.done ? `${stats.done} reviews, ${stats.again} lapses.` : total ? `You have ${total} cards. New cards arrive at ${app.settings.newPerDay} per day.` : 'Make cards with {{c1::cloze}}, Q:/A: lines, or named :::definition / :::theorem blocks.'),
-        h('button', { class: 'btn', onclick: () => ov.close() }, 'Close')));
+        h('div', { class: 'btn-row', style: { justifyContent: 'center' } }, h('button', { class: 'btn', onclick: () => { ov.close(); openStats(); } }, 'See statistics'), h('button', { class: 'btn', onclick: () => ov.close() }, 'Close'))));
       updateDueBadge();
       return;
     }
     const n = vault.get(card.noteId);
     const st = app.srs[card.id];
+    if (card !== lastCard || !shown && stats.done === 0 && lastCard == null) { cardStart = Date.now(); lastCard = card; }
     const front = h('div', { class: 'rv-card prose' });
     front.innerHTML = renderMarkdown(card.front, { note: n, idPrefix: 'rv-', breaks: !!(card.breaks || card.frontBreaks) });
     const back = h('div', { class: 'rv-back prose', hidden: !shown });
@@ -393,7 +396,10 @@ function openReview(scope = {}) {
     box.appendChild(h('div', { class: 'rv-body' }, src, front, shown ? h('div', { class: 'rv-sep' }) : null, back, actions));
   };
   const grade = (g) => {
-    const { s, isNew } = schedule(app.srs[card.id], g);
+    const prev = app.srs[card.id];
+    statsLog(card, prev, g, Date.now() - cardStart);
+    lastCard = null;
+    const { s, isNew } = schedule(prev, g);
     app.srs[card.id] = s;
     if (isNew) { app.srs._new = app.srs._new || {}; const k = todayKey(); app.srs._new = { [k]: (app.srs._new[k] || 0) + 1 }; }
     saveSrs();
@@ -527,6 +533,7 @@ function openSettings(tab = 'general') {
         row('New cards per day', sel('newPerDay', [0, 5, 10, 20, 30, 50, 100].map((x) => [x, String(x)]), updateDueBadge)),
         row('Cards from statements', chk('autoCards', 'Make a card from each named definition, theorem, lemma, axiom or law block', updateDueBadge), 'Add the word nocard after the brackets to skip one block.'),
         h('p', { class: 'muted' }, `${total} cards in the vault; ${known} have a review history.`),
+        row('Statistics', h('button', { class: 'btn btn-sm', onclick: () => { ov.close(); openStats(); } }, 'Open review statistics'), 'Reviews per day, retention, streak, a 30-day forecast, intervals, and the cards you forget most.'),
         row('Reset schedule', h('button', { class: 'btn btn-danger btn-sm', onclick: async () => {
           if (await confirmDialog('Reset all review history?', 'All cards become new again.', 'Reset', true)) { app.srs = {}; saveSrs(); updateDueBadge(); toast('Review history reset'); }
         } }, 'Reset')),
