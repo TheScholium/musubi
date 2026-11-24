@@ -638,6 +638,42 @@ function lpPremiseEnter(view) {
   return true;
 }
 
+/* ---------- indentation: wider, with faint guides ----------
+   The file keeps two spaces (or a tab) for each level, as Markdown expects. The editor draws each level
+   wider, with a faint vertical guide line, as a code editor does, and wrapped lines stay under their indent. */
+class IndentWidget extends WidgetType {
+  eq() { return true; }
+  toDOM() { const s = document.createElement('span'); s.className = 'cm-indent'; s.setAttribute('aria-hidden', 'true'); return s; }
+  ignoreEvent() { return false; }
+}
+const INDENT_WIDGET = new IndentWidget();
+function indentGuideExt() {
+  const build = (view) => {
+    const b = new CM.RangeSetBuilder(); const doc = view.state.doc; let lastLine = 0;
+    for (const { from, to } of view.visibleRanges) {
+      let pos = from;
+      while (pos <= to) {
+        const line = doc.lineAt(pos);
+        if (line.number <= lastLine) { pos = line.to + 1; continue; }
+        lastLine = line.number;
+        const m = /^(?: {2}|\t)+/.exec(line.text);
+        if (m) {
+          const units = m[0].match(/ {2}|\t/g);
+          b.add(line.from, line.from, Decoration.line({ class: 'cm-indented', attributes: { style: `--lvl:${units.length}` } }));
+          let p = line.from;
+          for (const u of units) { b.add(p, p + u.length, Decoration.replace({ widget: INDENT_WIDGET })); p += u.length; }
+        }
+        pos = line.to + 1;
+      }
+    }
+    return b.finish();
+  };
+  return ViewPlugin.fromClass(class {
+    constructor(view) { this.decorations = build(view); }
+    update(u) { if (u.docChanged || u.viewportChanged) this.decorations = build(u.view); }
+  }, { decorations: (v) => v.decorations });
+}
+
 /* ---------- editor facade ---------- */
 const ed = {
   view: null, mode: 'live', states: new Map(), noteId: null, quiet: false,
@@ -655,12 +691,14 @@ const ed = {
       closeBrackets(),
       autocompletion({ override: [lpCompletions], icons: false, activateOnTyping: true, defaultKeymap: true, maxRenderedOptions: 30 }),
       indentUnit.of('  '),
+      Prec.low(indentGuideExt()),
       focusField,
       EditorView.focusChangeEffect.of((state, focusing) => focusEffect.of(focusing)),
       placeholder('Write. Type [[ to link a note, $ for mathematics, ::: for a theorem block.'),
       Prec.high(keymap.of([
         { key: 'Tab', run: (v) => acceptCompletion(v) || indentMore(v), shift: indentLess },
         { key: 'Enter', run: lpPremiseEnter },
+        { key: 'Alt-Enter', run: () => followLinkAtCursor(false), shift: () => followLinkAtCursor(true) },
         { key: 'Mod-b', run: lpWrap('**') }, { key: 'Mod-i', run: lpWrap('*') }, { key: 'Mod-m', run: lpWrap('$') },
         { key: 'Mod-Shift-m', run: lpWrap('$$\n', '\n$$') }, { key: 'Mod-Shift-l', run: lpWrap('[[', ']]') },
         { key: 'Mod-Shift-d', run: lpWrap('{{c1::', '}}') }, { key: 'Mod-Shift-h', run: lpWrap('==') },
@@ -749,6 +787,11 @@ function lpMouseDown(e, view) {
   }
   const tag = t.closest && t.closest('.cm-lp-tag');
   if (tag && (e.ctrlKey || e.metaKey)) { e.preventDefault(); filterByTag(tag.dataset.tag); return true; }
+  // Cmd/Ctrl+click on the raw text of a [[link]] (source mode, or a link that shows its source): a new tab
+  if ((e.ctrlKey || e.metaKey) && !t.closest('.cm-lp-mdlink')) {
+    const pos = view.posAtCoords({ x: e.clientX, y: e.clientY });
+    if (pos != null) { const l = wikiLinkAt(view.state, pos); if (l) { e.preventDefault(); openLinkTarget(l, e); return true; } }
+  }
   const md = t.closest && t.closest('.cm-lp-mdlink');
   if (md && (e.ctrlKey || e.metaKey) && md.dataset.href) {
     e.preventDefault();
@@ -762,6 +805,33 @@ function lpMouseDown(e, view) {
   }
   return false;
 }
+/* The [[link]] around a document position, or null. */
+function wikiLinkAt(state, pos) {
+  const line = state.doc.lineAt(pos); const re = /!?\[\[([^\[\]\n]+?)\]\]/g; let m;
+  while ((m = re.exec(line.text))) {
+    const a = line.from + m.index; const b = a + m[0].length;
+    if (pos >= a && pos <= b) { const raw = m[1].split('|')[0].trim(); return splitTarget(raw); }
+  }
+  return null;
+}
+/* Open a parsed link target: a note (heading or block too) or a file. e decides the tab, as for a click. */
+function openLinkTarget({ target, heading }, e) {
+  const n = cur();
+  if (target && hasFileExt(target) && !NOTE_EXT.test(target)) { const f = findAsset(target, n); if (f) openAttachment(f.name, pageOfHeading(heading)); else toast('No file named ' + target); return; }
+  const id = target ? resolveTarget(target) : (n && n.id);
+  if (!id) { createFromBroken(target); return; }
+  const opts = isBlockRef(heading) ? { block: heading.slice(1) } : heading ? { heading: slugify(heading) } : {};
+  openWithKeys(e, id, opts);
+}
+/* Alt+Enter: follow the link at the text cursor. With Shift (or from the palette with newTab) it opens in a new tab. */
+function followLinkAtCursor(newTab) {
+  if (!ed.view || app.settings.mode === 'read') return false;
+  const l = wikiLinkAt(ed.view.state, ed.view.state.selection.main.head);
+  if (!l) { toast('The cursor is not in a [[link]]'); return false; }
+  openLinkTarget(l, newTab ? { metaKey: true, ctrlKey: true } : null);
+  return true;
+}
+
 /* Pasting or dropping a file saves it as an attachment (Settings, Data, Attachments says where)
    and inserts a link: ![[name]] for images, PDFs, audio and video, [[name]] for other files.
    Markdown, ZIP, JSON and BibTeX files dropped here are imported as notes instead. */

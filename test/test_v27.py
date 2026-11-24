@@ -162,6 +162,27 @@ with sync_playwright() as p:
     check(E("document.querySelectorAll('.cm-ba').length") > 3, 'bold anchors appear in live preview')
     E("musubi.app.settings.boldAnchors = false; musubi.app.settings.theme = 'dark'; musubi.applyTheme(); musubi.ed.setAnchors()")
 
+    # ---------- 2.7.1: indentation, layout, shortcuts ----------
+    E("musubi.setMode('live')")
+    E("musubi.createNote({ title: 'Indented', body: 'Top\\n\\n- a\\n  - b\\n    - c\\n' })"); pg.wait_for_timeout(400)
+    check(E("document.querySelectorAll('.cm-indent').length") == 3 and E("document.querySelectorAll('.cm-line.cm-indented').length") == 2, 'each indent level is drawn as a wide guide')
+    check(E("Math.round(document.querySelector('.cm-indent').getBoundingClientRect().width)") > 20, 'the indent is wider than two spaces')
+    check(E("musubi.ed.getText()").startswith('Top\n\n- a\n  - b'), 'the file keeps two spaces for each level')
+    check(E("!document.querySelector('#crumb')"), 'the type name is gone from the top bar')
+    check(E("document.querySelector('.sb-bottom').contains(document.querySelector('#filter')) && document.querySelector('.sb-bottom').contains(document.querySelector('#key-fab'))"), 'the filter and sort sit at the bottom, beside the compass')
+    dock = E("(() => { const r = document.querySelector('#nav-dock').getBoundingClientRect(); return [innerWidth - r.right, innerHeight - r.bottom, r.height]; })()")
+    check(dock[0] < 30 and dock[1] < 30 and dock[2] < 30, 'the arrows are small, at the bottom right')
+    E('document.activeElement.blur()'); n0 = E('musubi.vault.all().length')
+    pg.keyboard.press('Control+KeyN'); pg.wait_for_timeout(400)
+    check(E('musubi.vault.all().length') == n0 + 1 and E("document.activeElement.id") == 'title' and E("musubi.vault.get(musubi.app.current).title").startswith('Untitled'), 'Ctrl+N makes a note, opens it, and selects its title')
+    E("musubi.setMode('source')"); pg.wait_for_timeout(200)
+    E("musubi.ed.setText('Go [[Open cover]] now'); musubi.ed.setSelection(6); musubi.ed.focus()")
+    pg.keyboard.press('Alt+Enter'); pg.wait_for_timeout(400)
+    check(E("musubi.vault.get(musubi.app.current).title") == 'Open cover', 'Alt+Enter follows the link at the cursor')
+    E("musubi.setMode('live')"); E('document.activeElement.blur()')
+    nt = len(tabs()[0]); pg.keyboard.press('Control+KeyW'); pg.wait_for_timeout(300); pg.keyboard.press('Control+Shift+KeyT'); pg.wait_for_timeout(300)
+    check(any('Open cover' in t for t in tabs()[0]), 'Ctrl+Shift+T opens the closed tab again')
+
     real = [e for e in errs if 'favicon' not in e]
     check(not real, 'no console errors' + (': ' + '; '.join(real[:4]) if real else ''))
     b.close()

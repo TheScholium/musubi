@@ -65,7 +65,7 @@ const DEFAULT_SETTINGS = {
   sections: { outline: true, relations: true, localgraph: true, info: false },
   templates: DEFAULT_TEMPLATES, recent: [], seeded: false, onboarded: false, tourSeen: 0, tour: null,
   attachLocation: 'folder', attachFolder: 'assets', attachSubfolder: 'assets',
-  theme: 'dark', boldAnchors: false, anchorStrength: 'medium', folderTree: false,
+  theme: 'dark', indentWidth: 'normal', indentGuides: true, boldAnchors: false, anchorStrength: 'medium', folderTree: false,
   tabs: null, split: false, splitRatio: 0.5,
   lsEnabled: true, lsDefaults: true, lsAutofraction: true, lsTabout: true, lsMatrix: true, lsEnlarge: true, lsEnlargeSpace: true, lsAutoDelete: true, lsSnippets: '', lsVariables: '',
 };
@@ -101,6 +101,7 @@ function applyTheme() {
   root.dataset.theme = resolvedTheme();
   root.dataset.anchors = s.boldAnchors ? (s.anchorStrength || 'medium') : 'off';
   const cs = document.querySelector('meta[name="color-scheme"]'); if (cs) cs.content = root.dataset.theme === 'istari-light' ? 'light' : 'dark';
+  root.dataset.indent = s.indentWidth || 'normal'; root.dataset.guides = s.indentGuides === false ? 'off' : 'on';
   root.dataset.width = s.width;
   root.style.setProperty('--reading-size', s.fontSize + 'px');
   root.style.setProperty('--editor-size', s.editorFontSize + 'px');
@@ -272,18 +273,19 @@ function buildShell() {
         iconBtn('loupe', 'Find a note or run a command (Ctrl K)', () => openPalette(''), 'btn-search'),
         iconBtn('scroll', 'Quick capture to the inbox (Alt C)', () => captureDialog(), 'btn-capture'),
         iconBtn('plus', 'New note (Alt N)', () => newNoteDialog(), 'btn-new'))),
-    h('div', { class: 'sb-filter' },
-      h('input', { id: 'filter', type: 'search', placeholder: 'Filter', autocomplete: 'off', spellcheck: 'false', title: 'Words, tag:x, type:theorem, status:fleeting', oninput: debounce(renderSidebar, 120) }),
-      h('select', { id: 'sort', title: 'Sort order', 'aria-label': 'Sort order', onchange: (e) => { app.settings.sort = e.target.value; saveSettings(); renderSidebar(); } },
-        h('option', { value: 'modified' }, 'Edited'), h('option', { value: 'created' }, 'Created'),
-        h('option', { value: 'title' }, 'Title'), h('option', { value: 'links' }, 'Links'))),
     h('nav', { class: 'sb-tabs', role: 'tablist' },
       // icons; the open tab also shows its name
       ...[['notes', 'Notes', 'slips'], ['folders', 'Folders', 'folder'], ['tags', 'Tags', 'tag'], ['inbox', 'Inbox', 'tray'], ['maint', 'Maintain', 'broom']].map(([k, l, ic]) =>
         h('button', { class: 'sb-tab', 'data-tab': k, role: 'tab', title: l, 'aria-label': l, onclick: () => { app.settings.sidebarTab = k; saveSettings(); renderSidebar(); } },
           h('span', { class: 'sb-tab-ic', html: icon(ic, 17) }), h('span', { class: 'sb-tab-label' }, l), k === 'inbox' ? h('span', { class: 'count', id: 'inbox-count' }) : null))),
     h('div', { class: 'sb-listwrap' },
-      h('div', { id: 'side-body', class: 'side-body' }),
+      h('div', { id: 'side-body', class: 'side-body' })),
+    h('div', { class: 'sb-bottom' },
+      h('div', { class: 'sb-filter' },
+      h('input', { id: 'filter', type: 'search', placeholder: 'Filter', autocomplete: 'off', spellcheck: 'false', title: 'Words, tag:x, type:theorem, status:fleeting', oninput: debounce(renderSidebar, 120) }),
+      h('select', { id: 'sort', title: 'Sort order', 'aria-label': 'Sort order', onchange: (e) => { app.settings.sort = e.target.value; saveSettings(); renderSidebar(); } },
+        h('option', { value: 'modified' }, 'Edited'), h('option', { value: 'created' }, 'Created'),
+        h('option', { value: 'title' }, 'Title'), h('option', { value: 'links' }, 'Links'))),
       h('div', { class: 'type-key', id: 'type-key' },
         h('button', { class: 'key-fab', id: 'key-fab', 'aria-label': 'Type key', 'aria-expanded': 'false', html: icon('compass', 18) }),
         h('div', { class: 'key-pop', id: 'key-pop', role: 'dialog', 'aria-label': 'Type key', hidden: true }))),
@@ -296,7 +298,7 @@ function buildShell() {
   const main = h('main', { id: 'main' },
     h('div', { class: 'mtop' },
       iconBtn('codex', 'Toggle the note list', toggleSidebar, 'btn-sidebar'),
-      h('span', { class: 'mtop-crumb', id: 'crumb' }),
+      h('span', { class: 'mtop-fill' }),
       h('span', { class: 'save-state', id: 'save-state' }),
       iconBtn('eye', 'Read or edit (Ctrl E)', () => setMode(app.settings.mode === 'read' ? 'live' : 'read'), 'btn-mode'),
       iconBtn('more', 'Note actions', (e) => openNoteMenu(e.currentTarget), 'btn-more'),
@@ -386,7 +388,6 @@ function showEmpty() {
   { const P = panes.list[panes.notePane]; const t = P.tabs[P.active]; if (t && t.k === 'note') t.id = null; else if (!t) { P.tabs.push({ k: 'note', id: null }); P.active = P.tabs.length - 1; } }
   $('#note-scroll').hidden = false;
   $('#note-view').hidden = true; const ev = $('#empty-view'); ev.hidden = false;
-  $('#crumb').textContent = '';
   document.title = 'Musubi';
   ev.innerHTML = '';
   const fs = 'showDirectoryPicker' in window;
@@ -526,7 +527,6 @@ function fillHeader(n) {
   if (!STATUS_IDS.includes(n.status) && !$$('option', ss).some((o) => o.value === n.status)) ss.appendChild(h('option', { value: n.status }, n.status));
   ss.value = n.status; ss.dataset.status = n.status;
   $('#note-id').textContent = n.id;
-  $('#crumb').textContent = TYPE_LABEL[n.type] || n.type;
   renderTagChips(n);
   for (const inp of $$('#details input')) {
     const k = inp.dataset.field;
@@ -570,7 +570,7 @@ function bindNoteView() {
   title.addEventListener('keydown', (e) => { if (e.key === 'Enter' || (e.key === 'ArrowDown' && !e.shiftKey)) { e.preventDefault(); commitTitle(); if (app.settings.mode !== 'read') { ed.focus(); ed.setSelection(0); } } });
   $('#type').addEventListener('change', (e) => {
     const n = cur(); if (!n) return;
-    const old = n.type; n.type = e.target.value; $('#type-dot').className = 'dot t-' + n.type; $('#crumb').textContent = TYPE_LABEL[n.type] || n.type;
+    const old = n.type; n.type = e.target.value; $('#type-dot').className = 'dot t-' + n.type;
     markDirty(); refreshLists();
     const oldT = (app.settings.templates[old] || '').replace(/\{\{title\}\}/g, n.title).trim();
     if ((!n.body.trim() || n.body.trim() === oldT) && app.settings.templates[n.type] != null) {

@@ -131,7 +131,10 @@ function commands() {
     { label: 'View: read', run: () => setMode('read') },
     { label: 'Toggle sidebar', run: toggleSidebar },
     { label: 'Manage tags: rename, merge, move, remove', run: () => openTagManager() },
-    { label: 'New tab', keys: 'Alt+T', run: () => newTab() },
+    { label: 'New note (no questions)', keys: modKey() + '+N', run: () => newUntitledNote() },
+    { label: 'New tab', keys: modKey() + '+T', run: () => newTab() },
+    { label: 'Open the last closed tab again', keys: modKey() + '+Shift+T', run: () => reopenClosedTab() },
+    { label: 'Follow the link at the cursor', keys: 'Alt+Enter', run: () => followLinkAtCursor(false) },
     { label: 'Close tab', keys: 'Alt+W', run: () => { const p = panes.focus == null ? panes.notePane : panes.focus; closeTab(p, panes.list[p].active); } },
     { label: panes.split ? 'Close the split' : 'Split view: open a second pane', keys: 'Alt+\\', run: toggleSplit },
     { label: 'Go back', keys: modKey() + '+Alt+←', run: () => navGo(-1) },
@@ -481,6 +484,10 @@ function openSettings(tab = 'general') {
         chk('boldAnchors', 'Make the first letters of each word bold', () => { applyTheme(); ed.setAnchors(); renderPreview(); }),
         sel('anchorStrength', [['light', 'Light (about a third of each word)'], ['medium', 'Medium (about two fifths)'], ['strong', 'Strong (about half)']], () => { applyTheme(); ed.setAnchors(); renderPreview(); })),
       'A lead-in for the eye, in live preview and in read view. Some readers with ADHD find it easier to keep their place. Code, mathematics and links do not change. The words in your files do not change.'),
+      row('Indentation', h('div', { class: 'check-col' },
+        sel('indentWidth', [['narrow', 'Narrow'], ['normal', 'Normal'], ['wide', 'Wide']], applyTheme),
+        chk('indentGuides', 'Show faint guide lines at each level', applyTheme)),
+      'Tab indents a line, Shift+Tab takes the indent back. The file keeps two spaces for each level, as Markdown expects; Musubi draws each level wider.'),
       row('Text size', sel('fontSize', [16, 17, 18, 19, 20, 21, 22].map((x) => [x, x + ' px']), applyTheme), 'Istari sets body text at 19 px.'),
       row('Measure', sel('width', [['istari', 'Istari (42 rem)'], ['vellum', 'Vellum (34 rem, justified)'], ['wide', 'Wide (52 rem)']], applyTheme)),
       row('View', sel('mode', [['live', 'Live preview'], ['source', 'Source'], ['read', 'Read']], () => setMode(s.mode))),
@@ -696,10 +703,15 @@ const SHORTCUTS_MD = `
 | <kbd>Alt</kbd> + hover | Preview a note from the sidebar |
 | <kbd>Ctrl/⌘ ,</kbd> | Settings |
 | <kbd>Ctrl/⌘ Alt ←</kbd> / <kbd>→</kbd> | Back / forward (also the arrows at the foot of the page, and the mouse's side buttons) |
-| <kbd>Alt T</kbd> / <kbd>Alt W</kbd> | New tab / close tab |
-| <kbd>Alt 1</kbd>…<kbd>9</kbd> | Go to a tab (9 is the last) |
-| <kbd>Alt \\</kbd> | Split view on or off |
-| <kbd>Ctrl/⌘</kbd> + click | Open a link or a note in a new tab (with <kbd>Shift</kbd>: in the other pane) |
+| <kbd>Ctrl/⌘ N</kbd> | New note, open, with its title selected (<kbd>Ctrl/⌘ Shift N</kbd>: choose the type first) |
+| <kbd>Ctrl/⌘ T</kbd> / <kbd>Ctrl/⌘ W</kbd> | New tab / close tab (in a browser tab, Chrome keeps these: use <kbd>Alt T</kbd> / <kbd>Alt W</kbd>) |
+| <kbd>Ctrl/⌘ Shift T</kbd> | Open the last closed tab again |
+| <kbd>Ctrl Tab</kbd>, <kbd>Ctrl/⌘ Shift ]</kbd> | Next tab (with <kbd>Shift</kbd>, or <kbd>[</kbd>: the previous one) |
+| <kbd>Ctrl/⌘ 1</kbd>…<kbd>9</kbd>, <kbd>Alt 1</kbd>…<kbd>9</kbd> | Go to a tab (9 is the last) |
+| <kbd>Ctrl/⌘ \\</kbd>, <kbd>Alt \\</kbd> | Split view on or off |
+| <kbd>Ctrl/⌘ O</kbd> | Open a note by name |
+| <kbd>Ctrl/⌘</kbd> + click | Open a link in a new tab, also on the raw text of a link (with <kbd>Shift</kbd>: in the other pane) |
+| <kbd>Alt Enter</kbd> | Follow the link at the cursor (<kbd>Alt Shift Enter</kbd>: in a new tab) |
 | <kbd>Alt P</kbd> | Open a PDF in the reader |
 | <kbd>?</kbd> | This page (when the cursor is not in a note or field) |
 
@@ -742,7 +754,7 @@ These follow the Obsidian plugin LaTeX Suite. Change them in Settings, Mathemati
 const ABOUT_MD = `
 **Musubi** is a free and open-source note platform for Zettelkasten work in mathematics, physics and philosophy. It is one HTML file. It needs no server, no account and no network.
 
-- Version 2.7.0. MIT License. Web app: https://thescholium.github.io/musubi/
+- Version 2.7.1. MIT License. Web app: https://thescholium.github.io/musubi/
 - Set in the Istari design system: EB Garamond, Cormorant Garamond and JetBrains Mono (SIL Open Font License 1.1), embedded in the file.
 - Bundled libraries: CodeMirror 6 and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0), pdf.js (Apache-2.0). Default snippets from Obsidian LaTeX Suite (MIT).
 - Your notes are plain Markdown with YAML front matter. You can read them in any editor, and they work in Obsidian.
@@ -1127,6 +1139,13 @@ async function folderRemove(n) {
 }
 
 /* ---------- keyboard, routing, boot ---------- */
+/* Cmd/Ctrl+N: a new note now, named "Untitled", open with its title selected. */
+function newUntitledNote() {
+  const used = new Set(vault.all().map((n) => n.title.toLowerCase()));
+  let title = 'Untitled'; let k = 2; while (used.has(title.toLowerCase())) title = 'Untitled ' + k++;
+  createNote({ title, status: 'fleeting' }, { focusTitle: true });
+}
+
 function bindGlobal() {
   // In-page links (#n-…, #heading) must never navigate the document: inside a srcdoc frame
   // a fragment URL resolves against the parent's address and would unload the app.
@@ -1155,6 +1174,17 @@ function bindGlobal() {
     if (mod && !e.shiftKey && k === 'e') { e.preventDefault(); setMode(app.settings.mode === 'read' ? 'live' : 'read'); return; }
     if (mod && e.shiftKey && k === 'e') { e.preventDefault(); setMode(app.settings.mode === 'source' ? 'live' : 'source'); return; }
     if (mod && k === 's') { e.preventDefault(); saveCurrent.flush(); setSaveState('saved'); return; }
+    // the shortcuts of most note apps. Chrome keeps Cmd/Ctrl+N, T and W for itself in a browser tab;
+    // the installed app gets them. The Alt versions work everywhere.
+    if (mod && !e.altKey && k === 'n') { e.preventDefault(); if (e.shiftKey) newNoteDialog(); else newUntitledNote(); return; }
+    if (mod && !e.altKey && !e.shiftKey && k === 't') { e.preventDefault(); newTab(); return; }
+    if (mod && !e.altKey && e.shiftKey && k === 't') { e.preventDefault(); reopenClosedTab(); return; }
+    if (mod && !e.altKey && !e.shiftKey && k === 'w') { e.preventDefault(); const p = panes.focus == null ? panes.notePane : panes.focus; closeTab(p, panes.list[p].active); return; }
+    if (mod && !e.altKey && !e.shiftKey && k === 'o') { e.preventDefault(); openPalette(''); return; }
+    if (mod && !e.altKey && e.key === '\\') { e.preventDefault(); toggleSplit(); return; }
+    if (e.ctrlKey && !e.altKey && e.key === 'Tab') { e.preventDefault(); cycleTab(e.shiftKey ? -1 : 1); return; }
+    if (mod && e.shiftKey && !e.altKey && (e.code === 'BracketRight' || e.code === 'BracketLeft')) { e.preventDefault(); cycleTab(e.code === 'BracketRight' ? 1 : -1); return; }
+    if (mod && !e.altKey && !e.shiftKey && /^Digit[1-9]$/.test(e.code)) { e.preventDefault(); paneShortcut(e.code); return; }
     // Typing in any text field, including the editor (a contenteditable element), must never trigger
     // one-key shortcuts. On a Mac, Option+letter types characters (ç, ∫, ®), so in a text field
     // the Alt shortcuts there need Ctrl+Option.

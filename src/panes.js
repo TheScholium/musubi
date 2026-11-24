@@ -245,8 +245,10 @@ function newTab(p = panes.notePane) {
   setTimeout(() => openPalette(''), 30);
 }
 
+const closedTabs = [];
 function closeTab(p, i) {
   const P = panes.list[p]; if (!P.tabs[i]) return;
+  if (P.tabs[i].k === 'pdf' || P.tabs[i].id) { closedTabs.push(Object.assign({}, P.tabs[i])); if (closedTabs.length > 20) closedTabs.shift(); }
   const wasActive = i === P.active;
   if (p === panes.notePane && wasActive && app.current) saveCurrent.flush();
   if (P.tabs[i].k === 'pdf' && wasActive) destroyPdf(p);
@@ -448,4 +450,24 @@ function paneShortcut(code) {
   const m = /^Digit([1-9])$/.exec(code);
   if (m) { const P = panes.list[p]; const i = m[1] === '9' ? P.tabs.length - 1 : +m[1] - 1; if (P.tabs[i]) activateTab(p, i); return true; }
   return false;
+}
+
+/* Cmd/Ctrl+Shift+T: the last closed tab comes back, in the pane that has the focus. */
+function reopenClosedTab() {
+  while (closedTabs.length) {
+    const t = closedTabs.pop();
+    if (t.k === 'note' && !vault.get(t.id)) continue;
+    if (t.k === 'pdf' && !vault.assets.has(t.name)) continue;
+    if (t.k === 'pdf') openPdfTab(t.name, { page: t.page });
+    else openNote(t.id, { newTab: true });
+    return;
+  }
+  toast('No closed tab to open again');
+}
+
+/* Ctrl+Tab and Cmd/Ctrl+Shift+] go to the next tab of the focused pane; with Shift or [ the previous one. */
+function cycleTab(d) {
+  const p = panes.focus == null ? panes.notePane : panes.focus; const P = panes.list[p];
+  if (P.tabs.length < 2) return;
+  activateTab(p, (P.active + d + P.tabs.length) % P.tabs.length);
 }
