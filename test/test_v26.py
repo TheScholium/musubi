@@ -46,7 +46,7 @@ with sync_playwright() as p:
     check(len(info['h2']) >= 6 and info['table'], 'the essay renders its sections and table')
     check(info['fn'] >= 50 and not info['raw'], f"the essay has its sources as footnotes ({info['fn']})")
     check(info['ext'], 'source links open in a new tab')
-    for w in ['Umesao', 'Gu Yanwu', 'Dasan', 'Ibn al-Jawzi', 'Timbuktu', 'khipu', 'Pāṇini', 'Ramanujan', 'Gauss', 'Stacks Project', 'Luhmann']:
+    for w in ['Shaoshupai', 'thinking notes', 'Quantum Well', 'TeXNotes', 'Hacker News', 'Umesao', 'Gu Yanwu', 'Dasan', 'Ibn al-Jawzi', 'Timbuktu', 'khipu', 'Pāṇini', 'Ramanujan', 'Gauss', 'Stacks Project', 'Luhmann']:
         check(w in info['text'], f'the essay covers {w}')
     pg.screenshot(path=f'{SHOTS}/v26-philosophy.png')
     pg.click('#philo-body sup.fnref a >> nth=0'); pg.wait_for_timeout(1800)

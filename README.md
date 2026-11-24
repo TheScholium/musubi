@@ -47,7 +47,7 @@ It is set in **Istari**, a dark, book-like design system: warm ink, parchment te
 - Global and local graph. Markers are shaped by field and coloured by type.
 
 **The interface**
-The sidebar tabs (notes, tags, inbox, maintain) are icons; the open tab shows its name. `Ctrl/⌘ ,` opens Settings. The welcome screen has a foldout essay, *Zettelkasten and the Musubi philosophy*: a history of slip boxes, commonplace books, brush notes, glosses and knotted cords from China, Korea, Japan, the Islamic world, West Africa, South Asia, the Andes and Europe; the case for the method in mathematics and physics; and why each part of Musubi works as it does, with 58 sources. The command palette opens it too.
+The sidebar tabs (notes, tags, inbox, maintain) are icons; the open tab shows its name. `Ctrl/⌘ ,` opens Settings. The welcome screen has a foldout essay, *Zettelkasten and the Musubi philosophy*: a history of slip boxes, commonplace books, brush notes, glosses and knotted cords from China, Korea, Japan, the Islamic world, West Africa, South Asia, the Andes and Europe; the case for the method in mathematics and physics; and why each part of Musubi works as it does, with 82 sources, and a section on the modern revival: Reddit, YouTube and forum testimony from mathematicians and physicists, and the method's return to China, Korea, Japan and India. The command palette opens it too.
 
 **The type key**
 A compass floats at the foot of the note list. Rest the pointer on it for a moment and the key opens: circles for general notes, diamonds for mathematics, squares for physics, triangles for philosophy, one Istari pigment per type. Click a type to filter the list.
@@ -138,7 +138,7 @@ python3 test/test_folder.py   # folder sync, using the Origin Private File Syste
 python3 test/test_latexsuite.py  # LaTeX Suite snippets, tabstops, auto-fraction, tabout, matrices, user snippet files, speed (48 checks)
 python3 test/test_pwa.py       # installed app: manifest, installability, offline start, Dock shortcuts, update prompt, folder banner (15 checks)
 python3 test/test_attach.py    # attachments: location setting, paste and drop, Markdown paths, PDF and audio cards, lazy files, changed images, ZIP paths (24 checks)
-python3 test/test_v26.py       # icon tabs, custom note types, Ctrl/⌘ comma, the knot mark, the philosophy essay and its footnotes (31 checks)
+python3 test/test_v26.py       # icon tabs, custom note types, Ctrl/⌘ comma, the knot mark, the philosophy essay and its footnotes (36 checks)
 python3 test/test_archive.py   # a note from the Archive Supernote plugin in folder mode: fields kept, file not rewritten, stable ID, ink image recoloured (7 checks)
 python3 test/test_sandbox.py  # runs inside a sandboxed srcdoc iframe, as an embedded artifact does (6 checks)
 ```
