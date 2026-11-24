@@ -126,6 +126,11 @@ function commands() {
     { label: 'View: source (plain Markdown)', keys: modKey() + '+Shift+E', run: () => setMode('source') },
     { label: 'View: read', run: () => setMode('read') },
     { label: 'Toggle sidebar', run: toggleSidebar },
+    { label: 'New tab', keys: 'Alt+T', run: () => newTab() },
+    { label: 'Close tab', keys: 'Alt+W', run: () => { const p = panes.focus == null ? panes.notePane : panes.focus; closeTab(p, panes.list[p].active); } },
+    { label: panes.split ? 'Close the split' : 'Split view: open a second pane', keys: 'Alt+\\', run: toggleSplit },
+    { label: 'Go back', keys: modKey() + '+Alt+←', run: () => navGo(-1) },
+    { label: 'Go forward', keys: modKey() + '+Alt+→', run: () => navGo(1) },
     { label: 'Toggle context panel', run: togglePanel },
     { label: 'Settings', keys: modKey() + '+,', run: () => openSettings() },
     { label: 'Settings: note types', run: () => openSettings('types') },
@@ -162,7 +167,7 @@ function openPalette(initial = '') {
   let ov; let items = []; let sel = 0;
   const input = h('input', { class: 'pal-input', placeholder: 'Find a note. Type > for commands.', value: initial, 'aria-label': 'Search', autocomplete: 'off', spellcheck: 'false' });
   const list = h('div', { class: 'pal-list', role: 'listbox' });
-  const foot = h('div', { class: 'pal-foot' }, h('span', null, '↑↓ choose'), h('span', null, 'Enter open'), h('span', null, modKey() + '+Enter insert link'), h('span', null, '> commands'));
+  const foot = h('div', { class: 'pal-foot' }, h('span', null, '↑↓ choose'), h('span', null, 'Enter open'), h('span', null, modKey() + '+Enter insert link'), h('span', null, 'Shift+Enter new tab'), h('span', null, '> commands'));
   const update = () => {
     const q = input.value; items = []; list.innerHTML = '';
     if (q.startsWith('>')) {
@@ -197,7 +202,7 @@ function openPalette(initial = '') {
     mark();
   };
   const mark = () => { $$('.pal-item', list).forEach((r, i) => r.classList.toggle('sel', i === sel)); const r = list.children[sel]; if (r && r.scrollIntoView) r.scrollIntoView({ block: 'nearest' }); };
-  const choose = (insert) => {
+  const choose = (insert, shift) => {
     const it = items[sel]; if (!it) return;
     ov.close();
     if (it.kind === 'cmd') { setTimeout(it.run, 0); return; }
@@ -205,13 +210,13 @@ function openPalette(initial = '') {
     if (insert && cur() && app.settings.mode !== 'read') {
       ed.insertAtCursor(linkText(it.note)); return;
     }
-    openNote(it.note.id);
+    openNote(it.note.id, shift ? { newTab: true } : {});
   };
   input.addEventListener('input', update);
   input.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(items.length - 1, sel + 1); mark(); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(0, sel - 1); mark(); }
-    else if (e.key === 'Enter') { e.preventDefault(); choose(e.ctrlKey || e.metaKey); }
+    else if (e.key === 'Enter') { e.preventDefault(); choose(e.ctrlKey || e.metaKey, e.shiftKey); }
   });
   ov = overlay('ov-palette', h('div', { class: 'palette' }, input, list, foot));
   update();
@@ -1135,8 +1140,11 @@ function bindGlobal() {
     const inField = !!ae && (/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) || ae.isContentEditable || !!(ae.closest && ae.closest('.cm-editor')));
     const mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
     const altShortcut = e.altKey && !e.metaKey && (mac && inField ? e.ctrlKey : !e.ctrlKey);
+    if (mod && e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); navGo(e.key === 'ArrowLeft' ? -1 : 1); return; }
+    if (!inField && e.altKey && !mod && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); navGo(e.key === 'ArrowLeft' ? -1 : 1); return; }
     if (altShortcut) {
       const c = e.code;
+      if (paneShortcut(c)) { e.preventDefault(); return; }
       if (c === 'KeyN') { e.preventDefault(); newNoteDialog(); return; }
       if (c === 'KeyC') { e.preventDefault(); captureDialog(); return; }
       if (c === 'KeyG') { e.preventDefault(); openGraph(); return; }
@@ -1162,6 +1170,8 @@ function bindGlobal() {
   $('#file-input').addEventListener('change', (e) => { importFiles(e.target.files); e.target.value = ''; });
   $('#dir-input').addEventListener('change', (e) => { importFiles(e.target.files); e.target.value = ''; });
   window.addEventListener('focus', () => { if (app.folder.status === 'linked') folderRescan(false); });
+  // the back and forward buttons of a mouse
+  window.addEventListener('mouseup', (e) => { if ((e.button === 3 || e.button === 4) && !app.overlays.length) { e.preventDefault(); navGo(e.button === 3 ? -1 : 1); } });
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveCurrent.flush(); });
   window.addEventListener('beforeunload', () => { saveCurrent.flush(); });
   window.addEventListener('resize', debounce(() => { applyLayout(); sizeTitle(); }, 150));
@@ -1226,9 +1236,15 @@ async function boot() {
   } catch (e) { app.bc = null; }
   renderSidebar();
   updateDueBadge();
+  panesRestore(); applySplit();
   const m = /^#n-(.+)$/.exec(readHash());
-  const target = (m && vault.get(decodeURIComponent(m[1])) && decodeURIComponent(m[1])) || (vault.get(app.settings.lastNote) && app.settings.lastNote) || (vault.all().sort(byModified)[0] || {}).id;
-  if (target) openNote(target, { replace: true }); else showEmpty();
+  const hashId = m && vault.get(decodeURIComponent(m[1])) ? decodeURIComponent(m[1]) : null;
+  const t0 = tabOf(panes.notePane);
+  let target = hashId || panesStartNote();
+  if (!target && !(t0 && t0.k === 'note' && t0.id == null)) target = (vault.get(app.settings.lastNote) && app.settings.lastNote) || (vault.all().sort(byModified)[0] || {}).id;
+  if (tabOf(panes.notePane) && tabOf(panes.notePane).k === 'pdf') activateTab(panes.notePane, panes.list[panes.notePane].active);
+  else if (target) openNote(target, { replace: true }); else showEmpty();
+  if (panes.split) renderPaneBody(otherPane(panes.notePane));
   document.documentElement.classList.add('ready');
   pwaLaunchAction();
   updateFolderBanner();

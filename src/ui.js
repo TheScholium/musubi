@@ -200,10 +200,12 @@ async function deleteNote(id, ask = true) {
   if (app.bc) app.bc.postMessage({ type: 'del', id });
   app.settings.recent = app.settings.recent.filter((x) => x !== id); saveSettings();
   refreshLists();
+  panesForget(id);
   if (app.current === id) {
     app.current = null;
-    const next = app.settings.recent.find((x) => vault.notes.has(x)) || (vault.all().sort(byModified)[0] || {}).id;
-    if (next) openNote(next, { replace: true }); else showEmpty();
+    const t = tabOf(panes.notePane);
+    const next = t && t.k === 'note' && t.id && vault.get(t.id) ? t.id : app.settings.recent.find((x) => vault.notes.has(x)) || (vault.all().sort(byModified)[0] || {}).id;
+    if (next) openNote(next, { replace: true, fromPane: !!(t && t.id === next) }); else showEmpty();
   }
   toast(`Moved “${n.title}” to the trash`, { action: { label: 'Undo', run: () => restoreFromTrash(id) } });
 }
@@ -292,8 +294,6 @@ function buildShell() {
   const main = h('main', { id: 'main' },
     h('div', { class: 'mtop' },
       iconBtn('codex', 'Toggle the note list', toggleSidebar, 'btn-sidebar'),
-      iconBtn('back', 'Back', () => navGo(-1), 'btn-back'),
-      iconBtn('fwd', 'Forward', () => navGo(1), 'btn-fwd'),
       h('span', { class: 'mtop-crumb', id: 'crumb' }),
       h('span', { class: 'save-state', id: 'save-state' }),
       iconBtn('eye', 'Read or edit (Ctrl E)', () => setMode(app.settings.mode === 'read' ? 'live' : 'read'), 'btn-mode'),
@@ -329,6 +329,7 @@ function buildShell() {
   document.body.appendChild(h('div', { id: 'menu', class: 'menu', hidden: true, role: 'menu' }));
   document.body.appendChild(h('input', { type: 'file', id: 'file-input', multiple: true, hidden: true, accept: '.md,.markdown,.txt,.json,.zip,.bib,.png,.jpg,.jpeg,.gif,.svg,.webp' }));
   document.body.appendChild(h('input', { type: 'file', id: 'dir-input', multiple: true, hidden: true, webkitdirectory: true }));
+  buildPanes();
 }
 
 function iconBtn(ic, title, fn, id) { return h('button', { class: 'icon-btn', title, 'aria-label': title, html: icon(ic, 17), onclick: fn, id: id || null }); }
@@ -380,6 +381,8 @@ function hopfMark(size = 40) {
 
 function showEmpty() {
   app.current = null;
+  { const P = panes.list[panes.notePane]; const t = P.tabs[P.active]; if (t && t.k === 'note') t.id = null; else if (!t) { P.tabs.push({ k: 'note', id: null }); P.active = P.tabs.length - 1; } }
+  $('#note-scroll').hidden = false;
   $('#note-view').hidden = true; const ev = $('#empty-view'); ev.hidden = false;
   $('#crumb').textContent = '';
   document.title = 'Musubi';
@@ -405,6 +408,7 @@ function showEmpty() {
       h('button', { class: 'link-btn', onclick: () => openSettings('shortcuts') }, 'Syntax and shortcuts')),
     philosophyFoldout()));
   renderPanel();
+  paneDidChange();
 }
 
 /* The essay on the welcome screen. It is rendered the first time the reader opens it. */
@@ -434,6 +438,8 @@ function openNote(id, opts = {}) {
     saveCurrent.flush();
     app.cursor.set(app.current, { top: $('#note-scroll').scrollTop });
   }
+  if (!opts.fromPane) paneWillOpen(id, opts);
+  $('#note-scroll').hidden = false;
   app.current = id;
   app.settings.lastNote = id;
   app.settings.recent = [id, ...app.settings.recent.filter((x) => x !== id)].slice(0, 30);
@@ -453,6 +459,7 @@ function openNote(id, opts = {}) {
   renderMentions();
   renderPanel();
   document.body.classList.remove('side-open');
+  paneDidChange();
   if (opts.heading) setTimeout(() => scrollToHeading(opts.heading), 40);
   if (opts.focusTitle) { const t = $('#title'); t.focus(); t.select(); }
   else if (opts.focusEditor && !read) { ed.focus(); const len = ed.getText().length; ed.setSelection(len); }
@@ -482,11 +489,7 @@ function navGo(d) {
   try { openNote(nav.stack[j]); } finally { nav.moving = false; }
   updateNavButtons();
 }
-function updateNavButtons() {
-  const b = $('#btn-back'); const f = $('#btn-fwd');
-  if (b) b.disabled = nav.idx <= 0;
-  if (f) f.disabled = nav.idx >= nav.stack.length - 1;
-}
+function updateNavButtons() { updateNavDock(); }
 function readHash() { try { return location.hash || ''; } catch (e) { return ''; } }
 function setHash(want, replace) {
   try {
@@ -544,12 +547,12 @@ function bindNoteView() {
   ed.init($('#cm-host'), () => {
     const n = cur(); if (!n) return;
     n.body = ed.getText(); markDirty();
-    renderMentionsSoon(); renderPanelSoon();
+    renderMentionsSoon(); renderPanelSoon(); renderGhostsSoon();
   });
   let titleAtFocus = null;
   const title = $('#title');
   title.addEventListener('focus', () => { titleAtFocus = cur() ? cur().title : null; });
-  title.addEventListener('input', () => { if (/\n/.test(title.value)) title.value = title.value.replace(/\n/g, ' '); sizeTitle(); const n = cur(); if (!n) return; n.title = title.value; document.title = n.title + ' · Musubi'; markDirty(); refreshListsSoon(); });
+  title.addEventListener('input', () => { if (/\n/.test(title.value)) title.value = title.value.replace(/\n/g, ' '); sizeTitle(); const n = cur(); if (!n) return; n.title = title.value; document.title = n.title + ' · Musubi'; markDirty(); refreshListsSoon(); renderGhostsSoon(); });
   const commitTitle = () => {
     const n = cur(); if (!n || titleAtFocus == null) return;
     const old = titleAtFocus; titleAtFocus = n.title;
@@ -615,7 +618,7 @@ function onRenderedClick(e) {
   if (a.classList.contains('wl') || a.classList.contains('cite-ref')) {
     e.preventDefault();
     hideHoverCard();
-    if (a.dataset.id) { openNote(a.dataset.id, { heading: a.dataset.heading }); return; }
+    if (a.dataset.id) { openWithKeys(e, a.dataset.id, { heading: a.dataset.heading, block: a.dataset.block }); return; }
     if (a.dataset.target) { createFromBroken(a.dataset.target); return; }
     if (a.dataset.cite) { newNoteDialog({ title: a.dataset.cite, type: 'literature', citekey: a.dataset.cite }); return; }
   }
@@ -715,6 +718,17 @@ function openNoteMenu(anchor) {
     { icon: 'trash', label: 'Move to trash', danger: true, run: () => deleteNote(c.id) });
   else items.push({ icon: 'plus', label: 'New note', run: () => newNoteDialog() });
   openMenu(anchor, items);
+}
+
+function noteContextMenu(anchor, id) {
+  const n = vault.get(id); if (!n) return;
+  openMenu(anchor, [
+    { icon: 'fwd', label: 'Open', run: () => openNote(id) },
+    { icon: 'plus', label: 'Open in a new tab', keys: modKey() + ' click', run: () => openNote(id, { newTab: true }) },
+    { icon: 'source', label: 'Open in the other pane', keys: modKey() + ' Shift click', run: () => openNote(id, { newTab: true, pane: panes.split ? otherPane(panes.notePane) : 1 }) },
+    '-',
+    { icon: 'copy', label: 'Copy a link to this note', run: () => copyText(linkText(n), 'Link copied') },
+  ]);
 }
 
 /* ---------- type key (floating, opens on a short hover) ---------- */
@@ -901,7 +915,7 @@ function fuzzyScore(text, q) {
 }
 
 /* ---------- sidebar ---------- */
-const refreshLists = () => { renderSidebar(); updateDueBadge(); };
+const refreshLists = () => { renderSidebar(); updateDueBadge(); if ($('#tabbar0')) renderGhostsSoon(); };
 const refreshListsSoon = debounce(refreshLists, 300);
 
 function renderSidebar() {
@@ -929,7 +943,9 @@ function renderSidebar() {
 
 function sideItem(n, extra) {
   return h('div', { class: 'side-item' + (n.id === app.current ? ' on' : ''), 'data-id': n.id, tabindex: '0', role: 'button',
-    onclick: () => openNote(n.id), onkeydown: (e) => { if (e.key === 'Enter') openNote(n.id); } },
+    onclick: (e) => openWithKeys(e, n.id), onkeydown: (e) => { if (e.key === 'Enter') openWithKeys(e, n.id); },
+    onauxclick: (e) => { if (e.button === 1) { e.preventDefault(); openNote(n.id, { newTab: true }); } },
+    oncontextmenu: (e) => { e.preventDefault(); noteContextMenu(e.currentTarget, n.id); } },
   h('span', { class: 'dot t-' + n.type, title: TYPE_LABEL[n.type] || n.type }),
   h('div', { class: 'si-main' },
     h('div', { class: 'si-title' }, n.title || 'Untitled', n.status === 'fleeting' ? h('span', { class: 'si-flag' }, 'fleeting') : null),
@@ -1041,7 +1057,7 @@ function renderMentions() {
     for (const [id, rels] of outById) {
       const o = vault.get(id); if (!o) continue;
       row.appendChild(h('span', { class: 'mn-link' }, ...Array.from(rels).map((r) => h('span', { class: 'rel rel-' + REL_CLASS(r) }, r)),
-        h('a', { class: 'wl', 'data-id': id, href: '#n-' + id, onclick: (e) => { e.preventDefault(); openNote(id); } }, o.title)));
+        h('a', { class: 'wl', 'data-id': id, href: '#n-' + id, onclick: (e) => { e.preventDefault(); openWithKeys(e, id); } }, o.title)));
     }
     box.appendChild(row);
   } else box.appendChild(h('div', { class: 'mn-none' }, 'No links yet. Type [[ in the text, or use + link.'));
@@ -1052,7 +1068,7 @@ function renderMentions() {
     const src = vault.get(from); if (!src) continue;
     box.appendChild(h('div', { class: 'mn-item' },
       h('div', { class: 'mn-src' }, h('span', { class: 'dot t-' + src.type }),
-        h('a', { class: 'wl mn-title', 'data-id': from, href: '#n-' + from, onclick: (e) => { e.preventDefault(); openNote(from); } }, src.title),
+        h('a', { class: 'wl mn-title', 'data-id': from, href: '#n-' + from, onclick: (e) => { e.preventDefault(); openWithKeys(e, from); } }, src.title),
         ...Array.from(info.rels).map((r) => h('span', { class: 'rel rel-' + REL_CLASS(r) }, REL_INVERSE[r] || r))),
       ...Array.from(new Set(info.ctx)).slice(0, 2).map((c) => h('div', { class: 'mn-ctx', html: contextHtml(c, src) }))));
   }
@@ -1063,7 +1079,7 @@ function renderMentions() {
   for (const u of um.slice(0, 15)) {
     box.appendChild(h('div', { class: 'mn-item' },
       h('div', { class: 'mn-src' }, h('span', { class: 'dot t-' + u.note.type }),
-        h('a', { class: 'wl mn-title', 'data-id': u.note.id, href: '#n-' + u.note.id, onclick: (e) => { e.preventDefault(); openNote(u.note.id); } }, u.note.title),
+        h('a', { class: 'wl mn-title', 'data-id': u.note.id, href: '#n-' + u.note.id, onclick: (e) => { e.preventDefault(); openWithKeys(e, u.note.id); } }, u.note.title),
         h('button', { class: 'link-btn mn-linkit', onclick: () => linkMention(u, n) }, 'link')),
       h('div', { class: 'mn-ctx', html: esc(u.before) + '<b>' + esc(u.match) + '</b>' + esc(u.after) })));
   }
@@ -1175,7 +1191,7 @@ function renderPanel() {
 
 function noteLinkRow(n) {
   if (!n) return h('span');
-  return h('a', { class: 'pn-link', 'data-id': n.id, href: '#n-' + n.id, onclick: (e) => { e.preventDefault(); openNote(n.id); } },
+  return h('a', { class: 'pn-link', 'data-id': n.id, href: '#n-' + n.id, onclick: (e) => { e.preventDefault(); openWithKeys(e, n.id); } },
     h('span', { class: 'dot t-' + n.type }), h('span', null, n.title));
 }
 

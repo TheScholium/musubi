@@ -504,7 +504,7 @@ function lpAnchorDown(e) {
   if (!a) return;
   e.preventDefault(); e.stopPropagation();
   if (a.dataset.att) openAttachment(a.dataset.att);
-  else if (a.dataset.id) openNote(a.dataset.id, { heading: a.dataset.heading });
+  else if (a.dataset.id) openWithKeys(e, a.dataset.id, { heading: a.dataset.heading, block: a.dataset.block });
   else if (a.dataset.target) createFromBroken(a.dataset.target);
   else if (a.dataset.cite) newNoteDialog({ title: a.dataset.cite, type: 'literature', citekey: a.dataset.cite });
 }
@@ -721,7 +721,7 @@ function lpMouseDown(e, view) {
   if (a && !e.altKey) {
     e.preventDefault();
     if (a.dataset.att) openAttachment(a.dataset.att);
-    else if (a.dataset.id) openNote(a.dataset.id, { heading: a.dataset.heading });
+    else if (a.dataset.id) openWithKeys(e, a.dataset.id, { heading: a.dataset.heading, block: a.dataset.block });
     else if (a.dataset.target) createFromBroken(a.dataset.target);
     else if (a.dataset.cite) newNoteDialog({ title: a.dataset.cite, type: 'literature', citekey: a.dataset.cite });
     return true;
