@@ -292,7 +292,16 @@ function renderMarkdown(src, opt = {}) {
   /* 1. protect code */
   {
     const fr = fencedRanges(text); let out = ''; let last = 0;
-    for (const [a, b] of fr) { out += text.slice(last, a) + ctok(text.slice(a, b)); last = b; }
+    for (const [a, b] of fr) {
+      const blockSrc = text.slice(a, b); const lines = blockSrc.split('\n');
+      const fm = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(lines[0]);
+      if (fm && isPlotFence(fm[2])) {
+        const closed = lines.length > 1 && new RegExp('^ {0,3}' + fm[1][0] + '{' + fm[1].length + ',}[ \\t]*$').test(lines[lines.length - 1]);
+        const code = lines.slice(1, closed ? -1 : undefined).join('\n');
+        out += text.slice(last, a) + '\n' + tok(plotBlockHtml(code, !opt.noPlotCode), true) + '\n'; last = b; continue;
+      }
+      out += text.slice(last, a) + ctok(blockSrc); last = b;
+    }
     text = out + text.slice(last);
     const ir = inlineCodeRanges(text); out = ''; last = 0;
     for (const [a, b] of ir) { out += text.slice(last, a) + ctok(text.slice(a, b)); last = b; }

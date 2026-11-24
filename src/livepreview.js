@@ -242,6 +242,13 @@ function lpAnalyze(state, noteRef) {
       const name = node.name; const a = node.from; const b = node.to;
       if (name === 'FencedCode' || name === 'CodeBlock') {
         items.push({ kind: 'codeblock', from: a, to: b });
+        if (name === 'FencedCode') {
+          const info = node.node.getChild('CodeInfo'); const ct = node.node.getChild('CodeText');
+          if (info && isPlotFence(text.slice(info.from, info.to) + text.slice(info.to, lineAt(info.to).to))) {
+            const code = ct ? text.slice(lineAt(ct.from).from, ct.to) : '';
+            items.push({ kind: 'plotblock', from: lineAt(a).from, to: lineAt(b).to, html: plotBlockHtml(code, false) });
+          }
+        }
         return false;
       }
       if (name === 'Table') {
@@ -356,6 +363,10 @@ function lpDecorations(state, an) {
       const cl = state.doc.lineAt(it.close);
       out.push(Decoration.replace({ widget: new HtmlWidget('', 'cm-lp-aclose' + envAt(cl.from).replace(' cm-lp-ablock', '').replace(' cm-env-block', ''), { block: true, key: 'aclose' + envAt(cl.from) }), block: true }).range(cl.from, cl.to));
       blockRanges.push([cl.from, cl.to]);
+    } else if (it.kind === 'plotblock' && !lineTouch(it.from, it.to)) {
+      const ec = envAt(it.from);
+      out.push(Decoration.replace({ widget: new HtmlWidget(it.html, 'cm-lp-plot' + ec, { block: true, key: it.html + ec }), block: true }).range(it.from, it.to));
+      blockRanges.push([it.from, it.to]);
     } else if (it.kind === 'embed' && !lineTouch(it.from, it.to)) {
       const ec = envAt(it.from);
       out.push(Decoration.replace({ widget: new HtmlWidget(it.html, 'cm-lp-embed prose' + ec, { block: true, key: it.html + ec, ignore: lpLinkIgnore, onDom: enhanceAttachments }), block: true }).range(state.doc.lineAt(it.from).from, state.doc.lineAt(it.to).to));
@@ -495,6 +506,7 @@ function lpDecorations(state, an) {
           lineC(ln.from, 'cm-lp-codeblock' + (fence ? ' cm-lp-fence' : ''));
         }
         break;
+      case 'plotblock': out.push(Decoration.widget({ widget: new HtmlWidget(it.html, 'cm-lp-plot cm-lp-plotpreview', { block: true, key: 'pv' + it.html }), block: true, side: 1 }).range(b)); break;
       case 'escape': if (!touches(a, b + 1)) hide(a, b); break;
       default: break;
     }

@@ -721,6 +721,7 @@ These follow the Obsidian plugin LaTeX Suite. Change them in Settings, Mathemati
 - Flashcards: \`{{c1::hidden text}}\`, or a line \`Q: …\` followed by \`A: …\`, or any named definition or theorem block.
 - Long answers: \`A:{ … }\`. Everything between the braces is the answer, with lists, display math and paragraphs. Put the closing \`}\` at the end of the answer, on its own line if you like.
 - Callouts: \`> [!note] Title\`. Tasks: \`- [ ] item\` (click to tick).
+- Plots: a code block that starts with \`\`\`python plot\` draws a figure. Musubi runs a part of Python offline: numpy (\`np\`), \`math\` and matplotlib.pyplot (\`plt\`): plot, scatter, bar, barh, hist, fill_between, errorbar, step, stem, quiver, axhline, axvline, text, annotate, legend, grid, subplots, log scales, and labels with \`$…$\`. def, for, if, while, lambda, list comprehensions and f-strings work. Files, the network and other modules do not.
 - Attachments: paste or drop any file. \`![[figure.png]]\`, \`![[figure.png|300]]\` (width), \`![[paper.pdf]]\` (a card that can show the PDF), \`![[talk.mp3]]\`, \`[[data.csv]]\` (a link). Markdown paths work too: \`![caption|300](figures/fig.png)\`, \`[paper](../library/paper.pdf)\`, \`[note](Other.md)\`.
 `;
 
