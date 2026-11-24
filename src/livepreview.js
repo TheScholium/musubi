@@ -620,7 +620,7 @@ function lpPremiseEnter(view) {
 /* ---------- editor facade ---------- */
 const ed = {
   view: null, mode: 'live', states: new Map(), noteId: null, quiet: false,
-  modeConf: new Compartment(), spellConf: new Compartment(),
+  modeConf: new Compartment(), spellConf: new Compartment(), baConf: new Compartment(),
   onChange: null,
 
   baseExtensions() {
@@ -646,6 +646,7 @@ const ed = {
       ])),
       keymap.of([...closeBracketsKeymap, ...completionKeymap, ...searchKeymap, ...historyKeymap, ...defaultKeymap]),
       this.modeConf.of(this.mode === 'live' ? livePreviewExt(() => cur()) : []),
+      this.baConf.of(this.anchorExt()),
       this.spellConf.of(EditorView.contentAttributes.of({ spellcheck: String(app.settings.spellcheck !== false), autocorrect: 'off', autocapitalize: 'sentences' })),
       EditorView.updateListener.of((u) => { if (u.docChanged && !self.quiet && self.onChange) self.onChange(u); }),
       EditorView.domEventHandlers({
@@ -693,9 +694,11 @@ const ed = {
   setScrollTop(t) { this.view.scrollDOM.scrollTop = t; },
   setMode(mode) {
     this.mode = mode; this.states.clear();
-    this.view.dispatch({ effects: this.modeConf.reconfigure(mode === 'live' ? livePreviewExt(() => cur()) : []) });
+    this.view.dispatch({ effects: [this.modeConf.reconfigure(mode === 'live' ? livePreviewExt(() => cur()) : []), this.baConf.reconfigure(this.anchorExt())] });
     if (this.view.state) this.view.state.__mode = mode;
   },
+  anchorExt() { return app.settings.boldAnchors && this.mode === 'live' ? boldAnchorExt() : []; },
+  setAnchors() { this.states.clear(); if (this.view) this.view.dispatch({ effects: this.baConf.reconfigure(this.anchorExt()) }); },
   setSpellcheck(on) { this.view.dispatch({ effects: this.spellConf.reconfigure(EditorView.contentAttributes.of({ spellcheck: String(on), autocorrect: 'off', autocapitalize: 'sentences' })) }); },
   refresh() { this.view.dispatch({ effects: refreshEffect.of(null) }); },
 };

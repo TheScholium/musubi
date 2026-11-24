@@ -43,7 +43,7 @@ const icons = r('src/istari-icons.json');
 const katexSrc = r(nm('katex/dist/katex.js'));
 const katexMacros = Array.from(new Set(Array.from(katexSrc.matchAll(/"(\\\\[A-Za-z]+)"/g), (m) => m[1].replace(/^\\\\/, '\\')))).sort();
 if (katexMacros.length < 500 || !katexMacros.includes('\\alpha')) throw new Error('Could not read the KaTeX macro names');
-const appJs = ['core.js', 'render.js', 'editorutil.js', 'livepreview.js', 'latexsuite-defaults.js', 'latexsuite.js', 'graph.js', 'ui.js', 'features.js', 'tour.js', 'pwa.js'].map((f) => r('src/' + f)).join('\n\n')
+const appJs = ['core.js', 'render.js', 'editorutil.js', 'livepreview.js', 'anchors.js', 'latexsuite-defaults.js', 'latexsuite.js', 'graph.js', 'plot.js', 'ui.js', 'panes.js', 'features.js', 'tags.js', 'stats.js', 'pdfreader.js', 'tour.js', 'pwa.js'].map((f) => r('src/' + f)).join('\n\n')
   .replace('__ISTARI_ICONS__', icons.trim()).replace('__KATEX_MACROS__', () => JSON.stringify(katexMacros));
 // Istari fonts (SIL OFL 1.1), embedded so that the file never loads anything from the network
 const font = (file, family, style, weight) => `@font-face{font-family:'${family}';font-style:${style};font-weight:${weight};font-display:swap;src:url(data:font/woff2;base64,${readFileSync(join(root, 'vendor/fonts/' + file)).toString('base64')}) format('woff2')}`;

@@ -594,6 +594,7 @@ function enhanceRendered(root, prefix) {
     if (t.parentElement && t.parentElement.classList.contains('table-wrap')) continue;
     const w = h('div', { class: 'table-wrap' }); t.replaceWith(w); w.appendChild(t);
   }
+  if (typeof app !== 'undefined' && app.settings && app.settings.boldAnchors) boldAnchorsDom(root);
 }
 
 /* ---------- flashcards ---------- */

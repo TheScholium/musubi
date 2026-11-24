@@ -460,6 +460,11 @@ function openSettings(tab = 'general') {
   const row = (label, control, help) => h('div', { class: 'set-row' }, h('div', { class: 'set-label' }, h('b', null, label), help ? h('div', { class: 'muted small' }, help) : null), h('div', { class: 'set-ctl' }, control));
   const renderers = {
     general: () => [
+      row('Theme', sel('theme', [['dark', 'Istari (dark)'], ['light', 'Istari Paper (light)'], ['auto', 'Follow the system']], applyTheme), 'Istari Paper is the same design on parchment: dark ink and a deeper gold.'),
+      row('Bold anchors', h('div', { class: 'check-col' },
+        chk('boldAnchors', 'Make the first letters of each word bold', () => { applyTheme(); ed.setAnchors(); renderPreview(); }),
+        sel('anchorStrength', [['light', 'Light (about a third of each word)'], ['medium', 'Medium (about two fifths)'], ['strong', 'Strong (about half)']], () => { applyTheme(); ed.setAnchors(); renderPreview(); })),
+      'A lead-in for the eye, in live preview and in read view. Some readers with ADHD find it easier to keep their place. Code, mathematics and links do not change. The words in your files do not change.'),
       row('Text size', sel('fontSize', [16, 17, 18, 19, 20, 21, 22].map((x) => [x, x + ' px']), applyTheme), 'Istari sets body text at 19 px.'),
       row('Measure', sel('width', [['istari', 'Istari (42 rem)'], ['vellum', 'Vellum (34 rem, justified)'], ['wide', 'Wide (52 rem)']], applyTheme)),
       row('View', sel('mode', [['live', 'Live preview'], ['source', 'Source'], ['read', 'Read']], () => setMode(s.mode))),
@@ -1227,7 +1232,7 @@ async function boot() {
   document.documentElement.classList.add('ready');
   pwaLaunchAction();
   updateFolderBanner();
-  window.musubi = { app, vault, store, ed, renderMarkdown, extractCards, openNote, createNote, searchNotes, parseNote, serializeNote, importFiles, makeZip, readZip, parseBibtex, dueQueue, graphData, useFolderHandle, folderRescan, startTour, endTour, seedVault, addLinkDialog, lsSnippets, lsParseSource, openReview, openPhilosophy, updateFolderBanner, saveAsset, assetUrl, findAsset, attachmentPath };
+  window.musubi = { app, vault, store, ed, applyTheme, setMode, renderPreview, openSettings, renderSidebar, refreshLists, renderMarkdown, extractCards, openNote, createNote, searchNotes, parseNote, serializeNote, importFiles, makeZip, readZip, parseBibtex, dueQueue, graphData, useFolderHandle, folderRescan, startTour, endTour, seedVault, addLinkDialog, lsSnippets, lsParseSource, openReview, openPhilosophy, updateFolderBanner, saveAsset, assetUrl, findAsset, attachmentPath };
   if (app.settings.tour && app.settings.tour.active) resumeTour();
   else if (tourDue()) startTour({ firstRun: true });
 }

@@ -64,6 +64,8 @@ const DEFAULT_SETTINGS = {
   sections: { outline: true, relations: true, localgraph: true, info: false },
   templates: DEFAULT_TEMPLATES, recent: [], seeded: false, onboarded: false, tourSeen: 0, tour: null,
   attachLocation: 'folder', attachFolder: 'assets', attachSubfolder: 'assets',
+  theme: 'dark', boldAnchors: false, anchorStrength: 'medium', folderTree: false,
+  tabs: null, split: false, splitRatio: 0.5,
   lsEnabled: true, lsDefaults: true, lsAutofraction: true, lsTabout: true, lsMatrix: true, lsEnlarge: true, lsEnlargeSpace: true, lsAutoDelete: true, lsSnippets: '', lsVariables: '',
 };
 
@@ -95,7 +97,9 @@ const saveSrs = debounce(() => { store.setMeta('srs', app.srs).catch(() => {}); 
 
 function applyTheme() {
   const s = app.settings; const root = document.documentElement;
-  root.dataset.theme = 'istari';
+  root.dataset.theme = resolvedTheme();
+  root.dataset.anchors = s.boldAnchors ? (s.anchorStrength || 'medium') : 'off';
+  const cs = document.querySelector('meta[name="color-scheme"]'); if (cs) cs.content = root.dataset.theme === 'istari-light' ? 'light' : 'dark';
   root.dataset.width = s.width;
   root.style.setProperty('--reading-size', s.fontSize + 'px');
   root.style.setProperty('--editor-size', s.editorFontSize + 'px');
