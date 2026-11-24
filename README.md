@@ -35,6 +35,8 @@ It is set in **Istari**, a dark, book-like design system: warm ink, parchment te
 - **Attachments:** paste or drop any file. Images, PDFs, audio and video show in the note (`![[file]]`); other files become links (`[[file]]`). Settings → Data chooses where new attachments go: a fixed folder, a folder next to each note, the note's own folder, or the vault folder. Musubi finds attachments anywhere in the folder by name or relative path, so Markdown links such as `![fig|300](figures/fig.png)` and `[paper](../library/paper.pdf)` work. PDFs and other large files stay in the folder and are read only when opened; images changed in another app load again.
 - Footnotes, tables (rendered when the cursor is outside), task lists, callouts (`> [!tip]`), highlights (`==…==`), code blocks.
 - A template for each of the 14 note types, editable in Settings.
+- **Your own note types** (Settings → Note types): give a name, choose a marker shape (circle, ring, square, diamond, triangle, star, moon, sun) and an Istari pigment. Custom types appear in the type menu, the note list, the type key, the graph and `type:` search.
+- **Handwriting from Supernote:** notes from the [Archive](https://github.com/TheScholium/archive) plugin load as they are; images marked `|ink` are drawn in parchment on the dark theme and in black when printed.
 
 **Linking and navigation**
 - Links by title, alias or ID; `[[Title|label]]`, `[[Title#Heading]]`; embeds `![[Note]]` and `![[Note#Heading]]`.
@@ -43,6 +45,9 @@ It is set in **Istari**, a dark, book-like design system: warm ink, parchment te
 - Under each note, in the Istari "mentions" style: its links, the notes that link to it (with the sentence around each link), and unlinked mentions with a one-click *link*.
 - Hover previews, a command palette and fuzzy quick switcher (`Ctrl/⌘ K`; `>` for commands), full-text search with `tag:`, `type:`, `status:`, `"phrases"` and `-exclusions`.
 - Global and local graph. Markers are shaped by field and coloured by type.
+
+**The interface**
+The sidebar tabs (notes, tags, inbox, maintain) are icons; the open tab shows its name. `Ctrl/⌘ ,` opens Settings. The welcome screen has a foldout essay, *Zettelkasten and the Musubi philosophy*: a history of slip boxes, commonplace books, brush notes, glosses and knotted cords from China, Korea, Japan, the Islamic world, West Africa, South Asia, the Andes and Europe; the case for the method in mathematics and physics; and why each part of Musubi works as it does, with 58 sources. The command palette opens it too.
 
 **The type key**
 A compass floats at the foot of the note list. Rest the pointer on it for a moment and the key opens: circles for general notes, diamonds for mathematics, squares for physics, triangles for philosophy, one Istari pigment per type. Click a type to filter the list.
@@ -133,6 +138,8 @@ python3 test/test_folder.py   # folder sync, using the Origin Private File Syste
 python3 test/test_latexsuite.py  # LaTeX Suite snippets, tabstops, auto-fraction, tabout, matrices, user snippet files, speed (48 checks)
 python3 test/test_pwa.py       # installed app: manifest, installability, offline start, Dock shortcuts, update prompt, folder banner (15 checks)
 python3 test/test_attach.py    # attachments: location setting, paste and drop, Markdown paths, PDF and audio cards, lazy files, changed images, ZIP paths (24 checks)
+python3 test/test_v26.py       # icon tabs, custom note types, Ctrl/⌘ comma, the knot mark, the philosophy essay and its footnotes (31 checks)
+python3 test/test_archive.py   # a note from the Archive Supernote plugin in folder mode: fields kept, file not rewritten, stable ID, ink image recoloured (7 checks)
 python3 test/test_sandbox.py  # runs inside a sandboxed srcdoc iframe, as an embedded artifact does (6 checks)
 ```
 

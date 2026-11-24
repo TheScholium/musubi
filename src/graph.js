@@ -193,7 +193,7 @@ class ForceGraph {
       ctx.globalAlpha = dim ? 0.18 : 1;
       const col = c[n.type] || c.muted;
       nodePath(ctx, n.x, n.y, n.r, TYPE_SHAPE[n.type] || 'circle');
-      if (n.type === 'structure') { ctx.fillStyle = c.bg; ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 1.8; ctx.stroke(); }
+      if (TYPE_SHAPE[n.type] === 'ring') { ctx.fillStyle = c.bg; ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 1.8; ctx.stroke(); }
       else { ctx.fillStyle = col; ctx.fill(); }
       if (n.status === 'fleeting') { ctx.strokeStyle = c.bg; ctx.lineWidth = 1.2 / this.scale; ctx.setLineDash([2 / this.scale, 2 / this.scale]); ctx.stroke(); ctx.setLineDash([]); }
       if (n.id === this.focusId || n === this.hover) {
@@ -258,5 +258,22 @@ function nodePath(ctx, x, y, r, shape) {
   if (shape === 'diamond') { const k = r * 1.25; ctx.moveTo(x, y - k); ctx.lineTo(x + k, y); ctx.lineTo(x, y + k); ctx.lineTo(x - k, y); ctx.closePath(); }
   else if (shape === 'square') { const k = r * 0.9; ctx.rect(x - k, y - k, 2 * k, 2 * k); }
   else if (shape === 'triangle') { const k = r * 1.3; ctx.moveTo(x, y - k); ctx.lineTo(x + k * 0.95, y + k * 0.7); ctx.lineTo(x - k * 0.95, y + k * 0.7); ctx.closePath(); }
-  else ctx.arc(x, y, r, 0, Math.PI * 2);
+  else if (shape === 'star' || shape === 'sun') {
+    const n = shape === 'star' ? 5 : 12; const R = r * (shape === 'star' ? 1.45 : 1.3); const q = shape === 'star' ? 0.42 : 0.66;
+    for (let k = 0; k < 2 * n; k++) { const rr = k % 2 ? R * q : R; const a = (k / (2 * n)) * 2 * Math.PI - Math.PI / 2; const px = x + rr * Math.cos(a); const py = y + rr * Math.sin(a); if (k) ctx.lineTo(px, py); else ctx.moveTo(px, py); }
+    ctx.closePath();
+  } else if (shape === 'moon') {
+    // crescent: disc 1 minus disc 2; draw the outer arc outside disc 2, then the inner arc inside disc 1
+    const R = r * 1.12; const x2 = x + R * 0.48; const y2 = y - R * 0.34; const R2 = R * 0.84;
+    const dx = x2 - x; const dy = y2 - y; const d = Math.hypot(dx, dy);
+    const aa = (R * R - R2 * R2 + d * d) / (2 * d); const hh = Math.sqrt(Math.max(0, R * R - aa * aa));
+    const px = x + (aa * dx) / d; const py = y + (aa * dy) / d; const nx = -dy / d; const ny = dx / d;
+    const p1 = [px + hh * nx, py + hh * ny]; const p2 = [px - hh * nx, py - hh * ny];
+    const arcMid = (cx, cy, rr, t0, t1, ccw) => { let span = ccw ? t0 - t1 : t1 - t0; span = ((span % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI); const tm = ccw ? t0 - span / 2 : t0 + span / 2; return [cx + rr * Math.cos(tm), cy + rr * Math.sin(tm)]; };
+    const t1 = Math.atan2(p1[1] - y, p1[0] - x); const t2 = Math.atan2(p2[1] - y, p2[0] - x);
+    const m = arcMid(x, y, R, t1, t2, false); const outCcw = (m[0] - x2) ** 2 + (m[1] - y2) ** 2 < R2 * R2;
+    const s2 = Math.atan2(p2[1] - y2, p2[0] - x2); const s1 = Math.atan2(p1[1] - y2, p1[0] - x2);
+    const m2 = arcMid(x2, y2, R2, s2, s1, false); const inCcw = (m2[0] - x) ** 2 + (m2[1] - y) ** 2 > R * R;
+    ctx.moveTo(p1[0], p1[1]); ctx.arc(x, y, R, t1, t2, outCcw); ctx.arc(x2, y2, R2, s2, s1, inCcw); ctx.closePath();
+  } else ctx.arc(x, y, r, 0, Math.PI * 2);
 }

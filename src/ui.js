@@ -15,7 +15,11 @@ const PLAIN_ICONS = {
   scissors: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.1 8.1L20 20M8.1 15.9L20 4"/>',
   branch: '<circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="9" r="2"/><path d="M6 7v10M18 11c0 4-6 3-11 6.5"/>',
   dice: '<rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><circle cx="8.5" cy="8.5" r="1"/><circle cx="15.5" cy="15.5" r="1"/><circle cx="12" cy="12" r="1"/>',
-  gear: '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
+  gear: '<path d="M9.81 4.93 L10.38 2.54 L13.62 2.54 L14.19 4.93 L15.45 5.45 L17.54 4.16 L19.84 6.46 L18.55 8.55 L19.07 9.81 L21.46 10.38 L21.46 13.62 L19.07 14.19 L18.55 15.45 L19.84 17.54 L17.54 19.84 L15.45 18.55 L14.19 19.07 L13.62 21.46 L10.38 21.46 L9.81 19.07 L8.55 18.55 L6.46 19.84 L4.16 17.54 L5.45 15.45 L4.93 14.19 L2.54 13.62 L2.54 10.38 L4.93 9.81 L5.45 8.55 L4.16 6.46 L6.46 4.16 L8.55 5.45Z"/><circle cx="12" cy="12" r="3.1"/><path d="M9.7 9.2a3.6 3.6 0 0 1 1.6-.9"/>',
+  slips: '<rect x="7" y="3.5" width="12.5" height="15.5" rx="1.2"/><path d="M4.5 6.5v13.3a1.2 1.2 0 0 0 1.2 1.2h10.8"/><path d="M10 8h6.5M10 11h6.5M10 14h4"/>',
+  tag: '<path d="M3.5 11.8V4.7a1.2 1.2 0 0 1 1.2-1.2h7.1l8.5 8.5a1.2 1.2 0 0 1 0 1.7l-7.1 7.1a1.2 1.2 0 0 1-1.7 0z"/><circle cx="8" cy="8" r="1.5"/><path d="M11.2 14.8l3.6-3.6"/>',
+  tray: '<path d="M3.5 13.5 6 5.3a1.2 1.2 0 0 1 1.2-.8h9.6a1.2 1.2 0 0 1 1.2.8l2.5 8.2v5.3a1.2 1.2 0 0 1-1.2 1.2H4.7a1.2 1.2 0 0 1-1.2-1.2z"/><path d="M3.5 13.5h4.6l1.4 2.4h5l1.4-2.4h4.6"/><path d="M12 7v4.6M10 9.8l2 1.9 2-1.9"/>',
+  broom: '<path d="M15.5 3 10.6 11.6"/><path d="M8.6 10.6l4.6 2.6-1.3 2.9c-.9 2-2.8 3.7-5 4.4l-3.4 1 .9-3.4c.6-2.3 2.1-4.2 4.2-5.4z"/><path d="M6.7 16.4l2.6 1.5M8.3 13.8l2.4 1.4"/>',
   source: '<path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/>',
 };
 const icon = (name, size = 16) => `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ISTARI_ICONS[name] || PLAIN_ICONS[name] || ''}</svg>`;
@@ -266,8 +270,10 @@ function buildShell() {
         h('option', { value: 'modified' }, 'Edited'), h('option', { value: 'created' }, 'Created'),
         h('option', { value: 'title' }, 'Title'), h('option', { value: 'links' }, 'Links'))),
     h('nav', { class: 'sb-tabs', role: 'tablist' },
-      ...[['notes', 'Notes'], ['tags', 'Tags'], ['inbox', 'Inbox'], ['maint', 'Maintain']].map(([k, l]) =>
-        h('button', { class: 'sb-tab', 'data-tab': k, role: 'tab', onclick: () => { app.settings.sidebarTab = k; saveSettings(); renderSidebar(); } }, l, k === 'inbox' ? h('span', { class: 'count', id: 'inbox-count' }) : null))),
+      // icons; the open tab also shows its name
+      ...[['notes', 'Notes', 'slips'], ['tags', 'Tags', 'tag'], ['inbox', 'Inbox', 'tray'], ['maint', 'Maintain', 'broom']].map(([k, l, ic]) =>
+        h('button', { class: 'sb-tab', 'data-tab': k, role: 'tab', title: l, 'aria-label': l, onclick: () => { app.settings.sidebarTab = k; saveSettings(); renderSidebar(); } },
+          h('span', { class: 'sb-tab-ic', html: icon(ic, 17) }), h('span', { class: 'sb-tab-label' }, l), k === 'inbox' ? h('span', { class: 'count', id: 'inbox-count' }) : null))),
     h('div', { class: 'sb-listwrap' },
       h('div', { id: 'side-body', class: 'side-body' }),
       h('div', { class: 'type-key', id: 'type-key' },
@@ -357,6 +363,17 @@ function setMode(mode) {
 }
 
 /* ---------- note page ---------- */
+/* The Musubi mark: two rings that link once (a Hopf link), drawn in the current colour. */
+let hopfSeq = 0;
+function hopfMark(size = 40) {
+  const k = 'hm' + (++hopfSeq); const r = 6.6; const d = 3.3; const cx = 12; const cy = 12; const hgt = Math.sqrt(r * r - d * d); const w = 1.6;
+  return `<svg class="hopf" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" aria-hidden="true"><defs>` +
+    `<clipPath id="${k}t"><circle cx="${cx}" cy="${(cy - hgt).toFixed(2)}" r="${w * 2.4}"/></clipPath><clipPath id="${k}b"><circle cx="${cx}" cy="${(cy + hgt).toFixed(2)}" r="${w * 2.4}"/></clipPath>` +
+    `<mask id="${k}mb" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff"/><circle cx="${cx - d}" cy="${cy}" r="${r}" stroke="#000" stroke-width="${w * 2.6}" clip-path="url(#${k}t)"/></mask>` +
+    `<mask id="${k}ma" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><rect width="24" height="24" fill="#fff"/><circle cx="${cx + d}" cy="${cy}" r="${r}" stroke="#000" stroke-width="${w * 2.6}" clip-path="url(#${k}b)"/></mask></defs>` +
+    `<circle cx="${cx - d}" cy="${cy}" r="${r}" mask="url(#${k}ma)"/><circle cx="${cx + d}" cy="${cy}" r="${r}" mask="url(#${k}mb)"/></svg>`;
+}
+
 function showEmpty() {
   app.current = null;
   $('#note-view').hidden = true; const ev = $('#empty-view'); ev.hidden = false;
@@ -366,7 +383,7 @@ function showEmpty() {
   const fs = 'showDirectoryPicker' in window;
   const first = vault.notes.size === 0;
   ev.appendChild(h('div', { class: 'setup' },
-    h('div', { class: 'setup-mark', html: icon('compass', 34) }),
+    h('div', { class: 'setup-mark', html: hopfMark(54) }),
     h('h1', { class: 'setup-title' }, first ? 'Begin your Zettelkasten' : 'No note is open'),
     h('p', { class: 'setup-lede' }, first
       ? 'The vault is empty and ready. Start with one idea in your own words, or bring notes you already have.'
@@ -377,12 +394,33 @@ function showEmpty() {
       first ? h('button', { class: 'btn btn-outline', onclick: () => $('#file-input').click() }, 'Import notes') : null),
     first ? h('ul', { class: 'setup-list' },
       h('li', null, h('b', null, 'Folder.'), ' Each note becomes a Markdown file on your disk', fs ? '.' : ' (needs Chrome or Edge).'),
-      h('li', null, h('b', null, 'Import.'), ' Markdown, an Obsidian vault as a ZIP, an Musubi backup, or BibTeX.'),
+      h('li', null, h('b', null, 'Import.'), ' Markdown, an Obsidian vault as a ZIP, a Musubi backup, or BibTeX.'),
       h('li', null, h('b', null, 'Browser.'), ' Without a folder, notes stay in this browser. Export often.')) : null,
     h('p', { class: 'setup-foot' },
       h('button', { class: 'link-btn', onclick: () => startTour() }, 'Take the tour'), ' · ',
-      h('button', { class: 'link-btn', onclick: () => openSettings('shortcuts') }, 'Syntax and shortcuts'))));
+      h('button', { class: 'link-btn', onclick: () => openSettings('shortcuts') }, 'Syntax and shortcuts')),
+    philosophyFoldout()));
   renderPanel();
+}
+
+/* The essay on the welcome screen. It is rendered the first time the reader opens it. */
+function philosophyFoldout(open = false) {
+  const body = h('div', { class: 'prose philo-body', id: 'philo-body', onclick: onRenderedClick });
+  const fill = () => { if (!body.childElementCount) { body.innerHTML = renderMarkdown(PHILOSOPHY_MD, { idPrefix: 'ph-' }); body.querySelectorAll('a[href^="http"]').forEach((a) => { a.target = '_blank'; a.rel = 'noopener'; }); } };
+  const d = h('details', { class: 'philo', id: 'philo' },
+    h('summary', null, h('span', { class: 'philo-knot', html: hopfMark(18) }), h('span', null, 'Read more about Zettelkasten and the Musubi philosophy')),
+    body);
+  d.addEventListener('toggle', () => { if (d.open) fill(); });
+  if (open) { d.open = true; fill(); }
+  return d;
+}
+
+function openPhilosophy() {
+  if (app.current) { saveCurrent.flush(); }
+  showEmpty();
+  const d = $('#philo'); if (!d) return;
+  d.open = true;
+  requestAnimationFrame(() => d.scrollIntoView({ behavior: 'smooth', block: 'start' }));
 }
 
 function openNote(id, opts = {}) {
@@ -454,6 +492,18 @@ function setHash(want, replace) {
 }
 function clearHash() {
   try { if (readHash()) history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* not allowed here */ }
+}
+
+/* After the list of note types changes: rebuild the type menu and redraw what shows type markers. */
+function refreshTypeOptions() {
+  const ts = $('#type'); if (!ts) return;
+  const v = ts.value; ts.innerHTML = '';
+  for (const [k, l] of NOTE_TYPES) ts.appendChild(h('option', { value: k }, l.toLowerCase()));
+  const n = typeof cur === 'function' && app.current ? cur() : null;
+  if (n && !TYPE_IDS.includes(n.type)) ts.appendChild(h('option', { value: n.type }, n.type));
+  ts.value = n ? n.type : v;
+  if (vault.notes.size) { renderSidebar(); if (n) renderMentions(); }
+  const pop = $('#key-pop'); if (pop && !pop.hidden) renderTypeKey();
 }
 
 function fillHeader(n) {
@@ -679,6 +729,7 @@ function renderTypeKey() {
   const counts = {}; for (const n of vault.notes.values()) counts[n.type] = (counts[n.type] || 0) + 1;
   pop.appendChild(h('div', { class: 'key-title' }, 'Type key'));
   for (const [, label, , ids] of TYPE_FAMILIES) {
+    if (!ids.length) continue;
     pop.appendChild(h('div', { class: 'key-family' }, label));
     for (const id of ids) {
       const on = app.settings.typeFilter.includes(id);

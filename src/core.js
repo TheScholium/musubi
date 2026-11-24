@@ -100,6 +100,64 @@ const TYPE_FAMILIES = [
 const TYPE_SHAPE = {};
 for (const [, , shape, ids] of TYPE_FAMILIES) for (const id of ids) TYPE_SHAPE[id] = shape;
 const TYPE_LABEL = Object.fromEntries(NOTE_TYPES);
+TYPE_SHAPE.structure = 'ring';
+
+/* ---------- note types made by the user ----------
+   A custom type is { id, label, shape, color }: one of TYPE_SHAPES and one of the Istari pigments.
+   The id is fixed when the type is made (it is what notes store in front matter); the label can change. */
+const TYPE_SHAPES = [['circle', 'Circle'], ['ring', 'Ring'], ['square', 'Square'], ['diamond', 'Diamond'], ['triangle', 'Triangle'], ['star', 'Star'], ['moon', 'Moon'], ['sun', 'Sun']];
+const ISTARI_PIGMENTS = [
+  ['gold', 'Gold', '#c4a24d'], ['ochre', 'Ochre', '#c7844f'], ['vermilion', 'Vermilion', '#be6052'], ['oxblood', 'Oxblood', '#9a4a3e'],
+  ['rose', 'Rose', '#b87884'], ['plum', 'Plum', '#a07f98'], ['slate', 'Slate', '#7f93b4'], ['sky', 'Sky', '#829eb6'],
+  ['verdigris', 'Verdigris', '#6d9a90'], ['moss', 'Moss', '#8a9a62'], ['parchment', 'Parchment', '#c8b79a'], ['bone', 'Bone', '#ebe1c8'], ['ash', 'Ash', '#948b76'],
+];
+const PIGMENT = Object.fromEntries(ISTARI_PIGMENTS.map(([k, , c]) => [k, c]));
+const BUILTIN_TYPE_COUNT = NOTE_TYPES.length;
+const CUSTOM_FAMILY = ['custom', 'Your types', null, []];
+TYPE_FAMILIES.push(CUSTOM_FAMILY);
+function typeSlug(label) {
+  return String(label || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+}
+/* CSS for a marker (.dot) of each shape; 'var(--tc)' is the type colour. */
+const SHAPE_CSS = {
+  circle: 'border-radius: 50%;',
+  ring: 'border-radius: 50%; background: transparent; box-shadow: inset 0 0 0 1.6px var(--tc);',
+  square: 'border-radius: 0; width: 7.5px; height: 7.5px;',
+  diamond: 'border-radius: 0; width: 7px; height: 7px; transform: rotate(45deg); margin-left: 1px; margin-right: 1px;',
+  triangle: 'border-radius: 0; width: 9px; height: 8px; clip-path: polygon(50% 0, 100% 100%, 0 100%);',
+  star: 'border-radius: 0; width: 10px; height: 10px; clip-path: polygon(50% 0%, 61.8% 35.5%, 99% 35.5%, 69% 57.5%, 80% 93%, 50% 71%, 20% 93%, 31% 57.5%, 1% 35.5%, 38.2% 35.5%);',
+  moon: 'width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle at 70% 30%, transparent 0 3.4px, var(--tc) 3.8px);',
+  sun: 'border-radius: 0; width: 10px; height: 10px; clip-path: ' + (() => {
+    const pts = []; for (let k = 0; k < 24; k++) { const r = k % 2 ? 31 : 50; const a = (k / 24) * 2 * Math.PI - Math.PI / 2; pts.push(`${(50 + r * Math.cos(a)).toFixed(1)}% ${(50 + r * Math.sin(a)).toFixed(1)}%`); }
+    return 'polygon(' + pts.join(', ') + ');';
+  })(),
+};
+function customTypesValid(list) {
+  const seen = new Set(TYPE_IDS.slice(0, BUILTIN_TYPE_COUNT));
+  return (Array.isArray(list) ? list : []).filter((t) => {
+    if (!t || !t.id || seen.has(t.id) || !/^[a-z0-9][a-z0-9-]*$/.test(t.id)) return false;
+    seen.add(t.id); return true;
+  });
+}
+/* Put the user's types into NOTE_TYPES, TYPE_IDS, TYPE_LABEL, TYPE_SHAPE and the "Your types" family,
+   and write their colours and marker shapes as CSS. */
+function applyCustomTypes(list) {
+  for (const id of TYPE_IDS.splice(BUILTIN_TYPE_COUNT)) { delete TYPE_LABEL[id]; delete TYPE_SHAPE[id]; }
+  NOTE_TYPES.splice(BUILTIN_TYPE_COUNT); CUSTOM_FAMILY[3].length = 0;
+  let css = '';
+  for (const t of customTypesValid(list)) {
+    const label = String(t.label || t.id).trim() || t.id;
+    const shape = SHAPE_CSS[t.shape] ? t.shape : 'circle';
+    const color = PIGMENT[t.color] || PIGMENT.ash;
+    NOTE_TYPES.push([t.id, label]); TYPE_IDS.push(t.id); TYPE_LABEL[t.id] = label; TYPE_SHAPE[t.id] = shape; CUSTOM_FAMILY[3].push(t.id);
+    css += `:root { --t-${t.id}: ${color}; } .t-${t.id} { --tc: var(--t-${t.id}); } .dot.t-${t.id} { ${SHAPE_CSS[shape]} }\n`;
+  }
+  if (typeof document !== 'undefined') {
+    let el = document.getElementById('custom-type-css');
+    if (!el) { el = document.createElement('style'); el.id = 'custom-type-css'; document.head.appendChild(el); }
+    el.textContent = css + Object.entries(SHAPE_CSS).map(([k, v]) => `.dot.shape-${k} { ${v} }`).join('\n');
+  }
+}
 const STATUSES = [['fleeting', 'Fleeting'], ['draft', 'Draft'], ['permanent', 'Permanent'], ['archived', 'Archived']];
 const STATUS_IDS = STATUSES.map((s) => s[0]);
 

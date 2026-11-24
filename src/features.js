@@ -127,7 +127,9 @@ function commands() {
     { label: 'View: read', run: () => setMode('read') },
     { label: 'Toggle sidebar', run: toggleSidebar },
     { label: 'Toggle context panel', run: togglePanel },
-    { label: 'Settings', run: () => openSettings() },
+    { label: 'Settings', keys: modKey() + '+,', run: () => openSettings() },
+    { label: 'Settings: note types', run: () => openSettings('types') },
+    { label: 'Read: Zettelkasten and the Musubi philosophy', run: () => openPhilosophy() },
     { label: 'Keyboard shortcuts and syntax', keys: '?', run: () => openSettings('shortcuts') },
     { label: 'Import files (Markdown, ZIP, JSON, BibTeX, images)', run: () => $('#file-input').click() },
     { label: 'Import a folder of Markdown', run: () => $('#dir-input').click() },
@@ -442,7 +444,7 @@ async function openHistory() {
 function openSettings(tab = 'general') {
   let ov;
   const s = app.settings;
-  const tabs = [['general', 'General'], ['editor', 'Editor'], ['math', 'Mathematics'], ['study', 'Study'], ['templates', 'Templates'], ['data', 'Data'], ['shortcuts', 'Shortcuts and syntax'], ['install', 'Install as an app'], ['about', 'About']];
+  const tabs = [['general', 'General'], ['editor', 'Editor'], ['math', 'Mathematics'], ['study', 'Study'], ['types', 'Note types'], ['templates', 'Templates'], ['data', 'Data'], ['shortcuts', 'Shortcuts and syntax'], ['install', 'Install as an app'], ['about', 'About']];
   const nav = h('nav', { class: 'set-nav' }); const pane = h('div', { class: 'set-pane' });
   const sel = (key, options, onchange) => {
     const el = h('select', { class: 'input' }, ...options.map(([v, l]) => h('option', { value: v }, l)));
@@ -514,6 +516,56 @@ function openSettings(tab = 'general') {
           if (await confirmDialog('Reset all review history?', 'All cards become new again.', 'Reset', true)) { app.srs = {}; saveSrs(); updateDueBadge(); toast('Review history reset'); }
         } }, 'Reset')),
       ];
+    },
+    types: () => {
+      const wrap = h('div', { class: 'types-pane' });
+      const commit = () => { s.customTypes = (s.customTypes || []).slice(); saveSettings(); applyCustomTypes(s.customTypes); refreshTypeOptions(); };
+      const draw = () => {
+        wrap.innerHTML = '';
+        wrap.appendChild(h('p', { class: 'muted' }, 'Every note has a type. Its marker shows the type in the note list, the type key and the graph. Make your own types with a name, a shape and an Istari pigment.'));
+        wrap.appendChild(h('div', { class: 'type-chips' }, ...NOTE_TYPES.slice(0, BUILTIN_TYPE_COUNT).map(([id, l]) => h('span', { class: 'type-chip', title: 'Built-in type' }, h('span', { class: 'dot t-' + id }), l))));
+        wrap.appendChild(h('h3', { class: 'set-h' }, 'Your types'));
+        const list = s.customTypes || [];
+        if (!list.length) wrap.appendChild(h('p', { class: 'muted small' }, 'None yet. Add one below, for example "Lemma", "Conjecture", "Experiment" or "Thought experiment".'));
+        list.forEach((t, i) => {
+          const color = PIGMENT[t.color] || PIGMENT.ash;
+          const used = vault.all().filter((n) => n.type === t.id).length;
+          const name = h('input', { class: 'input type-name', value: t.label, 'aria-label': 'Name of the type' });
+          name.addEventListener('change', () => { const v = name.value.trim(); if (!v) { name.value = t.label; return; } t.label = v; commit(); draw(); });
+          wrap.appendChild(h('div', { class: 'type-row', 'data-type': t.id },
+            h('div', { class: 'type-row-head' },
+              h('span', { class: 'dot type-preview t-' + t.id }), name,
+              h('code', { class: 'type-id', title: 'Notes store this in their front matter' }, 'type: ' + t.id),
+              h('span', { class: 'muted small' }, used ? `${used} note${used === 1 ? '' : 's'}` : ''),
+              h('button', { class: 'link-btn type-del', onclick: async () => {
+                const msg = used ? `${used} note${used === 1 ? ' keeps' : 's keep'} “type: ${t.id}” and show a plain marker until you make the type again.` : 'No note uses this type.';
+                if (!(await confirmDialog(`Delete the type “${t.label}”?`, msg, 'Delete', true))) return;
+                s.customTypes = list.filter((x) => x !== t); commit(); draw();
+              } }, 'Delete')),
+            h('div', { class: 'type-picks' },
+              h('div', { class: 'shape-picks', role: 'radiogroup', 'aria-label': 'Shape' }, ...TYPE_SHAPES.map(([k, l]) => h('button', {
+                class: 'shape-btn' + (t.shape === k ? ' on' : ''), title: l, 'aria-label': l, role: 'radio', 'aria-checked': String(t.shape === k),
+                onclick: () => { t.shape = k; commit(); draw(); } }, h('span', { class: 'dot shape-' + k, style: '--tc:' + color })))),
+              h('div', { class: 'color-picks', role: 'radiogroup', 'aria-label': 'Colour' }, ...ISTARI_PIGMENTS.map(([k, l, c]) => h('button', {
+                class: 'swatch' + (t.color === k ? ' on' : ''), title: l, 'aria-label': l, role: 'radio', 'aria-checked': String(t.color === k), style: 'background:' + c,
+                onclick: () => { t.color = k; commit(); draw(); } }))))));
+        });
+        const nameIn = h('input', { class: 'input', placeholder: 'Name of a new type', 'aria-label': 'Name of a new type' });
+        const add = () => {
+          const label = nameIn.value.trim(); if (!label) { nameIn.focus(); return; }
+          let id = typeSlug(label) || 'type'; const taken = new Set(TYPE_IDS); let k = 2; const base = id;
+          while (taken.has(id)) id = `${base}-${k++}`;
+          const usedColors = new Set((s.customTypes || []).map((x) => x.color));
+          const color = (ISTARI_PIGMENTS.find(([c]) => !usedColors.has(c)) || ISTARI_PIGMENTS[0])[0];
+          s.customTypes = [...(s.customTypes || []), { id, label, shape: 'star', color }];
+          commit(); draw(); toast(`Type “${label}” added`);
+        };
+        nameIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } });
+        wrap.appendChild(h('div', { class: 'btn-row type-add' }, nameIn, h('button', { class: 'btn btn-sm btn-cta', onclick: add }, 'Add type')));
+        wrap.appendChild(h('p', { class: 'muted small' }, 'A type can have its own template (Settings, Templates). Search with type:name.'));
+      };
+      draw();
+      return [wrap];
     },
     templates: () => {
       const typeSel = h('select', { class: 'input' }, ...NOTE_TYPES.map(([k, l]) => h('option', { value: k }, l)));
@@ -619,6 +671,7 @@ const SHORTCUTS_MD = `
 | <kbd>Ctrl/⌘ Shift D</kbd> | Wrap as a cloze deletion |
 | <kbd>Tab</kbd> / <kbd>Shift Tab</kbd> | Indent / outdent lines |
 | <kbd>Alt</kbd> + hover | Preview a note from the sidebar |
+| <kbd>Ctrl/⌘ ,</kbd> | Settings |
 | <kbd>?</kbd> | This page (when the cursor is not in a note or field) |
 
 ## Typing mathematics (LaTeX Suite)
@@ -658,7 +711,7 @@ These follow the Obsidian plugin LaTeX Suite. Change them in Settings, Mathemati
 const ABOUT_MD = `
 **Musubi** is a free and open-source note platform for Zettelkasten work in mathematics, physics and philosophy. It is one HTML file. It needs no server, no account and no network.
 
-- Version 2.5.0. MIT License. Web app: https://thescholium.github.io/musubi/
+- Version 2.6.0. MIT License. Web app: https://thescholium.github.io/musubi/
 - Set in the Istari design system: EB Garamond, Cormorant Garamond and JetBrains Mono (SIL Open Font License 1.1), embedded in the file.
 - Bundled libraries: CodeMirror 6 and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0). Default snippets from Obsidian LaTeX Suite (MIT).
 - Your notes are plain Markdown with YAML front matter. You can read them in any editor, and they work in Obsidian.
@@ -1063,6 +1116,7 @@ function bindGlobal() {
       if (mod && k === 'k') { e.preventDefault(); }
       return;
     }
+    if (mod && e.key === ',') { e.preventDefault(); openSettings(); return; }
     if (mod && k === 'k') { e.preventDefault(); openPalette(e.shiftKey ? '>' : ''); return; }
     if (mod && e.shiftKey && k === 'p') { e.preventDefault(); openPalette('>'); return; }
     if (mod && !e.shiftKey && k === 'p') { e.preventDefault(); openPalette(''); return; }
@@ -1129,6 +1183,7 @@ async function boot() {
   pwaInit();
   await store.open();
   try { app.settings = mergeSettings(await store.getMeta('settings')); } catch (e) { /* defaults */ }
+  applyCustomTypes(app.settings.customTypes); refreshTypeOptions();
   try { app.srs = (await store.getMeta('srs')) || {}; } catch (e) { app.srs = {}; }
   setMacros(app.settings.macros);
   applyTheme(); applyLayout();
@@ -1172,7 +1227,7 @@ async function boot() {
   document.documentElement.classList.add('ready');
   pwaLaunchAction();
   updateFolderBanner();
-  window.musubi = { app, vault, store, ed, renderMarkdown, extractCards, openNote, createNote, searchNotes, parseNote, serializeNote, importFiles, makeZip, readZip, parseBibtex, dueQueue, graphData, useFolderHandle, folderRescan, startTour, endTour, seedVault, addLinkDialog, lsSnippets, lsParseSource, openReview, updateFolderBanner, saveAsset, assetUrl, findAsset, attachmentPath };
+  window.musubi = { app, vault, store, ed, renderMarkdown, extractCards, openNote, createNote, searchNotes, parseNote, serializeNote, importFiles, makeZip, readZip, parseBibtex, dueQueue, graphData, useFolderHandle, folderRescan, startTour, endTour, seedVault, addLinkDialog, lsSnippets, lsParseSource, openReview, openPhilosophy, updateFolderBanner, saveAsset, assetUrl, findAsset, attachmentPath };
   if (app.settings.tour && app.settings.tour.active) resumeTour();
   else if (tourDue()) startTour({ firstRun: true });
 }

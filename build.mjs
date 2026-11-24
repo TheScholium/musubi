@@ -36,7 +36,7 @@ const vendor = [
 
 const seedDir = join(root, 'src/seed');
 const seeds = readdirSync(seedDir).filter((f) => f.endsWith('.md')).sort().map((f) => readFileSync(join(seedDir, f), 'utf8'));
-const seedJs = `function starterNotes() { return ${JSON.stringify(seeds)}; }`;
+const seedJs = `function starterNotes() { return ${JSON.stringify(seeds)}; }\nconst PHILOSOPHY_MD = ${JSON.stringify(r('src/philosophy.md'))};`;
 
 const icons = r('src/istari-icons.json');
 // Macro names known to KaTeX, for the LaTeX Suite rule that adds a space after a finished macro.
