@@ -395,7 +395,7 @@ function bindGhost(ghost, p) {
     const a = e.target.closest('a');
     if (a && (a.classList.contains('wl') || a.classList.contains('cite-ref'))) {
       e.preventDefault();
-      if (a.dataset.id) { panes.list[p].tabs[panes.list[p].active] = { k: 'note', id: a.dataset.id }; focusPane(p); if (a.dataset.heading) setTimeout(() => scrollToHeading(a.dataset.heading), 60); }
+      if (a.dataset.id) { panes.list[p].tabs[panes.list[p].active] = { k: 'note', id: a.dataset.id }; focusPane(p); if (a.dataset.block) setTimeout(() => scrollToBlock(a.dataset.block), 80); else if (a.dataset.heading) setTimeout(() => scrollToHeading(a.dataset.heading), 60); }
       else if (a.dataset.target) createFromBroken(a.dataset.target);
       return;
     }

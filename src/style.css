@@ -842,3 +842,14 @@ body.resizing { cursor: col-resize; user-select: none; }
 .ft-note .si-title { font-size: 15px; }
 .ft-root-drop { margin: 10px 14px; padding: 8px; border: 1px dashed var(--ist-rule); color: var(--ist-text-faint); font-size: 13px; font-style: italic; text-align: center; display: none; }
 .side-body:has(.ft-note[draggable]) .ft-root-drop { display: block; }
+
+/* ---------- block references ---------- */
+.block-anchor { display: inline; }
+.cm-lp-blockid { font-family: var(--font-mono); font-size: .72em; color: var(--ist-text-faint); opacity: .7; }
+.embed-block { padding-top: .2em; }
+.embed-block .embed-body > :first-child { margin-top: 0; }
+.embed-block .embed-body > :last-child { margin-bottom: .2em; }
+.embed-src { text-align: right; font-size: .82em; }
+.embed-src a.wl::before { content: '↳ '; color: var(--ist-text-faint); }
+a.wl.broken-block { text-decoration-style: dashed; }
+.cm-lp-embed .embed-block .math-display, .cm-lp-embed .embed-block .env { margin: .3em 0; }

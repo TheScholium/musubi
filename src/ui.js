@@ -462,7 +462,8 @@ function openNote(id, opts = {}) {
   renderPanel();
   document.body.classList.remove('side-open');
   paneDidChange();
-  if (opts.heading) setTimeout(() => scrollToHeading(opts.heading), 40);
+  if (opts.block) setTimeout(() => scrollToBlock(opts.block), 60);
+  else if (opts.heading) setTimeout(() => scrollToHeading(opts.heading), 40);
   if (opts.focusTitle) { const t = $('#title'); t.focus(); t.select(); }
   else if (opts.focusEditor && !read) { ed.focus(); const len = ed.getText().length; ed.setSelection(len); }
 }
@@ -715,6 +716,7 @@ function openNoteMenu(anchor) {
     { icon: 'blackhole', label: 'Local graph', run: () => openGraph({ focus: c.id, depth: 2 }) },
     { icon: 'history', label: 'Version history', run: openHistory },
     { icon: 'folder', label: 'Move to a folder…', run: () => moveToFolderDialog(c) },
+    { icon: 'chainout', label: 'Copy a link to the block at the cursor', run: copyBlockLink },
     '-',
     { icon: 'source', label: app.settings.mode === 'source' ? 'Live preview' : 'Source mode', run: () => setMode(app.settings.mode === 'source' ? 'live' : 'source') },
     { icon: 'copy', label: 'Copy as Markdown', run: () => copyText(serializeNote(c), 'Markdown copied') },
@@ -790,7 +792,8 @@ function showHoverCard(a) {
   const n = vault.get(a.dataset.id); if (!n) return;
   const card = $('#hover-card');
   let body = stripTitleHeading(n.body, n.title);
-  if (a.dataset.heading) { const sec = extractSection(n.body, a.dataset.heading.replace(/-/g, ' ')); if (sec) body = sec; }
+  if (a.dataset.block) { const blk = findBlock(n.body, a.dataset.block); if (blk) body = blk.text; }
+  else if (a.dataset.heading) { const sec = extractSection(n.body, a.dataset.heading.replace(/-/g, ' ')); if (sec) body = sec; }
   if (body.length > 2200) body = body.slice(0, 2200) + '\n\n…';
   card.innerHTML = `<div class="hc-head"><span class="dot t-${esc(n.type)}"></span><span class="hc-title">${esc(n.title)}</span><span class="hc-type">${esc(TYPE_LABEL[n.type] || n.type)}</span></div>` +
     (body.trim() ? renderMarkdown(body, { note: n, depth: 2, idPrefix: 'hc-' }) : '<p class="muted"><i>Empty note.</i></p>');
@@ -1032,6 +1035,9 @@ function renderMaintenance(body) {
     h('span', { class: 'dot broken-dot' }),
     h('div', { class: 'si-main' }, h('div', { class: 'si-title' }, u.target), h('div', { class: 'si-sub' }, `${u.refs.length} · from ${vault.get(u.refs[0].from).title}`)),
     h('button', { class: 'btn btn-sm btn-outline', onclick: (e) => { e.stopPropagation(); newNoteDialog({ title: u.target }); } }, 'Create'))), 'These links point to notes that do not exist yet.');
+  const brokenBlocks = [];
+  for (const [from, links] of idx.out) for (const l of links) if (l.to && isBlockRef(l.heading) && !findBlock(vault.get(l.to).body, l.heading.slice(1))) brokenBlocks.push({ from, l });
+  section('Broken block links', brokenBlocks.map(({ from, l }) => sideItem(vault.get(from), `→ ${vault.get(l.to).title} #${l.heading}`)), 'The block ID is gone from the target note.');
   const weekAgo = isoLocal(new Date(Date.now() - 7 * 86400000));
   const stale = vault.all().filter((n) => n.status === 'fleeting' && n.created < weekAgo);
   section('Fleeting for over a week', stale.map((n) => sideItem(n, relTime(parseDate(n.created)))));

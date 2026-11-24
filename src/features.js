@@ -157,6 +157,7 @@ function commands() {
     { label: 'Local graph of this note', run: () => openGraph({ focus: c.id, depth: 2 }) },
     { label: 'Version history of this note', run: openHistory },
     { label: 'Copy link to this note', run: () => copyText(linkText(c), 'Link copied') },
+    { label: 'Copy a link to the block at the cursor', run: copyBlockLink },
     { label: 'Copy this note as Markdown', run: () => copyText(serializeNote(c), 'Markdown copied') },
     { label: 'Print or save this note as PDF', run: () => { setMode('read'); setTimeout(() => window.print(), 120); } },
     { label: 'Move this note to the trash', run: () => deleteNote(c.id) },
@@ -709,6 +710,7 @@ These follow the Obsidian plugin LaTeX Suite. Change them in Settings, Mathemati
 ## Syntax
 
 - Links: \`[[Title]]\`, \`[[Title|label]]\`, \`[[Title#Heading]]\`, embed with \`![[Title]]\` or \`![[Title#Heading]]\`.
+- Block references: end a paragraph or list item with \`^my-id\` (or put \`^my-id\` on the line after a box, an equation or a table). Link with \`[[Title#^my-id]]\`, embed with \`![[Title#^my-id]]\`. Type \`[[Title#^\` to search the blocks of a note; Musubi adds the ID for you.
 - Typed links: \`supports::[[Note]]\`, \`refutes::[[Note]]\`, \`depends-on::[[Note]]\`, \`generalizes::[[Note]]\`, \`example-of::[[Note]]\`, \`follows::[[Note]]\`. Any word works.
 - Math: \`$…$\`, \`$$…$$\`, \`\\[…\\]\`, and \`\\begin{align}…\\end{align}\` at the start of a line. \`\\label{eq:x}\` and \`\\eqref{eq:x}\` work across a note. Chemistry: \`\\ce{H2O}\`.
 - Statements: \`:::theorem[Name]\` … \`:::\`. Also definition, lemma, proposition, corollary, axiom, postulate, law, principle, example, exercise, proof, remark, intuition, objection, reply, quote.

@@ -35,7 +35,7 @@ class LinkWidget extends WidgetType {
     a.textContent = s.label;
     if (s.att) { a.className = 'att att-' + attKind(s.att); a.dataset.att = s.att; a.dataset.ext = attExt(s.att); a.href = '#att'; }
     else if (s.missing) { a.className = 'asset-missing'; a.textContent = 'Missing file: ' + s.target; }
-    else { a.className = 'wl' + (s.id ? '' : ' broken'); if (s.id) { a.dataset.id = s.id; a.href = '#n-' + s.id; if (s.heading) a.dataset.heading = s.heading; } else a.dataset.target = s.target; }
+    else { a.className = 'wl' + (s.id ? '' : ' broken'); if (s.id) { a.dataset.id = s.id; a.href = '#n-' + s.id; if (s.heading) a.dataset.heading = s.heading; if (s.block) a.dataset.block = s.block; } else a.dataset.target = s.target; }
     wrap.appendChild(a);
     wrap.addEventListener('mousedown', lpAnchorDown);
     return wrap;
@@ -140,13 +140,15 @@ function lpAnalyze(state, noteRef) {
     const raw = text.slice(b - 2 - (m[5] != null ? m[5].length + 1 : 0) - m[4].length, b - 2 - (m[5] != null ? m[5].length + 1 : 0));
     const { target, heading } = splitTarget(raw);
     const id = target ? resolveTarget(target) : (note ? note.id : null);
-    const label = m[5] != null ? m[5] : (id ? (heading ? (target ? vault.get(id).title + ' › ' : '') + heading : vault.get(id).title) : raw);
+    const blockId = isBlockRef(heading) ? heading.slice(1) : '';
+    const blk = blockId && id ? findBlock(id === (note && note.id) ? text : vault.get(id).body, blockId) : null;
+    const label = m[5] != null ? m[5] : (id ? (blockId ? (target ? vault.get(id).title + ' › ' : '') + (blk ? blockSnippet(blk, 48) : '^' + blockId) : heading ? (target ? vault.get(id).title + ' › ' : '') + heading : vault.get(id).title) : raw);
     if (m[3]) {
       const html = renderMarkdown(text.slice(a, b), { note, idPrefix: 'lpi' + a + '-' }).replace(/^\s*<p>|<\/p>\s*$/g, '');
       items.push({ kind: 'inlineembed', from: a, to: b, html });
     } else {
       const att = !id && hasFileExt(target) ? findAsset(target, note) : null;
-      items.push({ kind: 'link', from: a, to: b, spec: { id, target, heading: heading ? slugify(heading) : '', label, rel: m[2] ? m[2].toLowerCase() : '', att: att ? att.name : '', missing: !id && hasFileExt(target) && !att } });
+      items.push({ kind: 'link', from: a, to: b, spec: { id, target, heading: heading && !blockId ? slugify(heading) : '', block: blockId, label, rel: m[2] ? m[2].toLowerCase() : '', att: att ? att.name : '', missing: !id && hasFileExt(target) && !att } });
     }
     protectedR.push([a, b]);
   }
@@ -185,6 +187,9 @@ function lpAnalyze(state, noteRef) {
     if (/^#{1,6}\s/.test(text.slice(ln.from, ln.to)) && a === ln.from) continue;
     items.push({ kind: 'tag', from: a, to: b, tag: t });
   }
+  // block IDs: faint at the end of a line, or on their own line
+  const bidRe = /(^|[ \t])\^([A-Za-z0-9][A-Za-z0-9-]*)[ \t]*$/gm;
+  while ((m = bidRe.exec(mmask))) { const a = m.index + m[1].length; const b = a + 1 + m[2].length; if (free(a, b)) items.push({ kind: 'blockid', from: a, to: b }); }
   // highlights ==text==
   const hiRe = /==(?=\S)([^=\n]+?)==/g;
   while ((m = hiRe.exec(mmask))) { const a = m.index; const b = a + m[0].length; if (free(a, b)) items.push({ kind: 'mark', from: a, to: b }); }
@@ -420,6 +425,7 @@ function lpDecorations(state, an) {
         break;
       case 'fndef': lineC(a, 'cm-lp-fndef'); markC(a, b, 'cm-lp-faint'); break;
       case 'qa': markC(a, b, 'cm-lp-qa'); break;
+      case 'blockid': markC(a, b, 'cm-lp-blockid', { title: 'Block ID: link with [[Title#' + state.sliceDoc(a, b) + ']]' }); break;
       case 'ablock': {
         const l0 = state.doc.lineAt(a).number; const l1 = state.doc.lineAt(b).number;
         for (let p = l0 + 1; p <= l1; p++) { const lf = state.doc.line(p).from; if (!inBlock(lf, lf)) lineC(lf, 'cm-lp-ablock' + (p === l1 ? ' cm-lp-ablock-last' : '')); }
@@ -545,6 +551,8 @@ function lpCompletions(context) {
   const line = context.state.doc.lineAt(context.pos);
   const before = line.text.slice(0, context.pos - line.from);
   let m;
+  const bc = blockCompletions(context, before) || headingCompletions(context, before);
+  if (bc) return bc;
   if ((m = /\[\[([^\[\]\n|]*)$/.exec(before))) {
     const q = m[1]; const from = context.pos - m[0].length;
     const after = context.state.sliceDoc(context.pos, context.pos + 2);

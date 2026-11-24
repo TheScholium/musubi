@@ -330,6 +330,11 @@ function renderMarkdown(src, opt = {}) {
       return relHtml + `<a class="wl broken" data-target="${esc(target)}" title="No note yet. Click to create “${esc(target)}”.">${esc(label || rawTarget)}</a>`;
     }
     const tn = vault.get(id);
+    if (isBlockRef(heading)) {
+      const bid = heading.slice(1); const blk = findBlock(tn.body, bid);
+      const shown = label || (target ? tn.title + ' › ' : '') + (blk ? blockSnippet(blk, 48) : '^' + bid);
+      return relHtml + `<a class="wl${blk ? '' : ' broken-block'}" data-id="${esc(id)}" data-block="${esc(bid)}" href="#n-${esc(id)}"${blk ? '' : ` title="No block ^${esc(bid)} in “${esc(tn.title)}”"`}>${esc(shown)}</a>`;
+    }
     const shown = label || (heading ? (target ? tn.title + ' › ' : '') + heading : tn.title);
     return relHtml + `<a class="wl" data-id="${esc(id)}"${heading ? ` data-heading="${esc(slugify(heading))}"` : ''} href="#n-${esc(id)}">${esc(shown)}</a>`;
   };
@@ -349,6 +354,12 @@ function renderMarkdown(src, opt = {}) {
     const tn = vault.get(id);
     if ((stack.has(id) && !heading) || depth >= 3) return `<div class="embed embed-cycle">Embed stopped (cycle or depth limit): ${linkHtml(rawTarget, label, '')}</div>`;
     let body = stripTitleHeading(tn.body, tn.title);
+    if (isBlockRef(heading)) {
+      const bid = heading.slice(1); const blk = findBlock(tn.body, bid);
+      if (!blk) return `<div class="embed embed-missing">No block ^${esc(bid)} in ${linkHtml(target, '', '')}</div>`;
+      const inner = renderMarkdown(blk.text, { note: tn, depth: depth + 1, stack: new Set([...stack, id]), idPrefix: pre + 'e' + depth + id + bid + '-' });
+      return `<div class="embed embed-block" data-id="${esc(id)}"><div class="embed-body">${inner}</div><div class="embed-src"><a class="wl" data-id="${esc(id)}" data-block="${esc(bid)}" href="#n-${esc(id)}">${esc(label || tn.title)}</a></div></div>`;
+    }
     if (heading) {
       const sec = extractSection(tn.body, heading);
       if (sec == null) return `<div class="embed embed-missing">No heading “${esc(heading)}” in ${linkHtml(target, '', '')}</div>`;
@@ -359,6 +370,9 @@ function renderMarkdown(src, opt = {}) {
   };
 
   const inlineTransforms = (s) => {
+    // block IDs: a line "^id" alone, or " ^id" at the end of a line, become anchors
+    s = s.replace(/^[ \t]*\^([A-Za-z0-9][A-Za-z0-9-]*)[ \t]*$/gm, (m, id) => '\n' + tok(blockAnchorHtml(id, pre), true) + '\n');
+    s = s.replace(/([ \t])\^([A-Za-z0-9][A-Za-z0-9-]*)[ \t]*$/gm, (m, sp, id) => tok(blockAnchorHtml(id, pre)));
     // embeds alone on a line -> block token
     s = s.replace(/^[ \t]*!\[\[([^\[\]\n|]+?)(?:\|([^\[\]\n]*?))?\]\][ \t]*$/gm, (m, t, l) => '\n' + tok(embedHtml(t, l || ''), true) + '\n');
     // typed links, links, inline embeds
