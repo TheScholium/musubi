@@ -52,12 +52,14 @@ function newNoteDialog(opts = {}) {
   status.value = opts.status || 'draft';
   const hint = opts.branchFrom ? `This note continues “${vault.get(opts.branchFrom).title}”. A link goes both ways.`
     : opts.extract ? 'The selected text moves into the new note. A link replaces it.'
+    : opts.folder ? `The note goes in the folder “${opts.folder.replace(/\/$/, '')}”.`
     : 'Each note holds one idea. Give it a title that states the idea.';
   const create = () => {
     const t = title.value.trim();
     if (!t) { title.focus(); title.classList.add('shake'); setTimeout(() => title.classList.remove('shake'), 400); return; }
     const existing = resolveTarget(t);
     const fields = { title: t, type: type.value, status: status.value };
+    if (opts.folder) fields.folder = opts.folder;
     if (opts.citekey) fields.citekey = opts.citekey;
     let body;
     if (opts.extract) body = opts.extract.text.trim() + '\n';
@@ -473,6 +475,7 @@ function openSettings(tab = 'general') {
       row('Text size', sel('fontSize', [16, 17, 18, 19, 20, 21, 22].map((x) => [x, x + ' px']), applyTheme), 'Istari sets body text at 19 px.'),
       row('Measure', sel('width', [['istari', 'Istari (42 rem)'], ['vellum', 'Vellum (34 rem, justified)'], ['wide', 'Wide (52 rem)']], applyTheme)),
       row('View', sel('mode', [['live', 'Live preview'], ['source', 'Source'], ['read', 'Read']], () => setMode(s.mode))),
+      row('Folder tree', chk('folderTree', 'Show a Folders tab in the sidebar', () => { renderSidebar(); }), 'Notes keep their folder as part of the file path. With a linked folder these are the folders on disk. A Zettelkasten does not need folders, so this is off at first.'),
       row('Link style', sel('linkStyle', [['title', '[[Title]] (readable)'], ['id', '[[ID|Title]] (stable IDs)']]), 'Both styles survive renames: Musubi rewrites links when you change a title.'),
     ],
     editor: () => [
@@ -901,8 +904,9 @@ function download(blob, name) {
 function fileNamesFor(notes) {
   const used = new Set(); const map = new Map();
   for (const n of notes) {
-    let base = safeName(n.title); let name = base + '.md';
-    if (used.has(name.toLowerCase())) name = `${base} ${n.id}.md`;
+    const dir = typeof noteFolder === 'function' ? noteFolder(n) : '';
+    let base = safeName(n.title); let name = dir + base + '.md';
+    if (used.has(name.toLowerCase())) name = `${dir}${base} ${n.id}.md`;
     used.add(name.toLowerCase()); map.set(n.id, name);
   }
   return map;
@@ -1045,7 +1049,7 @@ async function folderRescan(manual, initial) {
     if (!initial) for (const [nm, a] of Array.from(vault.assets)) if (a.lazy && !seenAssets.has(nm)) { vault.assets.delete(nm); await store.delAsset(nm).catch(() => {}); assetChanges++; }
     vault.touch();
     if (initial) {
-      for (const n of vault.all()) if (!n.file || !seen.has(n.file)) { n.file = null; await folderWrite(n); }
+      for (const n of vault.all()) if (!n.file || !seen.has(n.file)) await folderWrite(n);
       for (const [name, a] of vault.assets) if (a.blob && !seenAssets.has(name)) await folderWriteAsset(a.path || attachmentPath(name, null), a.blob, name).catch(() => {});
     }
     if (assetChanges && app.current) { ed.refresh(); if (app.settings.mode === 'read') renderPreview(); }

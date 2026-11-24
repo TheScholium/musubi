@@ -828,3 +828,17 @@ body.resizing { cursor: col-resize; user-select: none; }
   .nav-dock { bottom: 10px; }
 }
 @media print { .tabbar, .nav-dock, #pane1, .pane-divider { display: none !important; } .panes, .pane, .pane-body { display: block; } }
+
+/* ---------- folder tree ---------- */
+.ft-head { display: flex; align-items: baseline; gap: 10px; padding: 4px 14px 6px 16px; }
+.ft-head .muted { flex: 1; font-style: italic; }
+.ft-folder { display: flex; align-items: center; gap: 6px; padding: 3px 12px 3px 12px; cursor: pointer; color: var(--ist-text-muted); font-size: 15px; user-select: none; }
+.ft-folder:hover { background: var(--hover); color: var(--ist-text-bright); }
+.ft-folder.open { color: var(--ist-text); }
+.ft-folder.drop, .ft-root-drop.drop { background: var(--active-item); box-shadow: inset 0 0 0 1px var(--ist-gold-dim); }
+.ft-caret { width: 10px; font-size: 10px; color: var(--ist-text-faint); }
+.ft-ic { display: inline-flex; color: var(--ist-gold-dim); }
+.ft-name { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ft-note .si-title { font-size: 15px; }
+.ft-root-drop { margin: 10px 14px; padding: 8px; border: 1px dashed var(--ist-rule); color: var(--ist-text-faint); font-size: 13px; font-style: italic; text-align: center; display: none; }
+.side-body:has(.ft-note[draggable]) .ft-root-drop { display: block; }

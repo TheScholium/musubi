@@ -21,6 +21,7 @@ const PLAIN_ICONS = {
   tray: '<path d="M3.5 13.5 6 5.3a1.2 1.2 0 0 1 1.2-.8h9.6a1.2 1.2 0 0 1 1.2.8l2.5 8.2v5.3a1.2 1.2 0 0 1-1.2 1.2H4.7a1.2 1.2 0 0 1-1.2-1.2z"/><path d="M3.5 13.5h4.6l1.4 2.4h5l1.4-2.4h4.6"/><path d="M12 7v4.6M10 9.8l2 1.9 2-1.9"/>',
   broom: '<path d="M15.5 3 10.6 11.6"/><path d="M8.6 10.6l4.6 2.6-1.3 2.9c-.9 2-2.8 3.7-5 4.4l-3.4 1 .9-3.4c.6-2.3 2.1-4.2 4.2-5.4z"/><path d="M6.7 16.4l2.6 1.5M8.3 13.8l2.4 1.4"/>',
   source: '<path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/>',
+  folder: '<path d="M3.5 7V17.8a1.5 1.5 0 0 0 1.5 1.5h14a1.5 1.5 0 0 0 1.5-1.5V9.6A1.5 1.5 0 0 0 19 8.1h-7.2l-2-2.6H5A1.5 1.5 0 0 0 3.5 7z"/>',
 };
 const icon = (name, size = 16) => `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ISTARI_ICONS[name] || PLAIN_ICONS[name] || ''}</svg>`;
 
@@ -127,6 +128,7 @@ function createNote(fields = {}, opts = {}) {
     year: fields.year || '', source: fields.source || '', url: fields.url || '', doi: fields.doi || '',
     created: now, modified: now, extra: [], body,
   };
+  if (fields.folder) n.file = cleanFolder(fields.folder) + safeName(title) + '.md';
   vault.notes.set(n.id, n); vault.touch();
   persistNote(n, { snapshot: false });
   refreshLists();
@@ -277,7 +279,7 @@ function buildShell() {
         h('option', { value: 'title' }, 'Title'), h('option', { value: 'links' }, 'Links'))),
     h('nav', { class: 'sb-tabs', role: 'tablist' },
       // icons; the open tab also shows its name
-      ...[['notes', 'Notes', 'slips'], ['tags', 'Tags', 'tag'], ['inbox', 'Inbox', 'tray'], ['maint', 'Maintain', 'broom']].map(([k, l, ic]) =>
+      ...[['notes', 'Notes', 'slips'], ['folders', 'Folders', 'folder'], ['tags', 'Tags', 'tag'], ['inbox', 'Inbox', 'tray'], ['maint', 'Maintain', 'broom']].map(([k, l, ic]) =>
         h('button', { class: 'sb-tab', 'data-tab': k, role: 'tab', title: l, 'aria-label': l, onclick: () => { app.settings.sidebarTab = k; saveSettings(); renderSidebar(); } },
           h('span', { class: 'sb-tab-ic', html: icon(ic, 17) }), h('span', { class: 'sb-tab-label' }, l), k === 'inbox' ? h('span', { class: 'count', id: 'inbox-count' }) : null))),
     h('div', { class: 'sb-listwrap' },
@@ -712,6 +714,7 @@ function openNoteMenu(anchor) {
     { icon: 'hourglass', label: 'Study the cards in this note', run: () => openReview({ noteId: c.id }) },
     { icon: 'blackhole', label: 'Local graph', run: () => openGraph({ focus: c.id, depth: 2 }) },
     { icon: 'history', label: 'Version history', run: openHistory },
+    { icon: 'folder', label: 'Move to a folder…', run: () => moveToFolderDialog(c) },
     '-',
     { icon: 'source', label: app.settings.mode === 'source' ? 'Live preview' : 'Source mode', run: () => setMode(app.settings.mode === 'source' ? 'live' : 'source') },
     { icon: 'copy', label: 'Copy as Markdown', run: () => copyText(serializeNote(c), 'Markdown copied') },
@@ -727,6 +730,7 @@ function noteContextMenu(anchor, id) {
     { icon: 'plus', label: 'Open in a new tab', keys: modKey() + ' click', run: () => openNote(id, { newTab: true }) },
     { icon: 'source', label: 'Open in the other pane', keys: modKey() + ' Shift click', run: () => openNote(id, { newTab: true, pane: panes.split ? otherPane(panes.notePane) : 1 }) },
     '-',
+    { icon: 'folder', label: 'Move to a folder…', run: () => moveToFolderDialog(n) },
     { icon: 'copy', label: 'Copy a link to this note', run: () => copyText(linkText(n), 'Link copied') },
   ]);
 }
@@ -919,7 +923,9 @@ const refreshLists = () => { renderSidebar(); updateDueBadge(); if ($('#tabbar0'
 const refreshListsSoon = debounce(refreshLists, 300);
 
 function renderSidebar() {
+  if (app.settings.sidebarTab === 'folders' && !app.settings.folderTree) app.settings.sidebarTab = 'notes';
   const tab = app.settings.sidebarTab;
+  const ftab = $('.sb-tab[data-tab="folders"]'); if (ftab) ftab.hidden = !app.settings.folderTree;
   $$('.sb-tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
   const body = $('#side-body'); body.innerHTML = '';
   $('.sb-filter').hidden = tab !== 'notes';
@@ -927,6 +933,7 @@ function renderSidebar() {
   $('#inbox-count').textContent = inboxN ? String(inboxN) : '';
   $('#sort').value = app.settings.sort;
   if (tab === 'notes') renderNoteList(body);
+  else if (tab === 'folders') renderFolderTree(body);
   else if (tab === 'tags') renderTagTree(body);
   else if (tab === 'inbox') renderInbox(body);
   else renderMaintenance(body);
