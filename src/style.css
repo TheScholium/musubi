@@ -972,3 +972,60 @@ i.st-key.st-a { background: var(--stat-a); } i.st-key.st-b { background: var(--s
 .st-table th { font-weight: 500; font-variant: small-caps; letter-spacing: var(--track-caps); color: var(--ist-text-muted); border-bottom: 1px solid var(--ist-rule); }
 .st-tablewrap { max-height: 240px; overflow-y: auto; }
 .st-tip { position: absolute; z-index: 5; width: 220px; padding: 5px 9px; background: var(--ist-bg-3); border: 1px solid var(--ist-rule); border-radius: 3px; box-shadow: var(--shadow-notice); font-size: 13px; color: var(--ist-text); pointer-events: none; text-align: center; }
+
+/* ---------- PDF reader ---------- */
+.pdf-host { flex: 1; min-width: 0; min-height: 0; display: flex; }
+.pdf-reader { position: relative; display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; background: var(--ist-bg-2); }
+.pdf-bar { display: flex; align-items: center; gap: 2px; height: 36px; padding: 0 8px; border-bottom: 1px solid var(--ist-rule); flex: none; background: var(--ist-bg-1); overflow-x: auto; scrollbar-width: none; }
+.pdf-bar::-webkit-scrollbar { display: none; }
+.pdf-btn { width: 28px; height: 28px; }
+.pdf-pagein { width: 3.2em; height: 24px; text-align: right; border: 1px solid var(--ist-rule); border-radius: 2px; background: var(--ist-bg-0); padding: 0 5px; font-size: 14px; font-variant-numeric: lining-nums tabular-nums; }
+.pdf-pagein:focus { outline: none; border-color: var(--ist-gold-dim); }
+.pdf-pageof { font-size: 14px; color: var(--ist-text-muted); margin: 0 4px; white-space: nowrap; font-variant-numeric: lining-nums; }
+.pdf-sep { width: 1px; height: 18px; background: var(--ist-rule); margin: 0 6px; flex: none; }
+.pdf-zoomlab { min-width: 3.4em; border: 0; background: none; color: var(--ist-text-muted); font-size: 13.5px; font-variant: small-caps; letter-spacing: var(--track-caps); font-variant-numeric: lining-nums; }
+.pdf-zoomlab:hover { color: var(--ist-gold); }
+.pdf-find { width: 140px; height: 24px; border: 1px solid var(--ist-rule); border-radius: 2px; background: var(--ist-bg-0); padding: 0 7px; font-size: 14px; font-style: italic; }
+.pdf-find:focus { outline: none; border-color: var(--ist-gold-dim); font-style: normal; }
+.pdf-findcount { font-size: 12.5px; color: var(--ist-text-faint); margin-left: 6px; white-space: nowrap; font-variant-numeric: lining-nums; }
+.pdf-fill { flex: 1; }
+.pdf-reader.pdf-dark .pdf-darkbtn { color: var(--ist-gold); opacity: 1; }
+.pdf-main { flex: 1; min-height: 0; display: flex; }
+.pdf-scroll { flex: 1; min-width: 0; overflow: auto; outline: none; }
+.pdf-pages { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 12px 18px 40vh; width: max-content; min-width: 100%; }
+.pdf-page { position: relative; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 6px 22px rgba(0, 0, 0, .22); flex: none; }
+.pdf-page canvas { position: absolute; inset: 0; display: block; }
+.pdf-reader.pdf-dark .pdf-page { background: #17140f; }
+.pdf-reader.pdf-dark .pdf-page canvas { filter: invert(.88) hue-rotate(180deg) sepia(.12) contrast(.95); }
+.pdf-pagenum { position: absolute; right: -2px; bottom: -18px; font-size: 11px; color: var(--ist-text-faint); font-variant-numeric: lining-nums; }
+.pdf-page .textLayer { position: absolute; inset: 0; overflow: clip; opacity: 1; line-height: 1; text-size-adjust: none; forced-color-adjust: none; transform-origin: 0 0; z-index: 2; }
+.pdf-page .textLayer :is(span, br) { color: transparent; position: absolute; white-space: pre; cursor: text; transform-origin: 0% 0%; }
+.pdf-page .textLayer span.markedContent { top: 0; height: 0; }
+.pdf-page .textLayer ::selection { background: rgba(196, 162, 77, .38); }
+.pdf-page .textLayer br::selection { background: transparent; }
+.pdf-page .textLayer .endOfContent { display: block; position: absolute; inset: 100% 0 0; z-index: 0; cursor: default; user-select: none; }
+.pdf-page .textLayer.selecting .endOfContent { top: 0; }
+.pdf-page .textLayer span.pdf-hit { background: rgba(106, 147, 214, .35); border-radius: 2px; }
+.pdf-links { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.pdf-link { position: absolute; pointer-events: auto; border-radius: 2px; }
+.pdf-link:hover { background: rgba(196, 162, 77, .18); box-shadow: 0 0 0 1px rgba(196, 162, 77, .5); }
+.pdf-hl { position: absolute; z-index: 1; background: rgba(214, 178, 84, .38); mix-blend-mode: multiply; border-radius: 2px; cursor: pointer; }
+.pdf-reader.pdf-dark .pdf-hl { mix-blend-mode: screen; background: rgba(196, 162, 77, .32); }
+.pdf-page .textLayer { pointer-events: auto; }
+.pdf-hl { pointer-events: auto; }
+.pdf-selbar { position: absolute; z-index: 8; display: flex; gap: 4px; padding: 4px; background: var(--ist-bg-3); border: 1px solid var(--ist-rule); border-radius: 3px; box-shadow: var(--shadow-popover); }
+.pdf-status { position: absolute; inset: 36px 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--ist-text-muted); font-style: italic; padding: 20px; text-align: center; }
+.pdf-side { width: 250px; flex: none; border-right: 1px solid var(--ist-rule); display: flex; flex-direction: column; min-height: 0; background: var(--ist-bg-1); }
+.pdf-sidetabs { display: flex; gap: 10px; padding: 6px 10px; border-bottom: 1px solid var(--ist-rule); }
+.pdf-sidetabs button { border: 0; background: none; padding: 2px 0; font-size: 13.5px; font-variant: small-caps; letter-spacing: var(--track-whisper); color: var(--ist-text-faint); border-bottom: 1px solid transparent; }
+.pdf-sidetabs button.on { color: var(--ist-gold); border-bottom-color: var(--ist-gold-dim); }
+.pdf-sidebody { flex: 1; overflow-y: auto; padding: 4px 0 20px; }
+.pdf-sidehint { padding: 8px 12px; }
+.pdf-sideactions { padding: 6px 10px; }
+.pdf-outrow { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 3px 10px; font-size: 14px; color: var(--ist-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pdf-outrow:hover, .pdf-markrow:hover { background: var(--hover); color: var(--ist-text-bright); }
+.pdf-markrow { display: flex; gap: 8px; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--ist-rule); background: none; padding: 6px 10px; font-size: 13.5px; color: var(--ist-text); line-height: 1.35; }
+.pdf-markpage { flex: none; color: var(--ist-gold-dim); font-variant-numeric: lining-nums; min-width: 3em; }
+.pdf-marktext { flex: 1; }
+.pdf-markq { color: var(--ist-gold-dim); }
+.tab .tab-ic { color: var(--c-red); }

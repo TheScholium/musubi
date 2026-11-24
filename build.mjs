@@ -56,6 +56,11 @@ const fontCss = [
 ].join('\n');
 const app = safeScript(`(function () {\n'use strict';\n${seedJs}\n${appJs.replace(/^'use strict';$/m, '')}\n})();`);
 
+// pdf.js (Apache-2.0) for the PDF reader. It stays as JSON text until a PDF opens.
+const stripMap = (js) => js.replace(/\/\/# sourceMappingURL=\S*\s*$/gm, '');
+const pdfjsJson = JSON.stringify({ lib: stripMap(r(nm('pdfjs-dist/build/pdf.min.mjs'))), worker: stripMap(r(nm('pdfjs-dist/build/pdf.worker.min.mjs'))) })
+  .replace(/<\//g, '<\\/').replace(/<!--/g, '<\\u0021--');
+
 const pkg = JSON.parse(r('package.json'));
 const thirdParty = [
   ['KaTeX ' + JSON.parse(r(nm('katex/package.json'))).version + ' (including mhchem)', r(nm('katex/LICENSE'))],
@@ -64,6 +69,7 @@ const thirdParty = [
   ['CodeMirror ' + JSON.parse(r(nm('@codemirror/view/package.json'))).version + ' and Lezer', r(nm('@codemirror/view/LICENSE'))],
   ['Istari fonts: EB Garamond, Cormorant Garamond, JetBrains Mono', r('vendor/fonts/OFL-1.1.txt')],
   ['Obsidian LaTeX Suite default snippets (src/latexsuite-defaults.js)', r('vendor/latex-suite-LICENSE.txt')],
+  ['pdf.js ' + JSON.parse(r(nm('pdfjs-dist/package.json'))).version + ' (Mozilla, Apache License 2.0)', r(nm('pdfjs-dist/LICENSE'))],
 ];
 const notices = thirdParty.map(([n, t]) => `===== ${n} =====\n${t.trim()}`).join('\n\n');
 writeFileSync(join(root, 'THIRD_PARTY_LICENSES.txt'), notices + '\n');
@@ -87,6 +93,7 @@ ${notices.replace(/-->/g, '- ->')}
 <style>${fontCss}</style>
 <style>${katexCss}</style>
 <style>${r('src/style.css')}</style>
+<script type="application/json" id="musubi-pdfjs">${pdfjsJson}</script>
 </head>
 <body>
 <noscript><p style="padding:2em;font-family:serif">Musubi needs JavaScript. It runs entirely in this file; nothing is sent anywhere.</p></noscript>

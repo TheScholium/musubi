@@ -198,9 +198,10 @@ function fmtSize(n) {
   return (i ? n.toFixed(n < 10 ? 1 : 0) : n) + ' ' + u[i];
 }
 const attExt = (name) => (String(name).split('.').pop() || '').toLowerCase();
-function attLinkHtml(name, label) {
-  return `<a class="att att-${attKind(name)}" data-att="${esc(name)}" data-ext="${esc(attExt(name))}" href="#att" title="Open ${esc(name)}">${esc(label || name)}</a>`;
+function attLinkHtml(name, label, page) {
+  return `<a class="att att-${attKind(name)}" data-att="${esc(name)}" data-ext="${esc(attExt(name))}"${page ? ` data-page="${+page}"` : ''} href="#att" title="Open ${esc(name)}${page ? ' at page ' + +page : ''}">${esc(label || name)}</a>`;
 }
+const pageOfHeading = (hd) => { const m = /^page=(\d+)$/i.exec(String(hd || '').trim()); return m ? +m[1] : 0; };
 function imgWidthFromAlt(alt) {
   const m = /^(.*?)\|(\d+)(?:x\d+)?$/.exec(alt || '');
   return m ? { alt: m[1], width: +m[2] } : { alt: alt || '', width: 0 };
@@ -244,8 +245,9 @@ function enhanceAttachments(root) {
       h('span', { class: 'att-name' }, name),
       a.size ? h('span', { class: 'att-size' }, fmtSize(a.size)) : null,
       h('span', { class: 'att-actions' },
+        kind === 'pdf' ? h('button', { class: 'link-btn att-read', title: 'Open in the PDF reader, beside the note', onclick: (e) => { e.preventDefault(); e.stopPropagation(); openPdfTab(name); } }, 'Read') : null,
         kind === 'pdf' ? h('button', { class: 'link-btn att-toggle', onclick: (e) => { e.preventDefault(); e.stopPropagation(); toggleAttFrame(el, name); } }, 'Show') : null,
-        h('button', { class: 'link-btn', onclick: (e) => { e.preventDefault(); e.stopPropagation(); openAttachment(name); } }, 'Open')));
+        h('button', { class: 'link-btn', onclick: (e) => { e.preventDefault(); e.stopPropagation(); openAttachment(name, { external: true }); } }, 'Open')));
     el.appendChild(head);
     if (kind === 'audio' || kind === 'video') {
       const media = h(kind, { controls: '', preload: 'metadata', class: 'att-media' });
@@ -261,7 +263,9 @@ async function toggleAttFrame(el, name) {
   fr = h('iframe', { class: 'att-frame', src: u, title: name });
   el.appendChild(fr); if (btn) btn.textContent = 'Hide';
 }
-async function openAttachment(name) {
+async function openAttachment(name, opts) {
+  const o = typeof opts === 'number' ? { page: opts } : (opts || {});
+  if (/\.pdf$/i.test(name) && !o.external && typeof openPdfTab === 'function') { openPdfTab(name, { page: o.page || null }); return; }
   const u = await assetUrl(name);
   if (!u) { toast('The file could not be read. Is the folder still linked?', { kind: 'error' }); return; }
   const kind = attKind(name);
@@ -334,7 +338,7 @@ function renderMarkdown(src, opt = {}) {
     if (!id) {
       if (hasFileExt(target)) {
         const f = findAsset(target, note);
-        return relHtml + (f ? attLinkHtml(f.name, label || target) : `<span class="asset-missing">Missing file: ${esc(target)}</span>`);
+        return relHtml + (f ? attLinkHtml(f.name, label || (pageOfHeading(heading) ? `${target}, p. ${pageOfHeading(heading)}` : target), pageOfHeading(heading)) : `<span class="asset-missing">Missing file: ${esc(target)}</span>`);
       }
       return relHtml + `<a class="wl broken" data-target="${esc(target)}" title="No note yet. Click to create “${esc(target)}”.">${esc(label || rawTarget)}</a>`;
     }

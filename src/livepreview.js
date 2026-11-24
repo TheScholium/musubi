@@ -33,7 +33,7 @@ class LinkWidget extends WidgetType {
     if (s.rel) { const r = document.createElement('span'); r.className = 'rel rel-' + REL_CLASS(s.rel); r.textContent = s.rel; wrap.appendChild(r); }
     const a = document.createElement('a');
     a.textContent = s.label;
-    if (s.att) { a.className = 'att att-' + attKind(s.att); a.dataset.att = s.att; a.dataset.ext = attExt(s.att); a.href = '#att'; }
+    if (s.att) { a.className = 'att att-' + attKind(s.att); a.dataset.att = s.att; a.dataset.ext = attExt(s.att); a.href = '#att'; if (s.page) a.dataset.page = String(s.page); }
     else if (s.missing) { a.className = 'asset-missing'; a.textContent = 'Missing file: ' + s.target; }
     else { a.className = 'wl' + (s.id ? '' : ' broken'); if (s.id) { a.dataset.id = s.id; a.href = '#n-' + s.id; if (s.heading) a.dataset.heading = s.heading; if (s.block) a.dataset.block = s.block; } else a.dataset.target = s.target; }
     wrap.appendChild(a);
@@ -148,7 +148,8 @@ function lpAnalyze(state, noteRef) {
       items.push({ kind: 'inlineembed', from: a, to: b, html });
     } else {
       const att = !id && hasFileExt(target) ? findAsset(target, note) : null;
-      items.push({ kind: 'link', from: a, to: b, spec: { id, target, heading: heading && !blockId ? slugify(heading) : '', block: blockId, label, rel: m[2] ? m[2].toLowerCase() : '', att: att ? att.name : '', missing: !id && hasFileExt(target) && !att } });
+      const pdfPage = att ? pageOfHeading(heading) : 0;
+      items.push({ kind: 'link', from: a, to: b, spec: { id, target, heading: heading && !blockId && !pdfPage ? slugify(heading) : '', block: blockId, page: pdfPage, label: att && pdfPage && m[5] == null ? `${target}, p. ${pdfPage}` : label, rel: m[2] ? m[2].toLowerCase() : '', att: att ? att.name : '', missing: !id && hasFileExt(target) && !att } });
     }
     protectedR.push([a, b]);
   }
@@ -521,12 +522,12 @@ function lpAnchorDown(e) {
   const a = e.target.closest && e.target.closest('a.wl, a.cite-ref, a.att');
   if (!a) return;
   e.preventDefault(); e.stopPropagation();
-  if (a.dataset.att) openAttachment(a.dataset.att);
+  if (a.dataset.att) openAttachment(a.dataset.att, +a.dataset.page || 0);
   else if (a.dataset.id) openWithKeys(e, a.dataset.id, { heading: a.dataset.heading, block: a.dataset.block });
   else if (a.dataset.target) createFromBroken(a.dataset.target);
   else if (a.dataset.cite) newNoteDialog({ title: a.dataset.cite, type: 'literature', citekey: a.dataset.cite });
 }
-function lpLinkIgnore(e) { return e.type === 'mousedown' && !e.altKey && !!(e.target.closest && e.target.closest('a')); }
+function lpLinkIgnore(e) { return e.type === 'mousedown' && !e.altKey && !!(e.target.closest && e.target.closest('a, button, video, audio, iframe, summary')); }
 
 const lpInlineCache = new Map();
 function lpInline(src) {
@@ -740,7 +741,7 @@ function lpMouseDown(e, view) {
   const a = t.closest && t.closest('a.wl, a.cite-ref, a.att');
   if (a && !e.altKey) {
     e.preventDefault();
-    if (a.dataset.att) openAttachment(a.dataset.att);
+    if (a.dataset.att) openAttachment(a.dataset.att, +a.dataset.page || 0);
     else if (a.dataset.id) openWithKeys(e, a.dataset.id, { heading: a.dataset.heading, block: a.dataset.block });
     else if (a.dataset.target) createFromBroken(a.dataset.target);
     else if (a.dataset.cite) newNoteDialog({ title: a.dataset.cite, type: 'literature', citekey: a.dataset.cite });

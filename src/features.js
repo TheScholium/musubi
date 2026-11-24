@@ -124,6 +124,7 @@ function commands() {
     { label: 'Open graph view', keys: 'Alt+G', run: () => openGraph() },
     { label: 'Review due flashcards', keys: 'Alt+R', run: () => openReview() },
     { label: 'Review statistics', run: () => openStats() },
+    { label: 'Open a PDF in the reader', keys: 'Alt+P', run: () => openPdfPicker() },
     { label: 'Random note (serendipity)', run: () => { const all = vault.all(); if (all.length) openNote(all[Math.floor(Math.random() * all.length)].id); } },
     { label: 'View: live preview', keys: modKey() + '+E', run: () => setMode('live') },
     { label: 'View: source (plain Markdown)', keys: modKey() + '+Shift+E', run: () => setMode('source') },
@@ -1128,7 +1129,7 @@ function bindGlobal() {
     if (!a) return;
     e.preventDefault();
     // attachment links outside the editor (the editor opens them on mousedown)
-    if (a.dataset.att && !a.closest('.cm-editor') && e.button === 0 && !e.altKey) openAttachment(a.dataset.att);
+    if (a.dataset.att && !a.closest('.cm-editor') && e.button === 0 && !e.altKey) openAttachment(a.dataset.att, +a.dataset.page || 0);
   }, true);
   document.addEventListener('keydown', (e) => {
     const mod = e.ctrlKey || e.metaKey; const k = e.key.toLowerCase();
@@ -1160,6 +1161,7 @@ function bindGlobal() {
     if (altShortcut) {
       const c = e.code;
       if (paneShortcut(c)) { e.preventDefault(); return; }
+      if (c === 'KeyP') { e.preventDefault(); openPdfPicker(); return; }
       if (c === 'KeyN') { e.preventDefault(); newNoteDialog(); return; }
       if (c === 'KeyC') { e.preventDefault(); captureDialog(); return; }
       if (c === 'KeyG') { e.preventDefault(); openGraph(); return; }
@@ -1263,7 +1265,7 @@ async function boot() {
   document.documentElement.classList.add('ready');
   pwaLaunchAction();
   updateFolderBanner();
-  window.musubi = { app, vault, store, ed, applyTheme, setMode, renderPreview, openSettings, renderSidebar, refreshLists, renderMarkdown, extractCards, openNote, createNote, searchNotes, parseNote, serializeNote, importFiles, makeZip, readZip, parseBibtex, dueQueue, graphData, useFolderHandle, folderRescan, startTour, endTour, seedVault, addLinkDialog, lsSnippets, lsParseSource, openReview, openPhilosophy, updateFolderBanner, saveAsset, assetUrl, findAsset, attachmentPath };
+  window.musubi = { app, vault, store, ed, panes, openPdfTab, openStats, openTagManager, plotHtml, listBlocks, applyTheme, setMode, renderPreview, openSettings, renderSidebar, refreshLists, renderMarkdown, extractCards, openNote, createNote, searchNotes, parseNote, serializeNote, importFiles, makeZip, readZip, parseBibtex, dueQueue, graphData, useFolderHandle, folderRescan, startTour, endTour, seedVault, addLinkDialog, lsSnippets, lsParseSource, openReview, openPhilosophy, updateFolderBanner, saveAsset, assetUrl, findAsset, attachmentPath };
   if (app.settings.tour && app.settings.tour.active) resumeTour();
   else if (tourDue()) startTour({ firstRun: true });
 }
