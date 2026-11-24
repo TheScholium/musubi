@@ -991,7 +991,7 @@ i.st-key.st-a { background: var(--stat-a); } i.st-key.st-b { background: var(--s
 .pdf-fill { flex: 1; }
 .pdf-reader.pdf-dark .pdf-darkbtn { color: var(--ist-gold); opacity: 1; }
 .pdf-main { flex: 1; min-height: 0; display: flex; }
-.pdf-scroll { flex: 1; min-width: 0; overflow: auto; outline: none; }
+.pdf-scroll { position: relative; flex: 1; min-width: 0; overflow: auto; outline: none; }
 .pdf-pages { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 12px 18px 40vh; width: max-content; min-width: 100%; }
 .pdf-page { position: relative; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 6px 22px rgba(0, 0, 0, .22); flex: none; }
 .pdf-page canvas { position: absolute; inset: 0; display: block; }

@@ -1341,7 +1341,7 @@ const svgEsc = (s) => esc(String(s));
 function renderFigure(fig) {
   const W = Math.round(Math.max(3, Math.min(14, fig.w)) * 100); const H = Math.round(Math.max(2, Math.min(16, fig.h)) * 100);
   const sup = fig.suptitle ? 28 : 0;
-  const fsz = (14 * Math.max(1, W / 700)).toFixed(1);
+  const fsz = (15 * W / 600).toFixed(1);
   const parts = []; const overlays = [];
   const pct = (v, d) => (100 * v / d).toFixed(3) + '%';
   const rows = Math.max(fig.rows, ...fig.axes.map((x) => x.row + 1)); const cols = Math.max(fig.cols, ...fig.axes.map((x) => x.col + 1));
