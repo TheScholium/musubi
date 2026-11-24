@@ -22,7 +22,7 @@ with sync_playwright() as p:
     # ---------- 1. sidebar tabs are icons; only the open tab shows its name ----------
     tabs = pg.evaluate("""[...document.querySelectorAll('.sb-tab')].map(t => ({k: t.dataset.tab, on: t.classList.contains('on'),
         svg: !!t.querySelector('.sb-tab-ic svg'), label: getComputedStyle(t.querySelector('.sb-tab-label')).display, aria: t.getAttribute('aria-label')}))""")
-    check(len(tabs) == 4 and all(t['svg'] for t in tabs), 'each of the four sidebar tabs has an icon')
+    check(len(tabs) == 5 and all(t['svg'] for t in tabs), 'each sidebar tab has an icon (Folders is the fifth, hidden until turned on)')
     check(all((t['label'] != 'none') == t['on'] for t in tabs), 'only the selected tab shows its name')
     check(all(t['aria'] for t in tabs), 'icon tabs keep an accessible name')
     pg.click('.sb-tab[data-tab="tags"]'); pg.wait_for_timeout(200)

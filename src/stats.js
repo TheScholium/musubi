@@ -59,7 +59,7 @@ function statBars(labels, series, opts = {}) {
   for (const t of ticks) out.push(`<line class="st-grid" x1="${ml}" x2="${W - mr}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}"/><text class="st-tick" x="${ml - 6}" y="${(Y(t) + 4).toFixed(1)}" text-anchor="end">${t}</text>`);
   labels.forEach((lab, i) => {
     let base = 0; const x = ml + i * bw + gap / 2; const w = Math.max(1, bw - gap);
-    const tip = esc(lab.long || lab.text) + ': ' + series.map((s) => `${s.values[i] || 0} ${s.label}`).join(', ');
+    const tip = esc(lab.long || lab.text) + ': ' + series.map((s) => { const v = s.values[i] || 0; return `${v} ${v === 1 ? s.one || s.label : s.label}`; }).join(', ');
     const segs = series.map((s) => ({ s, v: s.values[i] || 0 })).filter((x2) => x2.v > 0);
     segs.forEach((sg, j) => {
       const y0 = Y(base); const y1 = Y(base + sg.v); base += sg.v;
@@ -122,7 +122,7 @@ function openStats() {
     const rangeSel = h('div', { class: 'st-range', role: 'group', 'aria-label': 'Time range' }, ...[[30, '30 days'], [90, '3 months'], [365, '1 year']].map(([v, l]) => h('button', { class: 'st-range-btn' + (v === range ? ' on' : ''), 'aria-pressed': String(v === range), onclick: () => { range = v; app.settings.statsRange = v; saveSettings(); draw(); } }, l)));
     const totalRange = rev.reduce((a, b) => a + b, 0) + nw.reduce((a, b) => a + b, 0);
     body.appendChild(statSection('Reviews per day', `${totalRange} in this period`, rangeSel,
-      statBars(labs, [{ label: 'reviews', cls: 'st-a', values: rev }, { label: 'new cards', cls: 'st-b', values: nw }], { aria: 'Reviews per day' }),
+      statBars(labs, [{ label: 'reviews', one: 'review', cls: 'st-a', values: rev }, { label: 'new cards', one: 'new card', cls: 'st-b', values: nw }], { aria: 'Reviews per day' }),
       h('div', { class: 'st-legend' }, h('span', null, h('i', { class: 'st-key st-a' }), 'reviews'), h('span', null, h('i', { class: 'st-key st-b' }), 'new cards')),
       () => statTable(['Day', 'Reviews', 'New cards'], days.map((k, i) => [dayKeyOffset(k), rev[i], nw[i]]).filter((r) => r[1] || r[2]).reverse())));
 
@@ -142,7 +142,7 @@ function openStats() {
     const buckets = [['1 d', 1, 2], ['2–3 d', 2, 4], ['4–7 d', 4, 8], ['1–2 wk', 8, 15], ['2–4 wk', 15, 31], ['1–3 mo', 31, 92], ['3–6 mo', 92, 183], ['6–12 mo', 183, 366], ['1 y +', 366, Infinity]];
     const bc = buckets.map(([, a, b]) => S.ivls.filter((x) => x >= a && x < b).length);
     if (S.ivls.length) body.appendChild(statSection('How far apart reviews are', 'the interval of each seen card', null,
-      statBars(buckets.map(([l]) => ({ text: l, long: 'Interval ' + l, show: true })), [{ label: 'cards', cls: 'st-a', values: bc }], { aria: 'Card intervals', h: 150 }), null,
+      statBars(buckets.map(([l]) => ({ text: l, long: 'Interval ' + l, show: true })), [{ label: 'cards', one: 'card', cls: 'st-a', values: bc }], { aria: 'Card intervals', h: 150 }), null,
       () => statTable(['Interval', 'Cards'], buckets.map(([l], i) => [l, bc[i]]))));
 
     // calendar heatmap: the last 26 weeks

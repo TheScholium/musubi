@@ -695,6 +695,12 @@ const SHORTCUTS_MD = `
 | <kbd>Tab</kbd> / <kbd>Shift Tab</kbd> | Indent / outdent lines |
 | <kbd>Alt</kbd> + hover | Preview a note from the sidebar |
 | <kbd>Ctrl/⌘ ,</kbd> | Settings |
+| <kbd>Ctrl/⌘ Alt ←</kbd> / <kbd>→</kbd> | Back / forward (also the arrows at the foot of the page, and the mouse's side buttons) |
+| <kbd>Alt T</kbd> / <kbd>Alt W</kbd> | New tab / close tab |
+| <kbd>Alt 1</kbd>…<kbd>9</kbd> | Go to a tab (9 is the last) |
+| <kbd>Alt \\</kbd> | Split view on or off |
+| <kbd>Ctrl/⌘</kbd> + click | Open a link or a note in a new tab (with <kbd>Shift</kbd>: in the other pane) |
+| <kbd>Alt P</kbd> | Open a PDF in the reader |
 | <kbd>?</kbd> | This page (when the cursor is not in a note or field) |
 
 ## Typing mathematics (LaTeX Suite)
@@ -736,9 +742,9 @@ These follow the Obsidian plugin LaTeX Suite. Change them in Settings, Mathemati
 const ABOUT_MD = `
 **Musubi** is a free and open-source note platform for Zettelkasten work in mathematics, physics and philosophy. It is one HTML file. It needs no server, no account and no network.
 
-- Version 2.6.1. MIT License. Web app: https://thescholium.github.io/musubi/
+- Version 2.7.0. MIT License. Web app: https://thescholium.github.io/musubi/
 - Set in the Istari design system: EB Garamond, Cormorant Garamond and JetBrains Mono (SIL Open Font License 1.1), embedded in the file.
-- Bundled libraries: CodeMirror 6 and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0). Default snippets from Obsidian LaTeX Suite (MIT).
+- Bundled libraries: CodeMirror 6 and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0), pdf.js (Apache-2.0). Default snippets from Obsidian LaTeX Suite (MIT).
 - Your notes are plain Markdown with YAML front matter. You can read them in any editor, and they work in Obsidian.
 
 **Musubi** (結び) is Japanese for a knot or a tie, from the verb *musubu* (結ぶ): to tie, to bind, to join. In Shinto, *musubi* (産霊) is also the power by which things come into being; two of the first three deities named in the *Kojiki*, Takamimusubi and Kamimusubi, carry it in their names. A Zettelkasten works in both senses: links tie separate notes together, and new ideas come out of the ties.

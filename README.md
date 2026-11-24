@@ -22,6 +22,8 @@ It is set in **Istari**, a dark, book-like design system: warm ink, parchment te
 | Numbered equations | `\label{eq:x}` and `\eqref{eq:x}`, numbered per note, in `$$`, `\[…\]`, `align`, `gather`, `multline` and `equation`. |
 | Links | Plain links `[[Title]]` need nothing else. A relation is optional: `supports::[[…]]`, `refutes::[[…]]`, `depends-on::[[…]]`, or any word. |
 | Sources | Literature notes with a citekey, citations `[@gettier1963, p. 122]`, BibTeX import and export. |
+| Plots | A code block that starts with ` ```python plot ` draws a figure. numpy, math and matplotlib.pyplot run offline, in a sandbox. |
+| Reading | A PDF reader beside the note: select a passage and *Quote into note* adds it with `[@citekey, p. 12]`. |
 | Retention | Spaced repetition. Named definitions and theorems become flashcards with no extra work; so do `{{c1::cloze}}` and `Q:`/`A:` pairs. A long answer goes in braces, `A:{ … }`, and can hold lists, display math and paragraphs. |
 
 ## Features
@@ -38,15 +40,34 @@ It is set in **Istari**, a dark, book-like design system: warm ink, parchment te
 - **Your own note types** (Settings → Note types): give a name, choose a marker shape (circle, ring, square, diamond, triangle, star, moon, sun) and an Istari pigment. Custom types appear in the type menu, the note list, the type key, the graph and `type:` search.
 - **Handwriting from Supernote:** notes from the [Archive](https://github.com/TheScholium/archive) plugin load as they are; images marked `|ink` are drawn in parchment on the dark theme and in black when printed.
 
+**Plots from Python**
+- A code block that starts with ` ```python plot ` (or ` ```plot `) draws a figure in the Istari pigments, in light and dark. Labels with `$…$` are KaTeX.
+- Musubi runs a part of Python offline, with no download: `def`, `for`, `if`, `while`, `lambda`, list comprehensions, f-strings and slicing; a part of numpy (`np`) and `math`; and matplotlib.pyplot (`plt`) and Axes: `plot`, `scatter`, `bar`, `barh`, `hist`, `fill_between`, `errorbar`, `step`, `stem`, `quiver`, `axhline`, `axvline`, spans, `text`, `annotate`, `legend`, `grid`, `subplots`, log scales. `np`, `plt` and `math` are there without an import.
+- The code can reach no file, no network and no page element. A step limit stops endless loops. Long lines are thinned to what the screen can show.
+- In live preview the figure takes the place of the code; while the cursor is in the code, the figure updates below it. Read view can show the code.
+
+**PDF reader**
+- `![[paper.pdf]]` cards have *Read*; `[[paper.pdf#page=12]]` opens the reader at page 12; `Alt P` opens any PDF in the vault, or one from the computer.
+- The PDF opens in a tab beside the note: continuous pages, zoom and fit width, contents from the PDF outline, find, links inside the PDF, dark pages, and the last place is remembered.
+- Select text: *Quote into note* puts the passage in the open note with `[@citekey, p. N]` (in a literature note with a citekey) or `[[paper.pdf#page=N|p. N]]`; *Highlight* keeps a highlight; a side list shows them and can quote them all.
+- pdf.js (Apache-2.0) is in the file and loads only when the first PDF opens.
+
 **Linking and navigation**
 - Links by title, alias or ID; `[[Title|label]]`, `[[Title#Heading]]`; embeds `![[Note]]` and `![[Note#Heading]]`.
+- **Block references** in the Obsidian syntax: end a paragraph or list item with `^id`, or put `^id` on the line after a box, an equation or a table. Link with `[[Note#^id]]` (the link shows the block's first words), embed with `![[Note#^id]]`. Type `[[Note#^` to search the blocks of a note; a block without an ID gets one. *Copy a link to the block at the cursor* is in the note menu. Maintain lists broken block links.
+- **Tabs and split view.** Each pane has tabs; `Ctrl/⌘`-click opens a link in a new tab, `Ctrl/⌘ Shift`-click in the other pane. `Alt \` splits the view: one editor moves to the pane you click, and the other pane shows its note as a page. Drag tabs to reorder them or to move them between panes. Tabs and the split survive a reload.
+- **Back and forward** with two long arrows from the mathematics at the foot of the page ($\longleftarrow$, $\longrightarrow$); the title of the note you go to appears over the arrow. Also `Ctrl/⌘ Alt ←/→` and the mouse's side buttons.
+- **Folder tree** (Settings → General, off at first): a Folders tab. A note's folder is part of its file path, so with a linked folder these are the folders on disk. New folder, rename, delete (notes move up one level), drag notes onto folders, *Move to a folder…*.
 - **Add a link** from the note menu or the `+ link` button: choose a note, and optionally a relation.
 - Renaming a note rewrites every link to it.
 - Under each note, in the Istari "mentions" style: its links, the notes that link to it (with the sentence around each link), and unlinked mentions with a one-click *link*.
 - Hover previews, a command palette and fuzzy quick switcher (`Ctrl/⌘ K`; `>` for commands), full-text search with `tag:`, `type:`, `status:`, `"phrases"` and `-exclusions`.
 - Global and local graph. Markers are shaped by field and coloured by type.
+- **Tag manager** (Tags tab → *manage*, or right-click a tag): rename, merge, move under another tag, and remove, in every note at once. Front matter tags, inline `#tags` (not in code or mathematics) and nested tags change together; tags that differ only in capital letters are flagged. Every change has *Undo*.
 
 **The interface**
+Settings → General → *Theme*: **Istari** (dark), **Istari Paper** (light), or follow the system. *Bold anchors* make the first letters of each word bold, as a lead-in for the eye, in live preview and read view (light, medium or strong); code, mathematics and links do not change, and neither do the words in the file. Some readers with ADHD say it helps them keep their place. A 2024 controlled study (Acta Psychologica 247, 104304) found no difference in reading speed, so treat it as a comfort setting, not a speed aid.
+
 The sidebar tabs (notes, tags, inbox, maintain) are icons; the open tab shows its name. `Ctrl/⌘ ,` opens Settings. The welcome screen has a foldout essay, *Zettelkasten and the Musubi philosophy*: a history of slip boxes, commonplace books, brush notes, glosses and knotted cords from China, Korea, Japan, the Islamic world, West Africa, South Asia, the Andes and Europe; the case for the method in mathematics and physics; and why each part of Musubi works as it does, with 82 sources, and a section on the modern revival: Reddit, YouTube and forum testimony from mathematicians and physicists, and the method's return to China, Korea, Japan and India. The command palette opens it too.
 
 **The type key**
@@ -60,6 +81,11 @@ A compass floats at the foot of the note list. Rest the pointer on it for a mome
 
 **First start**
 A thirteen-step tour, skippable at any step, uses two practice notes to show live preview, links, statements, mentions, the type key, capture, search, graph, review and data. When it ends (or is skipped), Musubi deletes every note, history entry, review schedule, trash entry and image made during the tour, and shows an empty setup screen: write the first note, link a folder, or import. The tour resumes after a reload. When a new version changes the tour, it opens once more for every user, and existing notes stay as they are. It can also be replayed from Settings without touching existing notes. Example notes are available on request in Settings, Data.
+
+**Review statistics**
+- Due now, today, streak, retention over the last 30 days, where the cards are (new, learning, young, mature), reviews per day (30 days, 3 months, a year), the answers you gave, a 30-day forecast, how far apart reviews are, a six-month calendar, and the notes whose cards you forget most.
+- Every chart has hover values and a table view. Open it from the review screen, by right-clicking the review button, or from the command palette.
+- The log is part of the review data, so JSON backups and ZIP exports carry it.
 
 **Data and safety**
 - Storage in IndexedDB; in-memory mode with a warning if the browser blocks storage.
@@ -109,7 +135,7 @@ Unknown front-matter keys are kept as they are. Notes without front matter take 
 ## Build from source
 
 ```sh
-npm install          # CodeMirror, KaTeX, marked, DOMPurify, esbuild
+npm install          # CodeMirror, KaTeX, marked, DOMPurify, pdf.js, esbuild
 node build.mjs       # bundles CodeMirror, inlines fonts and libraries, writes dist/musubi.html and the web app in dist/site/
 ```
 
@@ -125,6 +151,14 @@ node build.mjs       # bundles CodeMirror, inlines fonts and libraries, writes d
 | `src/latexsuite-defaults.js` | LaTeX Suite default snippets and variables (MIT, artisticat1) |
 | `src/pwa.js`, `src/pwa/` | Installed-app support: manifest, offline service worker, icons (a Hopf link), Dock shortcuts, update prompt, folder-permission banner |
 | `tools/icons.py` | Renders the PNG icons from the SVGs |
+| `src/panes.js` | Tabs, split view, the navigation arrows |
+| `src/folders.js` | The optional folder tree |
+| `src/blocks.js` | Block references: blocks, IDs, completion, jump to a block |
+| `src/tags.js` | The tag manager |
+| `src/plot.js` | The Python subset, numpy, math and pyplot, and the SVG renderer for plots |
+| `src/stats.js` | Review log and statistics |
+| `src/pdfreader.js` | The PDF reader (pdf.js) |
+| `src/anchors.js` | Bold anchors and the theme choice |
 | `src/tour.js` | Onboarding tour with full cleanup, add-link dialog, migration from version 1 |
 | `src/style.css` | The Istari theme for the whole interface, with a Paper theme for print |
 | `vendor/` | CodeMirror bundle entry and the Istari fonts (OFL) |
@@ -141,6 +175,7 @@ python3 test/test_attach.py    # attachments: location setting, paste and drop, 
 python3 test/test_v26.py       # icon tabs, custom note types, Ctrl/⌘ comma, the knot mark, the philosophy essay and its footnotes (36 checks)
 python3 test/test_archive.py   # a note from the Archive Supernote plugin in folder mode: fields kept, file not rewritten, stable ID, ink image recoloured (7 checks)
 python3 test/test_sandbox.py  # runs inside a sandboxed srcdoc iframe, as an embedded artifact does (6 checks)
+python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors (49 checks)
 ```
 
 ## Privacy
@@ -149,4 +184,4 @@ Musubi makes no network requests. Notes never leave your device unless you expor
 
 ## Licence
 
-MIT. See `LICENSE`. Third-party notices are in `THIRD_PARTY_LICENSES.txt`: CodeMirror and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0), the Istari fonts (SIL OFL 1.1), and the LaTeX Suite default snippets (MIT).
+MIT. See `LICENSE`. Third-party notices are in `THIRD_PARTY_LICENSES.txt`: CodeMirror and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0), pdf.js (Apache-2.0), the Istari fonts (SIL OFL 1.1), and the LaTeX Suite default snippets (MIT).
