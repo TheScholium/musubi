@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs><radialGradient id="g" cx="50%" cy="36%" r="72%"><stop offset="0" stop-color="#231e17"/><stop offset="1" stop-color="#110f0d"/></radialGradient></defs>
+<rect width="512" height="512" fill="url(#g)"/>
+<defs>
+<clipPath id="ct"><circle cx="256" cy="189.07" r="33.800000000000004"/></clipPath>
+<clipPath id="cb"><circle cx="256" cy="322.93" r="33.800000000000004"/></clipPath>
+<mask id="mb" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512"><rect width="512" height="512" fill="#fff"/><circle cx="220" cy="256" r="76" fill="none" stroke="#000" stroke-width="29.9" clip-path="url(#ct)"/></mask>
+<mask id="ma" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512"><rect width="512" height="512" fill="#fff"/><circle cx="292" cy="256" r="76" fill="none" stroke="#000" stroke-width="29.9" clip-path="url(#cb)"/></mask>
+<linearGradient id="au" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d8b862"/><stop offset="1" stop-color="#a8873a"/></linearGradient>
+</defs>
+<circle cx="220" cy="256" r="76" fill="none" stroke="url(#au)" stroke-width="13" mask="url(#ma)"/>
+<circle cx="292" cy="256" r="76" fill="none" stroke="url(#au)" stroke-width="13" mask="url(#mb)"/>
+</svg>
