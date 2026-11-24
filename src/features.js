@@ -128,6 +128,7 @@ function commands() {
     { label: 'View: source (plain Markdown)', keys: modKey() + '+Shift+E', run: () => setMode('source') },
     { label: 'View: read', run: () => setMode('read') },
     { label: 'Toggle sidebar', run: toggleSidebar },
+    { label: 'Manage tags: rename, merge, move, remove', run: () => openTagManager() },
     { label: 'New tab', keys: 'Alt+T', run: () => newTab() },
     { label: 'Close tab', keys: 'Alt+W', run: () => { const p = panes.focus == null ? panes.notePane : panes.focus; closeTab(p, panes.list[p].active); } },
     { label: panes.split ? 'Close the split' : 'Split view: open a second pane', keys: 'Alt+\\', run: toggleSplit },

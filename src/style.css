@@ -853,3 +853,28 @@ body.resizing { cursor: col-resize; user-select: none; }
 .embed-src a.wl::before { content: '↳ '; color: var(--ist-text-faint); }
 a.wl.broken-block { text-decoration-style: dashed; }
 .cm-lp-embed .embed-block .math-display, .cm-lp-embed .embed-block .env { margin: .3em 0; }
+
+/* ---------- tag manager ---------- */
+.ov-tags .ov-panel { width: min(980px, 96vw); height: min(680px, 88vh); padding: 0; display: flex; }
+.tagman { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.tagman .rv-head .input { max-width: 260px; margin-left: 16px; }
+.tm-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(280px, 42%) 1fr; }
+.tm-left { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--ist-rule); }
+.tm-list { flex: 1; overflow-y: auto; padding: 6px 0; }
+.tm-row { display: flex; align-items: center; gap: 8px; padding: 2px 12px 2px 8px; }
+.tm-row:hover, .tm-row.on { background: var(--hover); }
+.tm-row.on .tm-name { color: var(--ist-gold); }
+.tm-name { flex: 1; min-width: 0; text-align: left; border: 0; background: none; padding: 2px 0; color: var(--ist-text); font-variant: small-caps; letter-spacing: var(--track-caps); font-size: 15.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tm-warn { font-size: 11px; font-variant: small-caps; letter-spacing: var(--track-caps); color: var(--ist-warn); border: 1px solid currentColor; border-radius: 2px; padding: 0 4px; }
+.tm-actions { display: flex; gap: 6px; opacity: 0; }
+.tm-row:hover .tm-actions, .tm-row.on .tm-actions { opacity: 1; }
+.link-btn.danger:hover { color: var(--ist-warn); }
+.tm-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 12px; border-top: 1px solid var(--ist-rule); min-height: 44px; }
+.tm-detail { overflow-y: auto; padding: 14px 18px; }
+.tm-dhead { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; font-size: 18px; color: var(--ist-gold); font-variant: small-caps; letter-spacing: var(--track-caps); }
+.tm-notes { margin-top: 12px; }
+.tm-note { display: flex; align-items: baseline; gap: 8px; padding: 3px 0; }
+.tm-note .dot { align-self: center; }
+.tm-note .muted { margin-left: auto; text-align: right; }
+.tm-help { color: var(--ist-text-muted); max-width: 34em; }
+@media (max-width: 760px) { .tm-body { grid-template-columns: 1fr; } .tm-detail { border-top: 1px solid var(--ist-rule); } }

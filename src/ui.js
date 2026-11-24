@@ -998,11 +998,19 @@ function renderTagTree(body) {
     let node = tree; const parts = t.split('/'); let path = '';
     for (const p of parts) { path = path ? path + '/' + p : p; node[p] = node[p] || { _path: path, _count: 0, _kids: {} }; if (path === t) node[p]._count = c; node = node[p]._kids; }
   }
+  body.appendChild(h('div', { class: 'ft-head' }, h('span', { class: 'muted small' }, `${tags.length} tag${tags.length === 1 ? '' : 's'}`),
+    h('button', { class: 'link-btn', id: 'manage-tags', title: 'Rename, merge, move and remove tags in every note', onclick: () => openTagManager() }, 'manage')));
   const renderLevel = (obj, depth) => {
     const box = h('div', { class: 'tag-level' });
     for (const k of Object.keys(obj).sort()) {
       const nd = obj[k];
-      box.appendChild(h('button', { class: 'tag-row', style: { paddingLeft: (12 + depth * 14) + 'px' }, onclick: () => filterByTag(nd._path) },
+      box.appendChild(h('button', { class: 'tag-row', style: { paddingLeft: (12 + depth * 14) + 'px' }, onclick: () => filterByTag(nd._path),
+        oncontextmenu: (e) => { e.preventDefault(); openMenu(e.currentTarget, [
+          { icon: 'loupe', label: 'Show its notes', run: () => filterByTag(nd._path) },
+          { icon: 'pen', label: 'Rename or move…', run: () => renameTagDialog(nd._path) },
+          { icon: 'tag', label: 'Open the tag manager', run: () => openTagManager(nd._path) },
+          '-',
+          { icon: 'trash', label: 'Remove from every note…', danger: true, run: () => deleteTagDialog(nd._path) }]); } },
         h('span', { class: 'tag-name' }, '#' + k), h('span', { class: 'count' }, nd._count ? String(nd._count) : '')));
       if (Object.keys(nd._kids).length) box.appendChild(renderLevel(nd._kids, depth + 1));
     }
