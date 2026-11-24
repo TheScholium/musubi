@@ -32,8 +32,10 @@ class LinkWidget extends WidgetType {
     const s = this.s; const wrap = document.createElement('span'); wrap.className = 'cm-lp-link';
     if (s.rel) { const r = document.createElement('span'); r.className = 'rel rel-' + REL_CLASS(s.rel); r.textContent = s.rel; wrap.appendChild(r); }
     const a = document.createElement('a');
-    a.className = 'wl' + (s.id ? '' : ' broken'); a.textContent = s.label;
-    if (s.id) { a.dataset.id = s.id; a.href = '#n-' + s.id; if (s.heading) a.dataset.heading = s.heading; } else a.dataset.target = s.target;
+    a.textContent = s.label;
+    if (s.att) { a.className = 'att att-' + attKind(s.att); a.dataset.att = s.att; a.dataset.ext = attExt(s.att); a.href = '#att'; }
+    else if (s.missing) { a.className = 'asset-missing'; a.textContent = 'Missing file: ' + s.target; }
+    else { a.className = 'wl' + (s.id ? '' : ' broken'); if (s.id) { a.dataset.id = s.id; a.href = '#n-' + s.id; if (s.heading) a.dataset.heading = s.heading; } else a.dataset.target = s.target; }
     wrap.appendChild(a);
     wrap.addEventListener('mousedown', lpAnchorDown);
     return wrap;
@@ -143,7 +145,8 @@ function lpAnalyze(state, noteRef) {
       const html = renderMarkdown(text.slice(a, b), { note, idPrefix: 'lpi' + a + '-' }).replace(/^\s*<p>|<\/p>\s*$/g, '');
       items.push({ kind: 'inlineembed', from: a, to: b, html });
     } else {
-      items.push({ kind: 'link', from: a, to: b, spec: { id, target, heading: heading ? slugify(heading) : '', label, rel: m[2] ? m[2].toLowerCase() : '' } });
+      const att = !id && hasFileExt(target) ? findAsset(target, note) : null;
+      items.push({ kind: 'link', from: a, to: b, spec: { id, target, heading: heading ? slugify(heading) : '', label, rel: m[2] ? m[2].toLowerCase() : '', att: att ? att.name : '', missing: !id && hasFileExt(target) && !att } });
     }
     protectedR.push([a, b]);
   }
@@ -272,7 +275,11 @@ function lpAnalyze(state, noteRef) {
         return false;
       } else if (name === 'Image') {
         let url = ''; for (let c = node.node.firstChild; c; c = c.nextSibling) if (c.name === 'URL') url = text.slice(c.from, c.to);
-        items.push({ kind: 'image', from: a, to: b, url, alt: (/^!\[([^\]]*)\]/.exec(text.slice(a, b)) || [])[1] || '' });
+        const w = imgWidthFromAlt((/^!\[([^\]]*)\]/.exec(text.slice(a, b)) || [])[1] || ''); let html;
+        const ws = w.width ? ` style="width:${w.width}px"` : '';
+        if (/^(?:[a-z][\w+.-]*:|\/\/)/i.test(url)) html = `<img src="${esc(url)}" alt="${esc(w.alt)}"${ws}>`;
+        else { const f = findAsset(url, note); html = f && f.a.url ? `<img class="asset" src="${f.a.url}" alt="${esc(w.alt)}"${ws}>` : f ? attLinkHtml(f.name, w.alt) : `<span class="asset-missing">Missing image: ${esc(url)}</span>`; }
+        items.push({ kind: 'image', from: a, to: b, url, html });
         return false;
       } else if (name === 'URL' && node.node.parent && node.node.parent.name !== 'Link' && node.node.parent.name !== 'Image') {
         items.push({ kind: 'url', from: a, to: b, url: text.slice(a, b) });
@@ -346,7 +353,7 @@ function lpDecorations(state, an) {
       blockRanges.push([cl.from, cl.to]);
     } else if (it.kind === 'embed' && !lineTouch(it.from, it.to)) {
       const ec = envAt(it.from);
-      out.push(Decoration.replace({ widget: new HtmlWidget(it.html, 'cm-lp-embed prose' + ec, { block: true, key: it.html + ec, ignore: lpLinkIgnore }), block: true }).range(state.doc.lineAt(it.from).from, state.doc.lineAt(it.to).to));
+      out.push(Decoration.replace({ widget: new HtmlWidget(it.html, 'cm-lp-embed prose' + ec, { block: true, key: it.html + ec, ignore: lpLinkIgnore, onDom: enhanceAttachments }), block: true }).range(state.doc.lineAt(it.from).from, state.doc.lineAt(it.to).to));
       blockRanges.push([state.doc.lineAt(it.from).from, state.doc.lineAt(it.to).to]);
     }
   }
@@ -392,7 +399,7 @@ function lpDecorations(state, an) {
         break;
       case 'inlineembed': case 'cite':
         if (touches(a, b)) markC(a, b, 'cm-lp-linksrc');
-        else out.push(Decoration.replace({ widget: new HtmlWidget(it.html, 'cm-lp-' + it.kind, { key: it.html, ignore: lpLinkIgnore }) }).range(a, b));
+        else out.push(Decoration.replace({ widget: new HtmlWidget(it.html, 'cm-lp-' + it.kind, { key: it.html, ignore: lpLinkIgnore, onDom: enhanceAttachments }) }).range(a, b));
         break;
       case 'eqref':
         if (touches(a, b)) markC(a, b, 'cm-lp-src');
@@ -451,7 +458,7 @@ function lpDecorations(state, an) {
       case 'url': markC(a, b, 'cm-lp-mdlink', { 'data-href': it.url }); break;
       case 'image':
         if (touches(a, b)) markC(a, b, 'cm-lp-src');
-        else out.push(Decoration.replace({ widget: new HtmlWidget(`<img src="${esc(it.url)}" alt="${esc(it.alt)}">`, 'cm-lp-image', { key: it.url }) }).range(a, b));
+        else out.push(Decoration.replace({ widget: new HtmlWidget(it.html, 'cm-lp-image', { key: it.html, ignore: lpLinkIgnore }) }).range(a, b));
         break;
       case 'quote': {
         for (let p = state.doc.lineAt(a).number; p <= state.doc.lineAt(b).number; p++) lineC(state.doc.line(p).from, 'cm-lp-quote' + (it.callout ? ' cm-lp-callout cm-lp-callout-' + it.callout : ''));
@@ -493,10 +500,11 @@ function lpDecorations(state, an) {
 /* Widgets that hold links get their own handler, because CodeMirror does not see events a widget ignores. */
 function lpAnchorDown(e) {
   if (e.button !== 0 || e.altKey) return;
-  const a = e.target.closest && e.target.closest('a.wl, a.cite-ref');
+  const a = e.target.closest && e.target.closest('a.wl, a.cite-ref, a.att');
   if (!a) return;
   e.preventDefault(); e.stopPropagation();
-  if (a.dataset.id) openNote(a.dataset.id, { heading: a.dataset.heading });
+  if (a.dataset.att) openAttachment(a.dataset.att);
+  else if (a.dataset.id) openNote(a.dataset.id, { heading: a.dataset.heading });
   else if (a.dataset.target) createFromBroken(a.dataset.target);
   else if (a.dataset.cite) newNoteDialog({ title: a.dataset.cite, type: 'literature', citekey: a.dataset.cite });
 }
@@ -706,10 +714,11 @@ const lpHighlight = HighlightStyle.define([
 function lpMouseDown(e, view) {
   if (e.button !== 0) return false;
   const t = e.target;
-  const a = t.closest && t.closest('a.wl, a.cite-ref');
+  const a = t.closest && t.closest('a.wl, a.cite-ref, a.att');
   if (a && !e.altKey) {
     e.preventDefault();
-    if (a.dataset.id) openNote(a.dataset.id, { heading: a.dataset.heading });
+    if (a.dataset.att) openAttachment(a.dataset.att);
+    else if (a.dataset.id) openNote(a.dataset.id, { heading: a.dataset.heading });
     else if (a.dataset.target) createFromBroken(a.dataset.target);
     else if (a.dataset.cite) newNoteDialog({ title: a.dataset.cite, type: 'literature', citekey: a.dataset.cite });
     return true;
@@ -717,24 +726,42 @@ function lpMouseDown(e, view) {
   const tag = t.closest && t.closest('.cm-lp-tag');
   if (tag && (e.ctrlKey || e.metaKey)) { e.preventDefault(); filterByTag(tag.dataset.tag); return true; }
   const md = t.closest && t.closest('.cm-lp-mdlink');
-  if (md && (e.ctrlKey || e.metaKey) && md.dataset.href) { e.preventDefault(); window.open(md.dataset.href, '_blank', 'noopener'); return true; }
+  if (md && (e.ctrlKey || e.metaKey) && md.dataset.href) {
+    e.preventDefault();
+    const href = md.dataset.href;
+    if (/^(?:[a-z][\w+.-]*:|\/\/)/i.test(href)) { window.open(href, '_blank', 'noopener'); return true; }
+    let path = href; try { path = decodeURIComponent(href); } catch (err) { /* keep */ }
+    const p0 = path.split('#')[0];
+    if (NOTE_EXT.test(p0)) { const id = resolveTarget(p0.split('/').pop().replace(NOTE_EXT, '')); if (id) openNote(id); return true; }
+    const f = findAsset(p0, cur()); if (f) openAttachment(f.name); else toast('No file at ' + p0);
+    return true;
+  }
   return false;
 }
+/* Pasting or dropping a file saves it as an attachment (Settings, Data, Attachments says where)
+   and inserts a link: ![[name]] for images, PDFs, audio and video, [[name]] for other files.
+   Markdown, ZIP, JSON and BibTeX files dropped here are imported as notes instead. */
+const LP_IMPORT_EXT = /\.(md|markdown|zip|json|bib)$/i;
+function lpFiles(list) { return Array.from(list || []).filter((f) => f && !LP_IMPORT_EXT.test(f.name || '')); }
 function lpPaste(e, view) {
   const items = Array.from((e.clipboardData && e.clipboardData.items) || []);
-  const img = items.find((i) => i.kind === 'file' && i.type.startsWith('image/'));
-  if (!img) return false;
+  const files = lpFiles(items.filter((i) => i.kind === 'file').map((i) => i.getAsFile()));
+  if (!files.length) return false;
   e.preventDefault();
-  saveAsset(img.getAsFile(), 'pasted').then((name) => ed.insertAtCursor(`![[${name}]]`));
+  const note = cur();
+  Promise.all(files.map((f) => saveAsset(f, f.type.startsWith('image/') && /^image\.\w+$/i.test(f.name || '') ? 'pasted' : (f.name || 'pasted'), note)))
+    .then((names) => ed.insertAtCursor(names.map(attachmentLink).join('\n')));
   return true;
 }
 function lpDrop(e, view) {
-  const files = Array.from((e.dataTransfer && e.dataTransfer.files) || []).filter((f) => f.type.startsWith('image/'));
-  if (!files.length) return false;
+  const all = Array.from((e.dataTransfer && e.dataTransfer.files) || []);
+  const files = lpFiles(all);
+  if (!files.length || files.length !== all.length) return false;
   e.preventDefault(); e.stopPropagation();
   const pos = view.posAtCoords({ x: e.clientX, y: e.clientY });
-  Promise.all(files.map((f) => saveAsset(f, f.name))).then((names) => {
-    const ins = names.map((n) => `![[${n}]]`).join('\n');
+  const note = cur();
+  Promise.all(files.map((f) => saveAsset(f, f.name, note))).then((names) => {
+    const ins = names.map(attachmentLink).join('\n');
     if (pos != null) ed.replaceRange(pos, pos, ins); else ed.insertAtCursor(ins);
   });
   return true;

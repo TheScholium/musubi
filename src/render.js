@@ -152,6 +152,123 @@ function extractSection(body, heading) {
 
 const IMG_EXT = /\.(png|jpe?g|gif|svg|webp|avif|bmp)$/i;
 
+/* ---------- attachments ----------
+   vault.assets maps a file name to { path, blob, url, mtime, size, type, lazy }. Names are unique in the vault.
+   Images keep their bytes (blob) so that notes render at once; other files found in a linked folder are "lazy":
+   only their path is known, and the bytes are read from the folder when the file is opened. */
+const NOTE_EXT = /\.(md|markdown)$/i;
+function attKind(name) {
+  if (IMG_EXT.test(name)) return 'image';
+  if (/\.pdf$/i.test(name)) return 'pdf';
+  if (/\.(mp3|wav|m4a|ogg|oga|flac|aac|opus)$/i.test(name)) return 'audio';
+  if (/\.(mp4|webm|mov|m4v|ogv)$/i.test(name)) return 'video';
+  return 'file';
+}
+function hasFileExt(t) { return /\.[A-Za-z0-9]{1,8}$/.test(String(t || '')) && !NOTE_EXT.test(t); }
+function normPath(p) {
+  const out = [];
+  for (const seg of String(p || '').replace(/\\/g, '/').split('/')) { if (!seg || seg === '.') continue; if (seg === '..') out.pop(); else out.push(seg); }
+  return out.join('/');
+}
+function noteDir(note) { return note && note.file && note.file.includes('/') ? note.file.slice(0, note.file.lastIndexOf('/') + 1) : ''; }
+function unescapeHtml(s) { return String(s).replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'); }
+/* Find an attachment by path (relative to the note's folder or to the vault) or by file name. */
+function findAsset(target, note) {
+  if (!target) return null;
+  let t = String(target).trim().replace(/^<|>$/g, '');
+  try { t = decodeURIComponent(t); } catch (e) { /* keep as written */ }
+  if (!t) return null;
+  const cands = [normPath(noteDir(note) + t), normPath(t)];
+  for (const [name, a] of vault.assets) if (a.path && cands.includes(a.path)) return { name, a };
+  const base = t.split('/').pop();
+  const a = vault.assets.get(base);
+  return a ? { name: base, a } : null;
+}
+async function assetUrl(name) {
+  const a = vault.assets.get(name); if (!a) return null;
+  if (a.url) return a.url;
+  if (!a.blob && a.path && typeof readFolderFile === 'function') a.blob = await readFolderFile(a.path);
+  if (!a.blob) return null;
+  a.url = URL.createObjectURL(a.blob);
+  return a.url;
+}
+function fmtSize(n) {
+  if (!n) return '';
+  const u = ['B', 'KB', 'MB', 'GB']; let i = 0; while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
+  return (i ? n.toFixed(n < 10 ? 1 : 0) : n) + ' ' + u[i];
+}
+const attExt = (name) => (String(name).split('.').pop() || '').toLowerCase();
+function attLinkHtml(name, label) {
+  return `<a class="att att-${attKind(name)}" data-att="${esc(name)}" data-ext="${esc(attExt(name))}" href="#att" title="Open ${esc(name)}">${esc(label || name)}</a>`;
+}
+function imgWidthFromAlt(alt) {
+  const m = /^(.*?)\|(\d+)(?:x\d+)?$/.exec(alt || '');
+  return m ? { alt: m[1], width: +m[2] } : { alt: alt || '', width: 0 };
+}
+/* Markdown images and links with a relative path: ![alt](attachments/fig.png), [text](paper.pdf), [text](Note.md). */
+function resolveRelativeRefs(html, note) {
+  const absolute = /^(?:[a-z][\w+.-]*:|\/\/|#)/i;
+  html = html.replace(/<img\b([^>]*?)\ssrc="([^"]*)"([^>]*)>/g, (all, pre, src, post) => {
+    if (absolute.test(src)) return all;
+    const raw = unescapeHtml(src); const f = findAsset(raw, note);
+    if (!f || !f.a.url) return `<span class="asset-missing">Missing image: ${esc(raw)}</span>`;
+    let attrs = pre + post; let style = '';
+    attrs = attrs.replace(/\salt="([^"]*)"/, (m0, alt) => { const w = imgWidthFromAlt(unescapeHtml(alt)); if (w.width) style = ` style="width:${w.width}px"`; return ` alt="${esc(w.alt)}"`; });
+    return `<img class="asset"${attrs} src="${f.a.url}"${style}>`;
+  });
+  html = html.replace(/<a\b([^>]*?)\shref="([^"]*)"([^>]*)>/g, (all, pre, href, post) => {
+    if (absolute.test(href) || !href) return all;
+    const raw = unescapeHtml(href); let path = raw; try { path = decodeURIComponent(raw); } catch (e) { /* keep */ }
+    const [p0, frag] = path.split('#');
+    if (NOTE_EXT.test(p0)) {
+      const byFile = vault.all().find((n) => n.file && (n.file === normPath(noteDir(note) + p0) || n.file === normPath(p0)));
+      const id = byFile ? byFile.id : resolveTarget(p0.split('/').pop().replace(NOTE_EXT, ''));
+      if (id) return `<a class="wl" data-id="${esc(id)}"${frag ? ` data-heading="${esc(slugify(frag))}"` : ''} href="#n-${esc(id)}">`;
+      return all;
+    }
+    const f = findAsset(p0, note);
+    if (f) return `<a class="att att-${attKind(f.name)}" data-att="${esc(f.name)}" data-ext="${esc(attExt(f.name))}" href="#att">`;
+    return all;
+  });
+  return html;
+}
+/* Fill attachment cards (PDF, audio, video, other files) after the HTML is in the page. */
+function enhanceAttachments(root) {
+  if (!root || !root.querySelectorAll) return;
+  for (const el of root.querySelectorAll('.att-card[data-att]:not([data-ready])')) {
+    el.dataset.ready = '1';
+    const name = el.dataset.att; const a = vault.assets.get(name); const kind = el.dataset.kind || attKind(name);
+    if (!a) continue;
+    const head = h('div', { class: 'att-head' },
+      h('span', { class: 'att-kind' }, kind === 'file' ? attExt(name) || 'file' : kind),
+      h('span', { class: 'att-name' }, name),
+      a.size ? h('span', { class: 'att-size' }, fmtSize(a.size)) : null,
+      h('span', { class: 'att-actions' },
+        kind === 'pdf' ? h('button', { class: 'link-btn att-toggle', onclick: (e) => { e.preventDefault(); e.stopPropagation(); toggleAttFrame(el, name); } }, 'Show') : null,
+        h('button', { class: 'link-btn', onclick: (e) => { e.preventDefault(); e.stopPropagation(); openAttachment(name); } }, 'Open')));
+    el.appendChild(head);
+    if (kind === 'audio' || kind === 'video') {
+      const media = h(kind, { controls: '', preload: 'metadata', class: 'att-media' });
+      el.appendChild(media);
+      assetUrl(name).then((u) => { if (u) media.src = u; });
+    }
+  }
+}
+async function toggleAttFrame(el, name) {
+  const btn = el.querySelector('.att-toggle'); let fr = el.querySelector('iframe');
+  if (fr) { fr.remove(); if (btn) btn.textContent = 'Show'; return; }
+  const u = await assetUrl(name); if (!u) { toast('The file could not be read. Is the folder still linked?', { kind: 'error' }); return; }
+  fr = h('iframe', { class: 'att-frame', src: u, title: name });
+  el.appendChild(fr); if (btn) btn.textContent = 'Hide';
+}
+async function openAttachment(name) {
+  const u = await assetUrl(name);
+  if (!u) { toast('The file could not be read. Is the folder still linked?', { kind: 'error' }); return; }
+  const kind = attKind(name);
+  if (kind !== 'file' || /\.(txt|csv|json|html?)$/i.test(name)) { if (window.open(u, '_blank', 'noopener')) return; }
+  const a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+}
+
 function stripTitleHeading(body, title) {
   const m = /^\s*#[ \t]+(.+?)[ \t#]*(\n|$)/.exec(body);
   if (m && normTitle(m[1]) === normTitle(title)) return body.slice(m[0].length);
@@ -206,6 +323,10 @@ function renderMarkdown(src, opt = {}) {
     const id = target ? resolveTarget(target) : (note ? note.id : null);
     const relHtml = rel ? `<span class="rel rel-${REL_CLASS(rel)}" title="typed link">${esc(rel)}</span>` : '';
     if (!id) {
+      if (hasFileExt(target)) {
+        const f = findAsset(target, note);
+        return relHtml + (f ? attLinkHtml(f.name, label || target) : `<span class="asset-missing">Missing file: ${esc(target)}</span>`);
+      }
       return relHtml + `<a class="wl broken" data-target="${esc(target)}" title="No note yet. Click to create “${esc(target)}”.">${esc(label || rawTarget)}</a>`;
     }
     const tn = vault.get(id);
@@ -214,9 +335,12 @@ function renderMarkdown(src, opt = {}) {
   };
   const embedHtml = (rawTarget, label) => {
     const { target, heading } = splitTarget(rawTarget);
-    if (IMG_EXT.test(target)) {
-      const a = vault.assets.get(target) || vault.assets.get(target.split('/').pop());
-      if (!a) return `<span class="asset-missing">Missing image: ${esc(target)}</span>`;
+    if (hasFileExt(target) && !resolveTarget(target)) {
+      const f = findAsset(target, note);
+      if (!f) return `<span class="asset-missing">Missing ${IMG_EXT.test(target) ? 'image' : 'file'}: ${esc(target)}</span>`;
+      if (attKind(f.name) !== 'image') return `<div class="att-card att-${attKind(f.name)}" data-att="${esc(f.name)}" data-kind="${attKind(f.name)}"></div>`;
+      const a = f.a;
+      if (!a.url) return attLinkHtml(f.name, label);
       const w = /^\d+$/.test((label || '').trim()) ? ` style="width:${+label}px"` : '';
       return `<img class="asset" src="${a.url}" alt="${esc(label && !w ? label : target)}"${w}>`;
     }
@@ -299,6 +423,7 @@ function renderMarkdown(src, opt = {}) {
   /* 6. markdown, sanitize, restore */
   let html = marked.parse(restoreCodes(text), { gfm: true, breaks: !!opt.breaks, async: false });
   html = DOMPurify.sanitize(html, { ADD_ATTR: ['target'], FORBID_TAGS: ['style', 'form', 'button', 'textarea', 'select'], FORBID_ATTR: ['onerror', 'onload'] });
+  html = resolveRelativeRefs(html, note);
   for (let pass = 0; pass < 5 && html.includes(PH_O); pass++) {
     html = html.replace(/<p>\s*B(\d+)\s*<\/p>/g, (_, k) => tokens[+k]);
     html = html.replace(/[TB](\d+)/g, (_, k) => tokens[+k]);
@@ -427,6 +552,7 @@ function argumentHtml(name, lines, inl) {
 
 /* Post-process a rendered container: heading ids, callouts, tasks, external links. */
 function enhanceRendered(root, prefix) {
+  enhanceAttachments(root);
   const seen = new Map();
   for (const hd of root.querySelectorAll('h1,h2,h3,h4,h5,h6')) {
     if (hd.closest('.embed-body')) continue;

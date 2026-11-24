@@ -81,6 +81,7 @@ Musubi can run as an app on your computer: its own icon in the Dock or taskbar, 
 
 **Use**
 
+- **No title bar:** Musubi draws its own top bar where the title bar was. If Chrome still shows a grey title bar, click the small **⌃** button next to Chrome's icons at its right end. The window buttons and Chrome's icons then float over Musubi's bar. The same button brings the title bar back.
 - **More windows:** <kbd>⌘ N</kbd> (<kbd>Ctrl N</kbd> on Windows and Linux) in the app, or the command *New window*. All windows share the same vault and stay in step.
 - **Folder:** Settings → Data → *Link a folder*. Each note is a Markdown file there. When the browser asks, choose **Allow on every visit**, so the link survives restarts. If it asks again later, click *Allow* in the banner at the top.
 - **Dock menu:** right-click the icon for *New note*, *Quick capture* and *Review*.

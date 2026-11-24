@@ -59,6 +59,7 @@ const DEFAULT_SETTINGS = {
   sidebar: true, panel: false, lastNote: null, sidebarTab: 'notes', sort: 'modified', typeFilter: [],
   sections: { outline: true, relations: true, localgraph: true, info: false },
   templates: DEFAULT_TEMPLATES, recent: [], seeded: false, onboarded: false, tourSeen: 0, tour: null,
+  attachLocation: 'folder', attachFolder: 'assets', attachSubfolder: 'assets',
   lsEnabled: true, lsDefaults: true, lsAutofraction: true, lsTabout: true, lsMatrix: true, lsEnlarge: true, lsEnlargeSpace: true, lsAutoDelete: true, lsSnippets: '', lsVariables: '',
 };
 
@@ -252,6 +253,7 @@ function renameNote(n, newTitle, oldTitle) {
 function buildShell() {
   document.body.innerHTML = '';
   const side = h('aside', { id: 'sidebar' },
+    h('div', { class: 'wco-bar', 'aria-hidden': 'true' }),
     h('div', { class: 'sb-head' },
       h('span', { class: 'wordmark', title: 'Musubi (結び): a knot, a tie' }, 'Musubi', h('span', { class: 'wordmark-kanji', lang: 'ja' }, '結び')),
       h('span', { class: 'sb-actions' },

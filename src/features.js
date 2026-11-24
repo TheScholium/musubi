@@ -548,6 +548,23 @@ function openSettings(tab = 'general') {
           : h('button', { class: 'btn btn-sm', onclick: async () => { await linkFolder(); ov.close(); openSettings('data'); } }, app.folder.status === 'needs-permission' ? 'Reconnect folder' : 'Link a folder'))
           : h('span', { class: 'muted small' }, 'This browser cannot open folders. Use Chrome, Edge or another Chromium browser, or use export and import.'),
         'Each note becomes a Markdown file with YAML front matter. Edits made in other editors load when you return to this tab.'),
+        (() => {
+          const sel = h('select', { class: 'input' },
+            ...[['folder', 'In a fixed folder'], ['subfolder', 'In a folder next to each note'], ['note', 'In the same folder as the note'], ['root', 'In the vault folder itself']]
+              .map(([v, l]) => h('option', { value: v }, l)));
+          sel.value = s.attachLocation || 'folder';
+          const inp = h('input', { class: 'input mono', spellcheck: 'false' });
+          const sync = () => {
+            const loc = sel.value; inp.hidden = loc === 'note' || loc === 'root';
+            inp.value = loc === 'subfolder' ? (s.attachSubfolder || 'assets') : (s.attachFolder || 'assets');
+            inp.placeholder = 'assets';
+          };
+          sel.addEventListener('change', () => { s.attachLocation = sel.value; saveSettings(); sync(); });
+          inp.addEventListener('input', () => { if (sel.value === 'subfolder') s.attachSubfolder = inp.value.trim(); else s.attachFolder = inp.value.trim(); saveSettings(); });
+          sync();
+          return row('Attachments', h('div', { class: 'btn-row' }, sel, inp),
+            'Where a pasted or dropped file goes in the linked folder. Images, PDFs, audio and video show in the note; other files appear as links. Existing files stay where they are. Musubi finds attachments anywhere in the folder by name or by relative path.');
+        })(),
         row('Export', h('div', { class: 'btn-row' }, h('button', { class: 'btn btn-sm', onclick: exportZip }, 'Markdown ZIP'), h('button', { class: 'btn btn-sm', onclick: exportJSON }, 'Backup JSON'),
           h('button', { class: 'btn btn-sm', onclick: exportBib }, 'BibTeX'), h('button', { class: 'btn btn-sm', onclick: async () => copyText(JSON.stringify(await backupObject(false)), 'Backup copied to the clipboard') }, 'Copy backup')),
         'If a download does not start (some embedded pages block downloads), use Copy backup and paste it into a .json file.'),
@@ -635,12 +652,13 @@ These follow the Obsidian plugin LaTeX Suite. Change them in Settings, Mathemati
 - Flashcards: \`{{c1::hidden text}}\`, or a line \`Q: …\` followed by \`A: …\`, or any named definition or theorem block.
 - Long answers: \`A:{ … }\`. Everything between the braces is the answer, with lists, display math and paragraphs. Put the closing \`}\` at the end of the answer, on its own line if you like.
 - Callouts: \`> [!note] Title\`. Tasks: \`- [ ] item\` (click to tick).
+- Attachments: paste or drop any file. \`![[figure.png]]\`, \`![[figure.png|300]]\` (width), \`![[paper.pdf]]\` (a card that can show the PDF), \`![[talk.mp3]]\`, \`[[data.csv]]\` (a link). Markdown paths work too: \`![caption|300](figures/fig.png)\`, \`[paper](../library/paper.pdf)\`, \`[note](Other.md)\`.
 `;
 
 const ABOUT_MD = `
 **Musubi** is a free and open-source note platform for Zettelkasten work in mathematics, physics and philosophy. It is one HTML file. It needs no server, no account and no network.
 
-- Version 2.4.0. MIT License. Web app: https://thescholium.github.io/musubi/
+- Version 2.5.0. MIT License. Web app: https://thescholium.github.io/musubi/
 - Set in the Istari design system: EB Garamond, Cormorant Garamond and JetBrains Mono (SIL Open Font License 1.1), embedded in the file.
 - Bundled libraries: CodeMirror 6 and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0). Default snippets from Obsidian LaTeX Suite (MIT).
 - Your notes are plain Markdown with YAML front matter. You can read them in any editor, and they work in Obsidian.
@@ -656,15 +674,34 @@ function idFromDate(ms) {
   return id;
 }
 
-async function saveAsset(blob, hint) {
-  const ext = (blob.type.split('/')[1] || 'png').replace('svg+xml', 'svg').replace('jpeg', 'jpg');
-  let base = String(hint || 'image').split('/').pop().replace(/\.[^.]+$/, '').replace(/[^\w.-]+/g, '-').slice(0, 40) || 'image';
-  if (base === 'pasted' || base === 'image') base = 'img-' + isoLocal().replace(/[-:T]/g, '');
+/* Where a new attachment goes, by the setting "attachLocation":
+   root: the vault's top folder; folder: a fixed folder (attachFolder); note: the note's folder;
+   subfolder: a folder (attachSubfolder) inside the note's folder. */
+function attachmentPath(name, note) {
+  const st = app.settings; const dir = noteDir(note);
+  const clean = (p, d) => normPath(p) || d;
+  switch (st.attachLocation) {
+    case 'root': return name;
+    case 'note': return dir + name;
+    case 'subfolder': return dir + clean(st.attachSubfolder, 'assets') + '/' + name;
+    default: return clean(st.attachFolder, 'assets') + '/' + name;
+  }
+}
+function attachmentLink(name) { return (attKind(name) === 'file' ? '' : '!') + `[[${name}]]`; }
+async function saveAsset(blob, hint, note, path) {
+  const hintName = String(hint || '').split('/').pop();
+  const hintExt = (/\.([A-Za-z0-9]{1,8})$/.exec(hintName) || [])[1];
+  const mimeExt = (String(blob.type || '').split('/')[1] || '').replace('svg+xml', 'svg').replace('jpeg', 'jpg').replace(/^x-/, '').replace(/[^a-z0-9]/gi, '');
+  const ext = (hintExt || mimeExt || 'bin').toLowerCase();
+  let base = hintName.replace(/\.[^.]+$/, '').replace(/[^\w.-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+  if (!base || base === 'pasted' || base === 'image' || base === 'file') base = (attKind('x.' + ext) === 'image' ? 'img-' : 'file-') + isoLocal().replace(/[-:T]/g, '');
   let name = base + '.' + ext; let k = 1;
   while (vault.assets.has(name)) name = `${base}-${k++}.${ext}`;
-  await store.putAsset(name, blob);
-  vault.assets.set(name, { blob, url: URL.createObjectURL(blob) });
-  if (app.folder.status === 'linked') await folderWriteAsset(name, blob).catch(() => {});
+  const entry = { blob, url: URL.createObjectURL(blob), path: path ? normPath(path.replace(/[^/]*$/, '') + name) : attachmentPath(name, note), mtime: 0, size: blob.size || 0, type: blob.type || mimeFor(name), lazy: false };
+  vault.assets.set(name, entry);
+  await store.putAsset(name, blob, entry);
+  if (app.folder.status === 'linked') await folderWriteAsset(entry.path, blob, name).catch(() => {});
+  vault.touch();
   return name;
 }
 
@@ -707,12 +744,19 @@ async function importFiles(fileList) {
         const dec = new TextDecoder();
         for (const en of entries) {
           if (/(^|\/)(\.|__MACOSX)/.test(en.name) && !/\.(musubi|organon)\//.test(en.name)) continue;
-          if (IMG_EXT.test(en.name)) { await saveAsset(new Blob([en.data], { type: mimeFor(en.name) }), en.name); assets++; }
-          else if (/\.(musubi|organon)\/srs\.json$/.test(en.name)) { const d = JSON.parse(dec.decode(en.data)); for (const [k, v] of Object.entries(d)) if (!(k in app.srs)) app.srs[k] = v; }
+          if (/\.(musubi|organon)\/srs\.json$/.test(en.name)) { const d = JSON.parse(dec.decode(en.data)); for (const [k, v] of Object.entries(d)) if (!(k in app.srs)) app.srs[k] = v; }
           else if (/\.(md|markdown|txt|bib)$/i.test(en.name)) handleText(en.name.replace(/^[^/]+\/(?=.*\/)/, ''), dec.decode(en.data), Date.now());
+          else if (!/\/$/.test(en.name) && !/\.(json|zip)$/i.test(en.name)) {
+            // any other file is an attachment; it keeps its place in the vault
+            const base = en.name.split('/').pop(); const ex = vault.assets.get(base);
+            if (ex && ex.size === en.data.length) continue;
+            await saveAsset(new Blob([en.data], { type: mimeFor(en.name) }), base, null, en.name.replace(/^[^/]+\/(?=.*\/)/, '')); assets++;
+          }
         }
-      } else if (IMG_EXT.test(name)) { await saveAsset(f, f.name); assets++; }
-      else {
+      } else if (!/\.(md|markdown|txt|json|bib)$/i.test(name)) {
+        const ex = vault.assets.get(f.name);
+        if (!(ex && ex.size === f.size)) { await saveAsset(f, f.name); assets++; }
+      } else {
         const extraAssets = handleText(name, await f.text(), f.lastModified);
         if (extraAssets) for (const [an, dataUrl] of Object.entries(extraAssets)) {
           await saveAsset(dataUrlToBlob(dataUrl), an); assets++;
@@ -725,7 +769,7 @@ async function importFiles(fileList) {
   refreshLists();
   const parts = [];
   if (res.added) parts.push(`${res.added} added`); if (res.updated) parts.push(`${res.updated} updated`);
-  if (res.skipped) parts.push(`${res.skipped} unchanged`); if (assets) parts.push(`${assets} images`);
+  if (res.skipped) parts.push(`${res.skipped} unchanged`); if (assets) parts.push(`${assets} attachment${assets === 1 ? '' : 's'}`);
   toast('Import: ' + (parts.join(', ') || 'nothing to import') + (errors.length ? ` · ${errors.length} failed` : ''), { kind: errors.length ? 'error' : '', ms: 5000 });
   if (errors.length) console.warn('Import errors', errors);
   if (!app.current && res.firstId) openNote(res.firstId);
@@ -740,7 +784,7 @@ function dataUrlToBlob(u) {
 }
 function mimeFor(name) {
   const e = name.split('.').pop().toLowerCase();
-  return { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', svg: 'image/svg+xml', webp: 'image/webp', avif: 'image/avif', bmp: 'image/bmp' }[e] || 'application/octet-stream';
+  return { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', svg: 'image/svg+xml', webp: 'image/webp', avif: 'image/avif', bmp: 'image/bmp', pdf: 'application/pdf', mp3: 'audio/mpeg', wav: 'audio/wav', m4a: 'audio/mp4', ogg: 'audio/ogg', flac: 'audio/flac', mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime', txt: 'text/plain', csv: 'text/csv' }[e] || 'application/octet-stream';
 }
 
 async function mergeNotes(incoming) {
@@ -805,7 +849,10 @@ async function exportZip() {
   const notes = vault.all().sort((a, b) => (a.id < b.id ? -1 : 1));
   const names = fileNamesFor(notes);
   const files = notes.map((n) => ({ name: 'musubi-vault/' + names.get(n.id), data: serializeNote(n) }));
-  for (const [name, a] of vault.assets) files.push({ name: 'musubi-vault/assets/' + name, data: a.blob });
+  for (const [name, a] of vault.assets) {
+    const blob = a.blob || (a.path ? await readFolderFile(a.path) : null);
+    if (blob) files.push({ name: 'musubi-vault/' + (a.path || 'assets/' + name), data: blob });
+  }
   files.push({ name: 'musubi-vault/.musubi/srs.json', data: JSON.stringify(app.srs) });
   files.push({ name: 'musubi-vault/.musubi/settings.json', data: JSON.stringify(app.settings, null, 2) });
   download(await makeZip(files), `musubi-vault-${todayKey()}.zip`);
@@ -814,7 +861,7 @@ async function backupObject(withAssets) {
   const o = { format: 'musubi', version: 1, exported: isoLocal(), notes: vault.all().map(plainNote), srs: app.srs, settings: app.settings };
   if (withAssets && vault.assets.size) {
     o.assets = {};
-    for (const [name, a] of vault.assets) o.assets[name] = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(a.blob); });
+    for (const [name, a] of vault.assets) if (a.blob) o.assets[name] = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(a.blob); });
   }
   return o;
 }
@@ -885,14 +932,23 @@ async function folderRescan(manual, initial) {
   try {
     const entries = await walkDir(app.folder.handle);
     const byPath = new Map(vault.all().filter((n) => n.file).map((n) => [n.file, n]));
-    const seen = new Set(); const incoming = []; let changed = 0;
+    const seen = new Set(); const incoming = []; let changed = 0; const seenAssets = new Set(); let assetChanges = 0;
     for (const en of entries) {
-      if (IMG_EXT.test(en.path)) {
-        const nm = en.path.split('/').pop();
-        if (!vault.assets.has(nm)) { const f = await en.handle.getFile(); await store.putAsset(nm, f); vault.assets.set(nm, { blob: f, url: URL.createObjectURL(f) }); }
+      if (!NOTE_EXT.test(en.path)) {
+        // an attachment: images are loaded, other files are only registered and read when opened
+        const nm = en.path.split('/').pop(); seenAssets.add(nm);
+        const ex = vault.assets.get(nm);
+        if (ex && ex.path && ex.path !== en.path) continue; // another file with the same name: the first one wins
+        const f = await en.handle.getFile();
+        if (ex && !ex.mtime && ex.blob) { ex.path = en.path; ex.mtime = f.lastModified; await store.putAsset(nm, ex.blob, ex); continue; }
+        if (ex && ex.mtime && f.lastModified <= ex.mtime) { if (!ex.path) ex.path = en.path; continue; }
+        const eager = attKind(nm) === 'image';
+        if (ex && ex.url) URL.revokeObjectURL(ex.url);
+        const entry = { path: en.path, mtime: f.lastModified, size: f.size, type: f.type || mimeFor(nm), blob: eager ? f : null, url: eager ? URL.createObjectURL(f) : null, lazy: !eager };
+        vault.assets.set(nm, entry); await store.putAsset(nm, eager ? f : null, entry);
+        assetChanges++;
         continue;
       }
-      if (!/\.(md|markdown)$/i.test(en.path)) continue;
       seen.add(en.path);
       const file = await en.handle.getFile();
       const known = byPath.get(en.path);
@@ -922,11 +978,14 @@ async function folderRescan(manual, initial) {
         if (app.current === n.id) app.current = null;
       }
     }
+    // attachments that exist only in the folder and were deleted there
+    if (!initial) for (const [nm, a] of Array.from(vault.assets)) if (a.lazy && !seenAssets.has(nm)) { vault.assets.delete(nm); await store.delAsset(nm).catch(() => {}); assetChanges++; }
     vault.touch();
     if (initial) {
       for (const n of vault.all()) if (!n.file || !seen.has(n.file)) { n.file = null; await folderWrite(n); }
-      for (const [name, a] of vault.assets) await folderWriteAsset(name, a.blob).catch(() => {});
+      for (const [name, a] of vault.assets) if (a.blob && !seenAssets.has(name)) await folderWriteAsset(a.path || attachmentPath(name, null), a.blob, name).catch(() => {});
     }
+    if (assetChanges && app.current) { ed.refresh(); if (app.settings.mode === 'read') renderPreview(); }
     if (changed || initial) {
       refreshLists();
       if (app.current && vault.get(app.current) && !app.dirty) {
@@ -961,9 +1020,16 @@ async function folderWrite(n) {
     toast('Could not write to the folder: ' + e.message, { kind: 'error' });
   }
 }
-async function folderWriteAsset(name, blob) {
-  const fh = await getFileHandle('assets/' + name, true);
+async function folderWriteAsset(path, blob, name) {
+  const fh = await getFileHandle(path, true);
   const w = await fh.createWritable(); await w.write(blob); await w.close();
+  const a = name && vault.assets.get(name);
+  if (a) { a.path = path; a.mtime = (await fh.getFile()).lastModified; await store.putAsset(name, a.lazy ? null : a.blob, a).catch(() => {}); }
+}
+/* Read a file of the linked folder (for attachments that stay only there). */
+async function readFolderFile(path) {
+  if (app.folder.status !== 'linked') return null;
+  try { const fh = await getFileHandle(path, false); return await fh.getFile(); } catch (e) { return null; }
 }
 async function removePath(path) {
   const parts = path.split('/'); let dir = app.folder.handle;
@@ -983,6 +1049,8 @@ function bindGlobal() {
     const a = e.target.closest && e.target.closest('a[href^="#"]');
     if (!a) return;
     e.preventDefault();
+    // attachment links outside the editor (the editor opens them on mousedown)
+    if (a.dataset.att && !a.closest('.cm-editor') && e.button === 0 && !e.altKey) openAttachment(a.dataset.att);
   }, true);
   document.addEventListener('keydown', (e) => {
     const mod = e.ctrlKey || e.metaKey; const k = e.key.toLowerCase();
@@ -1070,7 +1138,7 @@ async function boot() {
     vault.notes.set(n.id, n);
   }
   vault.touch();
-  try { for (const a of await store.allAssets()) vault.assets.set(a.name, { blob: a.blob, url: URL.createObjectURL(a.blob) }); } catch (e) { /* none */ }
+  try { for (const a of await store.allAssets()) vault.assets.set(a.name, { blob: a.blob || null, url: a.blob ? URL.createObjectURL(a.blob) : null, path: a.path || '', mtime: a.mtime || 0, size: a.size || (a.blob && a.blob.size) || 0, type: a.type || (a.blob && a.blob.type) || '', lazy: !a.blob }); } catch (e) { /* none */ }
   await migrateStarterNotes();
   try {
     const handle = await store.getMeta('folderHandle');
@@ -1104,7 +1172,7 @@ async function boot() {
   document.documentElement.classList.add('ready');
   pwaLaunchAction();
   updateFolderBanner();
-  window.musubi = { app, vault, store, ed, renderMarkdown, extractCards, openNote, createNote, searchNotes, parseNote, serializeNote, importFiles, makeZip, readZip, parseBibtex, dueQueue, graphData, useFolderHandle, folderRescan, startTour, endTour, seedVault, addLinkDialog, lsSnippets, lsParseSource, openReview, updateFolderBanner };
+  window.musubi = { app, vault, store, ed, renderMarkdown, extractCards, openNote, createNote, searchNotes, parseNote, serializeNote, importFiles, makeZip, readZip, parseBibtex, dueQueue, graphData, useFolderHandle, folderRescan, startTour, endTour, seedVault, addLinkDialog, lsSnippets, lsParseSource, openReview, updateFolderBanner, saveAsset, assetUrl, findAsset, attachmentPath };
   if (app.settings.tour && app.settings.tour.active) resumeTour();
   else if (tourDue()) startTour({ firstRun: true });
 }

@@ -32,7 +32,7 @@ It is set in **Istari**, a dark, book-like design system: warm ink, parchment te
 - Completion for `[[links]]` (with "create note"), `#tags`, `[@citations]`, `:::environments`, LaTeX commands and your own macros.
 - `Ctrl/⌘ B`, `I`, `M` (inline math), `Shift M` (display math), `Shift L` (link), `Shift D` (cloze), `Shift H` (highlight). Lists continue on Enter; `P1.` premises continue too.
 - **LaTeX Suite snippets**, compatible with the Obsidian plugin: `mk` and `dm` open math, `x/` makes a fraction, `sr`, `@a`, `x1`, `RR`, `sum`, `pmat` and about 200 more expand as you type. Tab moves through fields and out of brackets; matrix shortcuts, auto-enlarged brackets, visual snippets on a selection, and undo that keeps what you typed. Paste your own LaTeX Suite snippet file in Settings, Mathematics.
-- Paste or drop images; they are stored with the vault.
+- **Attachments:** paste or drop any file. Images, PDFs, audio and video show in the note (`![[file]]`); other files become links (`[[file]]`). Settings → Data chooses where new attachments go: a fixed folder, a folder next to each note, the note's own folder, or the vault folder. Musubi finds attachments anywhere in the folder by name or relative path, so Markdown links such as `![fig|300](figures/fig.png)` and `[paper](../library/paper.pdf)` work. PDFs and other large files stay in the folder and are read only when opened; images changed in another app load again.
 - Footnotes, tables (rendered when the cursor is outside), task lists, callouts (`> [!tip]`), highlights (`==…==`), code blocks.
 - A template for each of the 14 note types, editable in Settings.
 
@@ -66,6 +66,8 @@ A thirteen-step tour, skippable at any step, uses two practice notes to show liv
 ## Install as an app
 
 Open **https://thescholium.github.io/musubi/** in Chrome, Edge, Brave or Arc and choose **Install Musubi** (the install icon at the right of the address bar, or in Chrome *Cast, save and share → Install page as app*). Musubi then has its own Dock or taskbar icon and its own windows (<kbd>⌘/Ctrl N</kbd> opens another). It works offline and updates itself.
+
+Musubi draws its own top bar in place of the title bar (window controls overlay); if a grey title bar shows, click the small ⌃ button at its right end.
 
 Then link your vault folder in Settings → Data. Every note is a Markdown file in that folder, as in Obsidian. When the browser asks, choose **Allow on every visit**. Right-click the Dock icon for *New note*, *Quick capture* and *Review*.
 
@@ -129,7 +131,8 @@ python3 test/test_app.py      # renderer, live preview reveal rules, palette, co
 python3 test/test_more.py     # tour cleanup and resume, replay, version-1 migration, branch, extract, mentions, hover, blocked storage, data carried over from the old name, tour reopening after a tour change (30 checks)
 python3 test/test_folder.py   # folder sync, using the Origin Private File System as the folder (7 checks)
 python3 test/test_latexsuite.py  # LaTeX Suite snippets, tabstops, auto-fraction, tabout, matrices, user snippet files, speed (48 checks)
-python3 test/test_pwa.py       # installed app: manifest, installability, offline start, Dock shortcuts, update prompt, folder banner (14 checks)
+python3 test/test_pwa.py       # installed app: manifest, installability, offline start, Dock shortcuts, update prompt, folder banner (15 checks)
+python3 test/test_attach.py    # attachments: location setting, paste and drop, Markdown paths, PDF and audio cards, lazy files, changed images, ZIP paths (24 checks)
 python3 test/test_sandbox.py  # runs inside a sandboxed srcdoc iframe, as an embedded artifact does (6 checks)
 ```
 

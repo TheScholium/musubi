@@ -660,3 +660,32 @@ code, kbd { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt
 /* Folder permission banner */
 .folder-banner { display: flex; align-items: center; gap: .8em; flex-wrap: wrap; padding: .55em 1.2em; background: rgba(196, 162, 77, .1); border-bottom: 1px solid var(--ist-gold-dim); color: var(--ist-text); font-size: .92em; position: relative; z-index: 5; }
 .folder-banner span { flex: 1 1 auto; }
+
+/* Attachments */
+a.att { color: var(--ist-gold); text-decoration: none; border-bottom: 1px dotted var(--ist-gold-dim); cursor: pointer; }
+a.att:hover { color: var(--ist-text); border-bottom-color: var(--ist-gold); }
+a.att::after { content: attr(data-ext); font-variant: small-caps; text-transform: lowercase; letter-spacing: .06em; font-size: .78em; color: var(--ist-text-muted); margin-left: .3em; }
+.att-card { margin: .8em 0; border: 1px solid var(--ist-rule); border-left: 2px solid var(--ist-gold-dim); background: rgba(196, 162, 77, .04); padding: .5em .9em; }
+.att-head { display: flex; align-items: baseline; gap: .7em; flex-wrap: wrap; }
+.att-kind { font-variant: small-caps; text-transform: lowercase; letter-spacing: var(--track-caps-wide, .08em); color: var(--ist-gold); font-size: .9em; }
+.att-name { color: var(--ist-text); word-break: break-all; }
+.att-size { color: var(--ist-text-muted); font-size: .85em; }
+.att-actions { margin-left: auto; display: flex; gap: .9em; }
+.att-frame { display: block; width: 100%; height: 70vh; border: 0; margin-top: .6em; background: #fff; }
+.att-media { display: block; width: 100%; margin-top: .5em; }
+video.att-media { max-height: 60vh; background: #000; }
+.asset-missing { color: var(--ist-warn, #c97a5a); font-style: italic; font-size: .92em; }
+
+/* Installed app without a title bar (window controls overlay). The window buttons float over the
+   top-left of the sidebar and Chrome's buttons over the top-right; the top bars become drag regions. */
+.wco-bar { display: none; }
+@media (display-mode: window-controls-overlay) {
+  :root { --tb-h: env(titlebar-area-height, 36px); --tb-x: env(titlebar-area-x, 0px); --tb-right: calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw)); }
+  .wco-bar { display: block; flex: none; height: var(--tb-h); -webkit-app-region: drag; app-region: drag; }
+  .sb-head { padding-top: 4px; }
+  .mtop { height: var(--tb-h); min-height: 32px; -webkit-app-region: drag; app-region: drag; }
+  .mtop button, .mtop a, .mtop input, .mtop select, .mtop .save-state, .folder-banner { -webkit-app-region: no-drag; app-region: no-drag; }
+  .mtop { padding-right: calc(var(--tb-right) + 8px); }
+  #app.no-sidebar .mtop { padding-left: calc(var(--tb-x) + 8px); }
+  #panel { padding-top: var(--tb-h); }
+}

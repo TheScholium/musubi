@@ -17,6 +17,7 @@ URL = f'http://127.0.0.1:{PORT}/'
 man = json.load(open(os.path.join(site, 'manifest.webmanifest')))
 check(man['display'] == 'standalone' and any(i['purpose'] == 'maskable' for i in man['icons']) and len(man['shortcuts']) == 3, 'manifest: standalone, maskable icon, three Dock shortcuts')
 check(all(os.path.exists(os.path.join(site, i['src'])) for i in man['icons']), 'every manifest icon exists')
+check(man.get('display_override') == ['window-controls-overlay'], 'manifest asks for the window without a title bar')
 check(re.search(r"const VERSION = '\d+\.\d+\.\d+-[0-9a-f]{10}'", open(os.path.join(site, 'sw.js')).read()) is not None, 'service worker carries the build version')
 try:
     with sync_playwright() as p:

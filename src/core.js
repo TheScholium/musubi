@@ -393,7 +393,7 @@ function noteTags(n) {
 /* ---------- vault ---------- */
 const vault = {
   notes: new Map(),
-  assets: new Map(), // name -> {blob, url}
+  assets: new Map(), // name -> { path, blob, url, mtime, size, type, lazy } (see render.js)
   version: 0,
   _idx: null,
   touch() { this.version++; },
@@ -429,6 +429,7 @@ function buildIndex() {
         if (!idx.back.has(rid)) idx.back.set(rid, []);
         idx.back.get(rid).push(rec);
       } else {
+        if (hasFileExt(l.target) && findAsset(l.target, n)) continue; // a link to an attachment, not to a missing note
         const k = normTitle(l.target);
         if (!idx.unresolved.has(k)) idx.unresolved.set(k, { target: l.target, refs: [] });
         idx.unresolved.get(k).refs.push(rec);
@@ -632,9 +633,11 @@ const store = {
     if (this.mode === 'memory') { this.mem.trash.clear(); return; }
     return this._tx('trash', 'readwrite', (os) => { os.clear(); });
   },
-  async putAsset(name, blob) {
-    if (this.mode === 'memory') { this.mem.assets.set(name, { name, blob }); return; }
-    return this._tx('assets', 'readwrite', (os) => { os.put({ name, blob }); });
+  async putAsset(name, blob, meta = {}) {
+    // blob is null for a file that stays only in the linked folder (read when opened)
+    const rec = { name, blob: blob || null, path: meta.path || '', type: meta.type || (blob && blob.type) || '', size: meta.size || (blob && blob.size) || 0, mtime: meta.mtime || 0 };
+    if (this.mode === 'memory') { this.mem.assets.set(name, rec); return; }
+    return this._tx('assets', 'readwrite', (os) => { os.put(rec); });
   },
   async allAssets() {
     if (this.mode === 'memory') return Array.from(this.mem.assets.values());
