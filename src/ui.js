@@ -65,6 +65,7 @@ const DEFAULT_SETTINGS = {
   sections: { outline: true, relations: true, localgraph: true, info: false },
   templates: DEFAULT_TEMPLATES, recent: [], seeded: false, onboarded: false, tourSeen: 0, tour: null,
   attachLocation: 'folder', attachFolder: 'assets', attachSubfolder: 'assets',
+  retiredTypes: [], deletedTypes: [], hotkeys: {},
   theme: 'dark', indentWidth: 'normal', indentGuides: true, boldAnchors: false, anchorStrength: 'medium', folderTree: false,
   tabs: null, split: false, splitRatio: 0.5,
   lsEnabled: true, lsDefaults: true, lsAutofraction: true, lsTabout: true, lsMatrix: true, lsEnlarge: true, lsEnlargeSpace: true, lsAutoDelete: true, lsSnippets: '', lsVariables: '',
@@ -509,8 +510,8 @@ function clearHash() {
 function refreshTypeOptions() {
   const ts = $('#type'); if (!ts) return;
   const v = ts.value; ts.innerHTML = '';
-  for (const [k, l] of NOTE_TYPES) ts.appendChild(h('option', { value: k }, l.toLowerCase()));
   const n = typeof cur === 'function' && app.current ? cur() : null;
+  for (const [k, l] of pickableTypes(n && n.type)) ts.appendChild(h('option', { value: k }, l.toLowerCase()));
   if (n && !TYPE_IDS.includes(n.type)) ts.appendChild(h('option', { value: n.type }, n.type));
   ts.value = n ? n.type : v;
   if (vault.notes.size) { renderSidebar(); if (n) renderMentions(); }
@@ -752,7 +753,8 @@ function renderTypeKey() {
   const pop = $('#key-pop'); pop.innerHTML = '';
   const counts = {}; for (const n of vault.notes.values()) counts[n.type] = (counts[n.type] || 0) + 1;
   pop.appendChild(h('div', { class: 'key-title' }, 'Type key'));
-  for (const [, label, , ids] of TYPE_FAMILIES) {
+  for (const [, label, , famIds] of TYPE_FAMILIES) {
+    const ids = famIds.filter((id) => !typeDeleted(id) && (!typeRetired(id) || counts[id]));
     if (!ids.length) continue;
     pop.appendChild(h('div', { class: 'key-family' }, label));
     for (const id of ids) {
@@ -931,7 +933,7 @@ function renderSidebar() {
   const ftab = $('.sb-tab[data-tab="folders"]'); if (ftab) ftab.hidden = !app.settings.folderTree;
   $$('.sb-tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
   const body = $('#side-body'); body.innerHTML = '';
-  $('.sb-filter').hidden = tab !== 'notes';
+  $('.sb-bottom').hidden = tab !== 'notes';
   const inboxN = vault.all().filter((n) => n.status === 'fleeting').length;
   $('#inbox-count').textContent = inboxN ? String(inboxN) : '';
   $('#sort').value = app.settings.sort;
@@ -1020,11 +1022,24 @@ function renderTagTree(body) {
 }
 
 function renderInbox(body) {
-  const ta = h('textarea', { class: 'inbox-capture', placeholder: 'Capture a thought. The first line is the title. Ctrl+Enter saves.', rows: 3 });
-  ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); if (captureText(ta.value)) ta.value = ''; } });
-  body.appendChild(h('div', { class: 'inbox-head' }, ta, h('button', { class: 'btn btn-sm btn-outline', onclick: () => { if (captureText(ta.value)) ta.value = ''; } }, 'Capture')));
+  const ta = h('textarea', { class: 'inbox-capture', placeholder: 'Capture a thought…', rows: 2, 'aria-label': 'Capture a thought' });
+  const go = h('button', { class: 'inbox-go', disabled: true, title: `Capture (${modKey()}+Enter)` }, 'capture');
+  const grow = () => { ta.style.height = 'auto'; ta.style.height = Math.min(220, ta.scrollHeight) + 'px'; go.disabled = !ta.value.trim(); };
+  const submit = () => { if (captureText(ta.value)) { ta.value = ''; grow(); } };
+  ta.addEventListener('input', grow);
+  ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submit(); } });
+  go.addEventListener('click', submit);
+  body.appendChild(h('div', { class: 'inbox-card' }, ta,
+    h('div', { class: 'inbox-foot' }, h('span', { class: 'inbox-hint' }, 'Line 1 is the title'), h('kbd', null, modKey() + ' ↵'), go)));
   const list = vault.all().filter((n) => n.status === 'fleeting').sort((a, b) => (a.created < b.created ? 1 : -1));
-  body.appendChild(h('div', { class: 'side-hint' }, list.length ? 'Rewrite each one in your own words, link it, then mark it permanent.' : 'The inbox is empty.'));
+  if (!list.length) {
+    body.appendChild(h('div', { class: 'inbox-empty' }, h('span', { class: 'inbox-empty-ic', html: icon('tray', 26) }),
+      h('div', { class: 'inbox-empty-title' }, 'Nothing waiting'),
+      h('div', { class: 'inbox-empty-sub' }, 'Quick thoughts land here as fleeting notes. Rewrite each one in your own words, link it, then mark it permanent.')));
+    return;
+  }
+  body.appendChild(h('div', { class: 'side-section' }, h('span', null, 'Fleeting'), h('span', { class: 'count' }, String(list.length))));
+  body.appendChild(h('div', { class: 'side-hint' }, 'Rewrite each one in your own words, link it, then mark it permanent.'));
   for (const n of list) body.appendChild(sideItem(n, relTime(parseDate(n.created))));
 }
 

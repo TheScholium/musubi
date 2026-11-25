@@ -37,7 +37,7 @@ It is set in **Istari**, a dark, book-like design system: warm ink, parchment te
 - **Attachments:** paste or drop any file. Images, PDFs, audio and video show in the note (`![[file]]`); other files become links (`[[file]]`). Settings → Data chooses where new attachments go: a fixed folder, a folder next to each note, the note's own folder, or the vault folder. Musubi finds attachments anywhere in the folder by name or relative path, so Markdown links such as `![fig|300](figures/fig.png)` and `[paper](../library/paper.pdf)` work. PDFs and other large files stay in the folder and are read only when opened; images changed in another app load again.
 - Footnotes, tables (rendered when the cursor is outside), task lists, callouts (`> [!tip]`), highlights (`==…==`), code blocks.
 - A template for each of the 14 note types, editable in Settings.
-- **Your own note types** (Settings → Note types): give a name, choose a marker shape (circle, ring, square, diamond, triangle, star, moon, sun) and an Istari pigment. Custom types appear in the type menu, the note list, the type key, the graph and `type:` search.
+- **A list of note types** (Settings → Note types): add a type by name, then choose its marker shape (circle, ring, square, diamond, triangle, star, moon, sun) and an Istari pigment. **Retire** a type to stop offering it for new notes while old notes keep it; **delete** a type to remove it, and Musubi asks which type its notes move to. Each row shows how many notes use the type. **Reset to defaults** at the bottom brings back the 14 built-in types. Types appear in the type menu, the note list, the type key, the graph and `type:` search.
 - **Handwriting from Supernote:** notes from the [Archive](https://github.com/TheScholium/archive) plugin load as they are; images marked `|ink` are drawn in parchment on the dark theme and in black when printed.
 
 **Plots from Python**
@@ -58,6 +58,7 @@ It is set in **Istari**, a dark, book-like design system: warm ink, parchment te
 - **Tabs and split view.** Each pane has tabs; `Ctrl/⌘`-click opens a link in a new tab, `Ctrl/⌘ Shift`-click in the other pane. `Alt \` splits the view: one editor moves to the pane you click, and the other pane shows its note as a page. Drag tabs to reorder them or to move them between panes. Tabs and the split survive a reload.
 - **Back and forward** with two small long arrows ($\longleftarrow$, $\longrightarrow$) at the bottom right; the title of the note you go to appears when you point at an arrow. Also `Ctrl/⌘ Alt ←/→` and the mouse's side buttons.
 - **Shortcuts as in other note apps:** `Ctrl/⌘ N` makes a note and selects its title; `Ctrl/⌘ T` and `Ctrl/⌘ W` open and close tabs, `Ctrl/⌘ Shift T` opens the last closed tab again, `Ctrl Tab` or `Ctrl/⌘ Shift ]` goes to the next tab, `Ctrl/⌘ 1`–`9` to a tab, `Ctrl/⌘ O` opens a note by name, `Ctrl/⌘`-click opens a link in a new tab (also on the raw text of a link), and `Alt Enter` follows the link at the cursor. In a browser tab Chrome keeps `Ctrl/⌘ N`, `T` and `W` for itself; the installed app gets them, and the `Alt` versions work everywhere.
+- **Editable hotkeys** (Settings → Hotkeys and syntax), as in Obsidian: about 45 commands, each with one or more keys. Filter by name or key, click **+** and press a key to add it, **×** to remove one, **↺** to reset one command. Musubi marks a key that two commands share, and **Reset all hotkeys** puts back the defaults.
 - **Folder tree** (Settings → General, off at first): a Folders tab. A note's folder is part of its file path, so with a linked folder these are the folders on disk. New folder, rename, delete (notes move up one level), drag notes onto folders, *Move to a folder…*.
 - **Add a link** from the note menu or the `+ link` button: choose a note, and optionally a relation.
 - Renaming a note rewrites every link to it.
@@ -77,7 +78,7 @@ The sidebar tabs (notes, tags, inbox, maintain) are icons; the open tab shows it
 A compass floats at the foot of the note list. Rest the pointer on it for a moment and the key opens: circles for general notes, diamonds for mathematics, squares for physics, triangles for philosophy, one Istari pigment per type. Click a type to filter the list.
 
 **Zettelkasten workflow**
-- Stable timestamp IDs. Quick capture (`Alt C`) to an inbox of fleeting notes.
+- Stable timestamp IDs. Quick capture (`Alt C`) to an inbox of fleeting notes; the inbox has its own capture box (`Ctrl/⌘ Enter` saves, the first line is the title).
 - *Branch* (`Alt B`): a new note that continues the current one, linked both ways.
 - *Extract*: move a selection into a new note and leave a link.
 - *Maintain* tab: orphans, unresolved links, stale fleeting notes.
@@ -92,7 +93,7 @@ A thirteen-step tour, skippable at any step, uses two practice notes to show liv
 
 **Data and safety**
 - Storage in IndexedDB; in-memory mode with a warning if the browser blocks storage.
-- Two-way folder sync in Chromium browsers: one `.md` file per note, named after its title; outside edits load when you return to the tab.
+- Two-way folder sync in Chromium browsers: one `.md` file per note, named after its title; Musubi writes a note's file 0.65 s after you stop typing; outside edits load when Musubi starts, when its window gets focus again, or with Settings → Data → Sync now.
 - Version history with a line diff, a trash with undo, and synchronisation between tabs.
 - Export: Markdown ZIP (with images and review data), JSON backup, BibTeX. Import: Markdown files or folders (Obsidian, Zettlr), ZIP, JSON, BibTeX, images, pasted text, or drag and drop.
 - All rendered HTML passes through DOMPurify.
@@ -178,7 +179,7 @@ python3 test/test_attach.py    # attachments: location setting, paste and drop, 
 python3 test/test_v26.py       # icon tabs, custom note types, Ctrl/⌘ comma, the knot mark, the philosophy essay and its footnotes (36 checks)
 python3 test/test_archive.py   # a note from the Archive Supernote plugin in folder mode: fields kept, file not rewritten, stable ID, ink image recoloured (7 checks)
 python3 test/test_sandbox.py  # runs inside a sandboxed srcdoc iframe, as an embedded artifact does (6 checks)
-python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors (49 checks)
+python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list (69 checks)
 ```
 
 ## Privacy

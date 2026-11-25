@@ -46,7 +46,7 @@ function promptDialog(title, label, value = '', okLabel = 'OK') {
 function newNoteDialog(opts = {}) {
   let ov;
   const title = h('input', { class: 'input input-lg', placeholder: 'Title of the idea', value: opts.title || '', 'aria-label': 'Title' });
-  const type = h('select', { class: 'input', 'aria-label': 'Type' }, ...NOTE_TYPES.map(([k, l]) => h('option', { value: k }, l)));
+  const type = h('select', { class: 'input', 'aria-label': 'Type' }, ...pickableTypes(opts.type).map(([k, l]) => h('option', { value: k }, l)));
   type.value = opts.type || 'concept';
   const status = h('select', { class: 'input', 'aria-label': 'Status' }, ...STATUSES.map(([k, l]) => h('option', { value: k }, l)));
   status.value = opts.status || 'draft';
@@ -118,32 +118,32 @@ function captureDialog() {
 function commands() {
   const c = cur();
   const list = [
-    { label: 'New note', keys: 'Alt+N', run: () => newNoteDialog() },
-    ...NOTE_TYPES.map(([k, l]) => ({ label: 'New note: ' + l, run: () => newNoteDialog({ type: k }) })),
-    { label: 'Quick capture to inbox', keys: 'Alt+C', run: () => captureDialog() },
-    { label: 'Open graph view', keys: 'Alt+G', run: () => openGraph() },
-    { label: 'Review due flashcards', keys: 'Alt+R', run: () => openReview() },
+    { label: 'New note: choose the type', keys: hotkeyHint('note.newDialog'), run: () => newNoteDialog() },
+    ...pickableTypes().map(([k, l]) => ({ label: 'New note: ' + l, run: () => newNoteDialog({ type: k }) })),
+    { label: 'Quick capture to inbox', keys: hotkeyHint('capture'), run: () => captureDialog() },
+    { label: 'Open graph view', keys: hotkeyHint('graph.open'), run: () => openGraph() },
+    { label: 'Review due flashcards', keys: hotkeyHint('review.open'), run: () => openReview() },
     { label: 'Review statistics', run: () => openStats() },
-    { label: 'Open a PDF in the reader', keys: 'Alt+P', run: () => openPdfPicker() },
+    { label: 'Open a PDF in the reader', keys: hotkeyHint('pdf.open'), run: () => openPdfPicker() },
     { label: 'Random note (serendipity)', run: () => { const all = vault.all(); if (all.length) openNote(all[Math.floor(Math.random() * all.length)].id); } },
-    { label: 'View: live preview', keys: modKey() + '+E', run: () => setMode('live') },
-    { label: 'View: source (plain Markdown)', keys: modKey() + '+Shift+E', run: () => setMode('source') },
+    { label: 'View: live preview', keys: hotkeyHint('view.read'), run: () => setMode('live') },
+    { label: 'View: source (plain Markdown)', keys: hotkeyHint('view.source'), run: () => setMode('source') },
     { label: 'View: read', run: () => setMode('read') },
     { label: 'Toggle sidebar', run: toggleSidebar },
     { label: 'Manage tags: rename, merge, move, remove', run: () => openTagManager() },
-    { label: 'New note (no questions)', keys: modKey() + '+N', run: () => newUntitledNote() },
-    { label: 'New tab', keys: modKey() + '+T', run: () => newTab() },
-    { label: 'Open the last closed tab again', keys: modKey() + '+Shift+T', run: () => reopenClosedTab() },
-    { label: 'Follow the link at the cursor', keys: 'Alt+Enter', run: () => followLinkAtCursor(false) },
-    { label: 'Close tab', keys: 'Alt+W', run: () => { const p = panes.focus == null ? panes.notePane : panes.focus; closeTab(p, panes.list[p].active); } },
-    { label: panes.split ? 'Close the split' : 'Split view: open a second pane', keys: 'Alt+\\', run: toggleSplit },
-    { label: 'Go back', keys: modKey() + '+Alt+←', run: () => navGo(-1) },
-    { label: 'Go forward', keys: modKey() + '+Alt+→', run: () => navGo(1) },
+    { label: 'New note (no questions)', keys: hotkeyHint('note.new'), run: () => newUntitledNote() },
+    { label: 'New tab', keys: hotkeyHint('tab.new'), run: () => newTab() },
+    { label: 'Open the last closed tab again', keys: hotkeyHint('tab.reopen'), run: () => reopenClosedTab() },
+    { label: 'Follow the link at the cursor', keys: hotkeyHint('link.follow'), run: () => followLinkAtCursor(false) },
+    { label: 'Close tab', keys: hotkeyHint('tab.close'), run: () => { const p = panes.focus == null ? panes.notePane : panes.focus; closeTab(p, panes.list[p].active); } },
+    { label: panes.split ? 'Close the split' : 'Split view: open a second pane', keys: hotkeyHint('split.toggle'), run: toggleSplit },
+    { label: 'Go back', keys: hotkeyHint('nav.back'), run: () => navGo(-1) },
+    { label: 'Go forward', keys: hotkeyHint('nav.forward'), run: () => navGo(1) },
     { label: 'Toggle context panel', run: togglePanel },
-    { label: 'Settings', keys: modKey() + '+,', run: () => openSettings() },
+    { label: 'Settings', keys: hotkeyHint('settings.open'), run: () => openSettings() },
     { label: 'Settings: note types', run: () => openSettings('types') },
     { label: 'Read: Zettelkasten and the Musubi philosophy', run: () => openPhilosophy() },
-    { label: 'Keyboard shortcuts and syntax', keys: '?', run: () => openSettings('shortcuts') },
+    { label: 'Hotkeys and syntax', keys: hotkeyHint('help.hotkeys'), run: () => openSettings('shortcuts') },
     { label: 'Import files (Markdown, ZIP, JSON, BibTeX, images)', run: () => $('#file-input').click() },
     { label: 'Import a folder of Markdown', run: () => $('#dir-input').click() },
     { label: 'Export vault as Markdown ZIP', run: exportZip },
@@ -151,13 +151,13 @@ function commands() {
     { label: 'Export bibliography (BibTeX)', run: exportBib },
     { label: 'Link a folder on disk (two-way sync)', run: linkFolder },
     { label: 'Install Musubi as an app', run: pwaInstall },
-    { label: 'New window', keys: modKey() + '+N (installed app)', run: pwaNewWindow },
+    { label: 'New window (installed app)', keys: hotkeyHint('app.newWindow'), run: pwaNewWindow },
     { label: 'Take the tour', run: () => startTour() },
     { label: 'Add example notes', run: () => seedVault(true) },
     { label: 'Open the inbox', run: () => { app.settings.sidebarTab = 'inbox'; renderSidebar(); if (!app.settings.sidebar) toggleSidebar(); } },
   ];
   if (c) list.push(
-    { label: 'Branch from this note', keys: 'Alt+B', run: branchNote },
+    { label: 'Branch from this note', keys: hotkeyHint('note.branch'), run: branchNote },
     { label: 'Extract selection to new note', run: extractSelection },
     { label: 'Study cards in this note', run: () => openReview({ noteId: c.id }) },
     { label: 'Local graph of this note', run: () => openGraph({ focus: c.id, depth: 2 }) },
@@ -463,7 +463,7 @@ async function openHistory() {
 function openSettings(tab = 'general') {
   let ov;
   const s = app.settings;
-  const tabs = [['general', 'General'], ['editor', 'Editor'], ['math', 'Mathematics'], ['study', 'Study'], ['types', 'Note types'], ['templates', 'Templates'], ['data', 'Data'], ['shortcuts', 'Shortcuts and syntax'], ['install', 'Install as an app'], ['about', 'About']];
+  const tabs = [['general', 'General'], ['editor', 'Editor'], ['math', 'Mathematics'], ['study', 'Study'], ['types', 'Note types'], ['templates', 'Templates'], ['data', 'Data'], ['shortcuts', 'Hotkeys and syntax'], ['install', 'Install as an app'], ['about', 'About']];
   const nav = h('nav', { class: 'set-nav' }); const pane = h('div', { class: 'set-pane' });
   const sel = (key, options, onchange) => {
     const el = h('select', { class: 'input' }, ...options.map(([v, l]) => h('option', { value: v }, l)));
@@ -547,58 +547,9 @@ function openSettings(tab = 'general') {
         } }, 'Reset')),
       ];
     },
-    types: () => {
-      const wrap = h('div', { class: 'types-pane' });
-      const commit = () => { s.customTypes = (s.customTypes || []).slice(); saveSettings(); applyCustomTypes(s.customTypes); refreshTypeOptions(); };
-      const draw = () => {
-        wrap.innerHTML = '';
-        wrap.appendChild(h('p', { class: 'muted' }, 'Every note has a type. Its marker shows the type in the note list, the type key and the graph. Make your own types with a name, a shape and an Istari pigment.'));
-        wrap.appendChild(h('div', { class: 'type-chips' }, ...NOTE_TYPES.slice(0, BUILTIN_TYPE_COUNT).map(([id, l]) => h('span', { class: 'type-chip', title: 'Built-in type' }, h('span', { class: 'dot t-' + id }), l))));
-        wrap.appendChild(h('h3', { class: 'set-h' }, 'Your types'));
-        const list = s.customTypes || [];
-        if (!list.length) wrap.appendChild(h('p', { class: 'muted small' }, 'None yet. Add one below, for example "Lemma", "Conjecture", "Experiment" or "Thought experiment".'));
-        list.forEach((t, i) => {
-          const color = PIGMENT[t.color] || PIGMENT.ash;
-          const used = vault.all().filter((n) => n.type === t.id).length;
-          const name = h('input', { class: 'input type-name', value: t.label, 'aria-label': 'Name of the type' });
-          name.addEventListener('change', () => { const v = name.value.trim(); if (!v) { name.value = t.label; return; } t.label = v; commit(); draw(); });
-          wrap.appendChild(h('div', { class: 'type-row', 'data-type': t.id },
-            h('div', { class: 'type-row-head' },
-              h('span', { class: 'dot type-preview t-' + t.id }), name,
-              h('code', { class: 'type-id', title: 'Notes store this in their front matter' }, 'type: ' + t.id),
-              h('span', { class: 'muted small' }, used ? `${used} note${used === 1 ? '' : 's'}` : ''),
-              h('button', { class: 'link-btn type-del', onclick: async () => {
-                const msg = used ? `${used} note${used === 1 ? ' keeps' : 's keep'} “type: ${t.id}” and show a plain marker until you make the type again.` : 'No note uses this type.';
-                if (!(await confirmDialog(`Delete the type “${t.label}”?`, msg, 'Delete', true))) return;
-                s.customTypes = list.filter((x) => x !== t); commit(); draw();
-              } }, 'Delete')),
-            h('div', { class: 'type-picks' },
-              h('div', { class: 'shape-picks', role: 'radiogroup', 'aria-label': 'Shape' }, ...TYPE_SHAPES.map(([k, l]) => h('button', {
-                class: 'shape-btn' + (t.shape === k ? ' on' : ''), title: l, 'aria-label': l, role: 'radio', 'aria-checked': String(t.shape === k),
-                onclick: () => { t.shape = k; commit(); draw(); } }, h('span', { class: 'dot shape-' + k, style: '--tc:' + color })))),
-              h('div', { class: 'color-picks', role: 'radiogroup', 'aria-label': 'Colour' }, ...ISTARI_PIGMENTS.map(([k, l, c]) => h('button', {
-                class: 'swatch' + (t.color === k ? ' on' : ''), title: l, 'aria-label': l, role: 'radio', 'aria-checked': String(t.color === k), style: 'background:' + c,
-                onclick: () => { t.color = k; commit(); draw(); } }))))));
-        });
-        const nameIn = h('input', { class: 'input', placeholder: 'Name of a new type', 'aria-label': 'Name of a new type' });
-        const add = () => {
-          const label = nameIn.value.trim(); if (!label) { nameIn.focus(); return; }
-          let id = typeSlug(label) || 'type'; const taken = new Set(TYPE_IDS); let k = 2; const base = id;
-          while (taken.has(id)) id = `${base}-${k++}`;
-          const usedColors = new Set((s.customTypes || []).map((x) => x.color));
-          const color = (ISTARI_PIGMENTS.find(([c]) => !usedColors.has(c)) || ISTARI_PIGMENTS[0])[0];
-          s.customTypes = [...(s.customTypes || []), { id, label, shape: 'star', color }];
-          commit(); draw(); toast(`Type “${label}” added`);
-        };
-        nameIn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } });
-        wrap.appendChild(h('div', { class: 'btn-row type-add' }, nameIn, h('button', { class: 'btn btn-sm btn-cta', onclick: add }, 'Add type')));
-        wrap.appendChild(h('p', { class: 'muted small' }, 'A type can have its own template (Settings, Templates). Search with type:name.'));
-      };
-      draw();
-      return [wrap];
-    },
+    types: () => [h('p', { class: 'muted' }, 'Every note has a type. Its marker shows the type in the note list, the type key and the graph.'), renderTypesPane()],
     templates: () => {
-      const typeSel = h('select', { class: 'input' }, ...NOTE_TYPES.map(([k, l]) => h('option', { value: k }, l)));
+      const typeSel = h('select', { class: 'input' }, ...NOTE_TYPES.filter(([k]) => !typeDeleted(k)).map(([k, l]) => h('option', { value: k }, l)));
       const ta = h('textarea', { class: 'input mono', rows: 14, spellcheck: 'false' });
       const load = () => { ta.value = s.templates[typeSel.value] || ''; };
       typeSel.addEventListener('change', load);
@@ -664,7 +615,7 @@ function openSettings(tab = 'general') {
         } }, 'Delete all notes'), 'Notes move to the trash first.'),
       ];
     },
-    shortcuts: () => [h('div', { class: 'prose shortcuts', html: renderMarkdown(SHORTCUTS_MD, { idPrefix: 'sc-' }) })],
+    shortcuts: () => [h('h3', { class: 'set-h' }, 'Hotkeys'), renderHotkeysPane(), h('div', { class: 'prose shortcuts', html: renderMarkdown(SHORTCUTS_MD, { idPrefix: 'sc-' }) })],
     about: () => [h('div', { class: 'prose', html: renderMarkdown(ABOUT_MD, { idPrefix: 'ab-' }) })],
     install: () => [h('div', { class: 'prose', html: renderMarkdown(INSTALL_MD(), { idPrefix: 'in-' }) }),
       PWA.can && !pwaStandalone() ? h('div', { class: 'btn-row' }, h('button', { class: 'btn btn-cta', onclick: pwaInstall }, 'Install Musubi')) : null].filter(Boolean),
@@ -684,36 +635,17 @@ function openSettings(tab = 'general') {
 }
 
 const SHORTCUTS_MD = `
+### Keys that do not change
+
 | Keys | Action |
 |---|---|
-| <kbd>Ctrl/⌘ K</kbd> | Find a note, or type \`>\` for commands |
-| <kbd>Ctrl/⌘ Shift K</kbd> | Command list |
-| <kbd>Ctrl/⌘ E</kbd> | Read or edit |
-| <kbd>Ctrl/⌘ Shift E</kbd> | Source mode (plain Markdown) or live preview |
-| <kbd>Alt</kbd> + click | Edit a rendered link instead of following it |
-| <kbd>Ctrl/⌘ S</kbd> | Save now (saving is automatic) |
-| <kbd>Alt N</kbd> / <kbd>Alt C</kbd> | New note / quick capture (on a Mac, while typing: <kbd>Ctrl Option</kbd>) |
-| <kbd>Alt B</kbd> | Branch: new note that continues this one |
-| <kbd>Alt G</kbd> / <kbd>Alt R</kbd> | Graph / review |
-| <kbd>Ctrl/⌘ B</kbd>, <kbd>I</kbd> | Bold, italic |
-| <kbd>Ctrl/⌘ M</kbd> / <kbd>Shift M</kbd> | Inline math / display math |
-| <kbd>Ctrl/⌘ Shift L</kbd> | Wrap as a link |
-| <kbd>Ctrl/⌘ Shift D</kbd> | Wrap as a cloze deletion |
 | <kbd>Tab</kbd> / <kbd>Shift Tab</kbd> | Indent / outdent lines |
-| <kbd>Alt</kbd> + hover | Preview a note from the sidebar |
-| <kbd>Ctrl/⌘ ,</kbd> | Settings |
-| <kbd>Ctrl/⌘ Alt ←</kbd> / <kbd>→</kbd> | Back / forward (also the arrows at the foot of the page, and the mouse's side buttons) |
-| <kbd>Ctrl/⌘ N</kbd> | New note, open, with its title selected (<kbd>Ctrl/⌘ Shift N</kbd>: choose the type first) |
-| <kbd>Ctrl/⌘ T</kbd> / <kbd>Ctrl/⌘ W</kbd> | New tab / close tab (in a browser tab, Chrome keeps these: use <kbd>Alt T</kbd> / <kbd>Alt W</kbd>) |
-| <kbd>Ctrl/⌘ Shift T</kbd> | Open the last closed tab again |
-| <kbd>Ctrl Tab</kbd>, <kbd>Ctrl/⌘ Shift ]</kbd> | Next tab (with <kbd>Shift</kbd>, or <kbd>[</kbd>: the previous one) |
-| <kbd>Ctrl/⌘ 1</kbd>…<kbd>9</kbd>, <kbd>Alt 1</kbd>…<kbd>9</kbd> | Go to a tab (9 is the last) |
-| <kbd>Ctrl/⌘ \\</kbd>, <kbd>Alt \\</kbd> | Split view on or off |
-| <kbd>Ctrl/⌘ O</kbd> | Open a note by name |
+| <kbd>Esc</kbd> | Close a dialog or a menu |
 | <kbd>Ctrl/⌘</kbd> + click | Open a link in a new tab, also on the raw text of a link (with <kbd>Shift</kbd>: in the other pane) |
-| <kbd>Alt Enter</kbd> | Follow the link at the cursor (<kbd>Alt Shift Enter</kbd>: in a new tab) |
-| <kbd>Alt P</kbd> | Open a PDF in the reader |
-| <kbd>?</kbd> | This page (when the cursor is not in a note or field) |
+| <kbd>Alt</kbd> + click | Edit a rendered link instead of following it |
+| <kbd>Alt</kbd> + hover | Preview a note from the sidebar |
+| Mouse side buttons | Back / forward |
+| <kbd>Ctrl/⌘ F</kbd>, <kbd>Ctrl/⌘ Z</kbd>, <kbd>Ctrl/⌘ Shift Z</kbd> | Find in the note, undo, redo (in the editor) |
 
 ## Typing mathematics (LaTeX Suite)
 
@@ -754,7 +686,7 @@ These follow the Obsidian plugin LaTeX Suite. Change them in Settings, Mathemati
 const ABOUT_MD = `
 **Musubi** is a free and open-source note platform for Zettelkasten work in mathematics, physics and philosophy. It is one HTML file. It needs no server, no account and no network.
 
-- Version 2.7.1. MIT License. Web app: https://thescholium.github.io/musubi/
+- Version 2.7.2. MIT License. Web app: https://thescholium.github.io/musubi/
 - Set in the Istari design system: EB Garamond, Cormorant Garamond and JetBrains Mono (SIL Open Font License 1.1), embedded in the file.
 - Bundled libraries: CodeMirror 6 and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0), pdf.js (Apache-2.0). Default snippets from Obsidian LaTeX Suite (MIT).
 - Your notes are plain Markdown with YAML front matter. You can read them in any editor, and they work in Obsidian.
@@ -1156,6 +1088,8 @@ function bindGlobal() {
     // attachment links outside the editor (the editor opens them on mousedown)
     if (a.dataset.att && !a.closest('.cm-editor') && e.button === 0 && !e.altKey) openAttachment(a.dataset.att, +a.dataset.page || 0);
   }, true);
+  // hotkeys (Settings, Hotkeys) run first, before the editor sees the key
+  document.addEventListener('keydown', (e) => { if (e.key !== 'Escape') handleHotkey(e); }, true);
   document.addEventListener('keydown', (e) => {
     const mod = e.ctrlKey || e.metaKey; const k = e.key.toLowerCase();
     if (e.key === 'Escape') {
@@ -1167,44 +1101,6 @@ function bindGlobal() {
       if (mod && k === 'k') { e.preventDefault(); }
       return;
     }
-    if (mod && e.key === ',') { e.preventDefault(); openSettings(); return; }
-    if (mod && k === 'k') { e.preventDefault(); openPalette(e.shiftKey ? '>' : ''); return; }
-    if (mod && e.shiftKey && k === 'p') { e.preventDefault(); openPalette('>'); return; }
-    if (mod && !e.shiftKey && k === 'p') { e.preventDefault(); openPalette(''); return; }
-    if (mod && !e.shiftKey && k === 'e') { e.preventDefault(); setMode(app.settings.mode === 'read' ? 'live' : 'read'); return; }
-    if (mod && e.shiftKey && k === 'e') { e.preventDefault(); setMode(app.settings.mode === 'source' ? 'live' : 'source'); return; }
-    if (mod && k === 's') { e.preventDefault(); saveCurrent.flush(); setSaveState('saved'); return; }
-    // the shortcuts of most note apps. Chrome keeps Cmd/Ctrl+N, T and W for itself in a browser tab;
-    // the installed app gets them. The Alt versions work everywhere.
-    if (mod && !e.altKey && k === 'n') { e.preventDefault(); if (e.shiftKey) newNoteDialog(); else newUntitledNote(); return; }
-    if (mod && !e.altKey && !e.shiftKey && k === 't') { e.preventDefault(); newTab(); return; }
-    if (mod && !e.altKey && e.shiftKey && k === 't') { e.preventDefault(); reopenClosedTab(); return; }
-    if (mod && !e.altKey && !e.shiftKey && k === 'w') { e.preventDefault(); const p = panes.focus == null ? panes.notePane : panes.focus; closeTab(p, panes.list[p].active); return; }
-    if (mod && !e.altKey && !e.shiftKey && k === 'o') { e.preventDefault(); openPalette(''); return; }
-    if (mod && !e.altKey && e.key === '\\') { e.preventDefault(); toggleSplit(); return; }
-    if (e.ctrlKey && !e.altKey && e.key === 'Tab') { e.preventDefault(); cycleTab(e.shiftKey ? -1 : 1); return; }
-    if (mod && e.shiftKey && !e.altKey && (e.code === 'BracketRight' || e.code === 'BracketLeft')) { e.preventDefault(); cycleTab(e.code === 'BracketRight' ? 1 : -1); return; }
-    if (mod && !e.altKey && !e.shiftKey && /^Digit[1-9]$/.test(e.code)) { e.preventDefault(); paneShortcut(e.code); return; }
-    // Typing in any text field, including the editor (a contenteditable element), must never trigger
-    // one-key shortcuts. On a Mac, Option+letter types characters (ç, ∫, ®), so in a text field
-    // the Alt shortcuts there need Ctrl+Option.
-    const ae = document.activeElement;
-    const inField = !!ae && (/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) || ae.isContentEditable || !!(ae.closest && ae.closest('.cm-editor')));
-    const mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
-    const altShortcut = e.altKey && !e.metaKey && (mac && inField ? e.ctrlKey : !e.ctrlKey);
-    if (mod && e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); navGo(e.key === 'ArrowLeft' ? -1 : 1); return; }
-    if (!inField && e.altKey && !mod && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); navGo(e.key === 'ArrowLeft' ? -1 : 1); return; }
-    if (altShortcut) {
-      const c = e.code;
-      if (paneShortcut(c)) { e.preventDefault(); return; }
-      if (c === 'KeyP') { e.preventDefault(); openPdfPicker(); return; }
-      if (c === 'KeyN') { e.preventDefault(); newNoteDialog(); return; }
-      if (c === 'KeyC') { e.preventDefault(); captureDialog(); return; }
-      if (c === 'KeyG') { e.preventDefault(); openGraph(); return; }
-      if (c === 'KeyR') { e.preventDefault(); openReview(); return; }
-      if (c === 'KeyB') { e.preventDefault(); branchNote(); return; }
-    }
-    if (!inField && e.key === '?') { e.preventDefault(); openSettings('shortcuts'); }
   });
   window.addEventListener('hashchange', () => {
     const m = /^#n-(.+)$/.exec(readHash());

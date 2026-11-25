@@ -698,10 +698,7 @@ const ed = {
       Prec.high(keymap.of([
         { key: 'Tab', run: (v) => acceptCompletion(v) || indentMore(v), shift: indentLess },
         { key: 'Enter', run: lpPremiseEnter },
-        { key: 'Alt-Enter', run: () => followLinkAtCursor(false), shift: () => followLinkAtCursor(true) },
-        { key: 'Mod-b', run: lpWrap('**') }, { key: 'Mod-i', run: lpWrap('*') }, { key: 'Mod-m', run: lpWrap('$') },
-        { key: 'Mod-Shift-m', run: lpWrap('$$\n', '\n$$') }, { key: 'Mod-Shift-l', run: lpWrap('[[', ']]') },
-        { key: 'Mod-Shift-d', run: lpWrap('{{c1::', '}}') }, { key: 'Mod-Shift-h', run: lpWrap('==') },
+        // Bold, italic, math, links, cloze and the rest come from Settings, Hotkeys (hotkeys.js)
       ])),
       keymap.of([...closeBracketsKeymap, ...completionKeymap, ...searchKeymap, ...historyKeymap, ...defaultKeymap]),
       this.modeConf.of(this.mode === 'live' ? livePreviewExt(() => cur()) : []),
