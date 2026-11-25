@@ -32,6 +32,46 @@ const ENV_DEFS = {
 };
 const ENV_NAMES = Object.keys(ENV_DEFS);
 
+/* Small line glyphs before the label of a block, as in the Istari Obsidian theme. Drawn in currentColor. */
+const BLOCK_GLYPHS = {
+  thm: '<rect x="5" y="3.5" width="14" height="17" rx="1.4"/><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4.2"/><path d="M5 7.5H3.5M5 12H3.5M5 16.5H3.5"/>',
+  def: '<path d="M3 5.6c3-1 6-.9 9 .9 3-1.8 6-1.9 9-.9v13c-3-1-6-.9-9 .9-3-1.8-6-1.9-9-.9z"/><path d="M12 6.5v13"/>',
+  pillar: '<path d="M3.5 20.5h17M5 18h14M4 8h16L12 3.5z"/><path d="M7 8v10M12 8v10M17 8v10"/>',
+  ex: '<path d="M9.5 6.5h10M9.5 12h10M9.5 17.5h10"/><circle cx="5" cy="6.5" r="1.1"/><circle cx="5" cy="12" r="1.1"/><circle cx="5" cy="17.5" r="1.1"/>',
+  exercise: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/><path d="M14 20h6"/>',
+  proof: '<rect x="4.5" y="4.5" width="15" height="15" rx="1.2"/><path d="M8.3 12.4l2.6 2.6 4.9-5.6"/>',
+  rem: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+  bulb: '<path d="M9.2 18h5.6M10.2 21h3.6"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/>',
+  warn: '<path d="M12 3.8 2.6 19.8h18.8z"/><path d="M12 9.6v5"/><circle cx="12" cy="17.2" r=".7" fill="currentColor"/>',
+  scales: '<path d="M12 3.5v16.5M7.5 20h9M4.5 7h15"/><path d="M4.5 7 2 13a2.5 2.5 0 0 0 5 0zM19.5 7 17 13a2.5 2.5 0 0 0 5 0z"/>',
+  con: '<circle cx="12" cy="12" r="8.6"/><path d="M8.7 8.7l6.6 6.6M15.3 8.7l-6.6 6.6"/>',
+  rep: '<path d="M9.5 6.5 4.5 11.5l5 5"/><path d="M4.5 11.5h9.5a6 6 0 0 1 6 6"/>',
+  quote: '<path d="M4.5 17c2.6 0 4.2-1.8 4.2-4.6V7H4v5.4h4.4"/><path d="M15 17c2.6 0 4.2-1.8 4.2-4.6V7h-4.7v5.4h4.4"/>',
+  info: '<circle cx="12" cy="12" r="8.6"/><path d="M12 11v5.6"/><circle cx="12" cy="7.8" r=".7" fill="currentColor"/>',
+  flame: '<path d="M12 21c3.5 0 6-2.4 6-5.8 0-3.6-3-5.7-3.6-9.2-1.9 1.5-2.6 3.4-2.4 5.3-1.3-.6-2-2-2.1-3.3C7.6 9.8 6 12.2 6 15.2 6 18.6 8.5 21 12 21z"/>',
+  question: '<circle cx="12" cy="12" r="8.6"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1.1.8-1.1 1.5v.7"/><circle cx="12" cy="16.9" r=".7" fill="currentColor"/>',
+  check: '<circle cx="12" cy="12" r="8.6"/><path d="M8.2 12.3l2.6 2.6 5-5.4"/>',
+  bolt: '<path d="M13.2 2.8 5 13.2h6.2L10.6 21.2 19 10.6h-6.2z"/>',
+  bug: '<rect x="7.5" y="7" width="9" height="12.5" rx="4.5"/><path d="M12 11v8.5M7.5 12H4M16.5 12H20M7.6 16H4.5M16.4 16h3.1M9 7.4 7.5 4.5M15 7.4l1.5-2.9"/>',
+  summary: '<rect x="5.5" y="4.5" width="13" height="16" rx="1.3"/><path d="M9 3.5h6v2.5H9z"/><path d="M8.8 10.5h6.4M8.8 13.8h6.4M8.8 17h3.8"/>',
+};
+const ENV_GLYPH = {
+  definition: 'def', theorem: 'thm', lemma: 'thm', proposition: 'thm', corollary: 'thm', conjecture: 'thm', claim: 'thm',
+  axiom: 'pillar', postulate: 'pillar', law: 'pillar', principle: 'pillar', example: 'ex', exercise: 'exercise', solution: 'proof', proof: 'proof',
+  remark: 'rem', note: 'rem', intuition: 'bulb', warning: 'warn', argument: 'scales', objection: 'con', reply: 'rep', quote: 'quote',
+};
+const CALLOUT_GLYPH = {
+  note: 'rem', abstract: 'summary', summary: 'summary', tldr: 'summary', info: 'info', todo: 'check', tip: 'flame', hint: 'flame', important: 'flame',
+  success: 'check', check: 'check', done: 'check', question: 'question', help: 'question', faq: 'question', warning: 'warn', caution: 'warn', attention: 'warn',
+  failure: 'con', fail: 'con', missing: 'con', danger: 'bolt', error: 'bolt', bug: 'bug', example: 'ex', quote: 'quote', cite: 'quote',
+};
+function glyphSvg(key) {
+  const d = BLOCK_GLYPHS[key] || BLOCK_GLYPHS.rem;
+  return `<svg class="blk-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+}
+const envGlyph = (kind) => glyphSvg(ENV_GLYPH[kind] || (ENV_DEFS[kind] ? ENV_DEFS[kind].style === 'thm' ? 'thm' : 'rem' : 'rem'));
+const calloutGlyph = (kind) => glyphSvg(CALLOUT_GLYPH[kind] || ENV_GLYPH[kind] || 'info');
+
 /* ---------- KaTeX ---------- */
 const KCACHE = new Map();
 let baseMacros = {};
@@ -311,6 +351,10 @@ function renderMarkdown(src, opt = {}) {
     for (const [a, b] of ir) { out += text.slice(last, a) + ctok(text.slice(a, b)); last = b; }
     text = out + text.slice(last);
   }
+  /* 1b. raw HTML: <style> blocks are dropped (a slide deck keeps them; see slides.js), comments stay out,
+     and tags with attributes keep their attributes as written (no #tags, links or math inside them) */
+  text = text.replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, '').replace(/<!--[\s\S]*?-->/g, '');
+  text = text.replace(/<[A-Za-z][\w-]*\s[^<>]*>/g, (m) => ctok(m));
 
   /* 2. math */
   const macros = Object.assign({}, baseMacros);
@@ -496,7 +540,7 @@ function blockTransforms(text, inl, st = { counter: 0 }) {
       }
       out.push('', `<div class="env env-${esc(kind)} env-style-${def.style}" data-env="${esc(kind)}">`);
       if (def.style !== 'quote') {
-        out.push(`<div class="env-head"><span class="env-label">${esc(label)}</span>${name ? `<span class="env-colon">:</span> <span class="env-name">${inl(name)}</span>` : '<span class="env-dot">.</span>'}</div>`);
+        out.push(`<div class="env-head">${envGlyph(kind)}<span class="env-label">${esc(label)}</span>${name ? `<span class="env-colon">:</span> <span class="env-name">${inl(name)}</span>` : '<span class="env-dot">.</span>'}</div>`);
       }
       out.push('');
       stack.push({ colons: open[1].length, kind, name });
@@ -574,11 +618,11 @@ function argumentHtml(name, lines, inl) {
     prevRule = false;
     rows.push(`<div class="arg-row ${concl ? 'arg-concl' : 'arg-prem'}"><span class="arg-label">${esc(label)}</span><span class="arg-text">${inl(body)}</span>${just ? `<span class="arg-just">${inl(just)}</span>` : ''}</div>`);
   }
-  return `<div class="env env-argument env-style-arg" data-env="argument"><div class="env-head"><span class="env-label">Argument</span>${name ? `<span class="env-colon">:</span> <span class="env-name">${inl(name)}</span>` : '<span class="env-dot">.</span>'}</div><div class="arg-body">${rows.join('')}</div></div>`;
+  return `<div class="env env-argument env-style-arg" data-env="argument"><div class="env-head">${envGlyph('argument')}<span class="env-label">Argument</span>${name ? `<span class="env-colon">:</span> <span class="env-name">${inl(name)}</span>` : '<span class="env-dot">.</span>'}</div><div class="arg-body">${rows.join('')}</div></div>`;
 }
 
 /* Post-process a rendered container: heading ids, callouts, tasks, external links. */
-function enhanceRendered(root, prefix) {
+function enhanceRendered(root, prefix, opts = {}) {
   enhanceAttachments(root);
   const seen = new Map();
   for (const hd of root.querySelectorAll('h1,h2,h3,h4,h5,h6')) {
@@ -599,12 +643,14 @@ function enhanceRendered(root, prefix) {
       first.textContent = first.textContent.replace(/^\s*\[![A-Za-z-]+\][+-]?[ \t]*/, '');
     }
     const title = h('div', { class: 'callout-title' }, m[2] ? '' : m[1][0].toUpperCase() + m[1].slice(1).toLowerCase());
+    const glyph = calloutGlyph(m[1].toLowerCase());
     if (m[2]) {
       // move the first line of the paragraph into the title
       const lineEnd = p.innerHTML.indexOf('\n');
       if (lineEnd >= 0) { title.innerHTML = p.innerHTML.slice(0, lineEnd); p.innerHTML = p.innerHTML.slice(lineEnd + 1); }
       else { title.innerHTML = p.innerHTML; p.remove(); }
     }
+    title.insertAdjacentHTML('afterbegin', glyph);
     bq.insertBefore(title, bq.firstChild);
   }
   let ti = 0;
@@ -617,6 +663,7 @@ function enhanceRendered(root, prefix) {
     const href = a.getAttribute('href') || '';
     if (/^(https?:|mailto:)/i.test(href)) { a.target = '_blank'; a.rel = 'noopener noreferrer'; a.classList.add('ext'); }
   }
+  if (opts.slides) return;
   for (const t of root.querySelectorAll('table')) {
     if (t.parentElement && t.parentElement.classList.contains('table-wrap')) continue;
     const w = h('div', { class: 'table-wrap' }); t.replaceWith(w); w.appendChild(t);

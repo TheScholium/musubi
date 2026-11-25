@@ -43,7 +43,7 @@ const icons = r('src/istari-icons.json');
 const katexSrc = r(nm('katex/dist/katex.js'));
 const katexMacros = Array.from(new Set(Array.from(katexSrc.matchAll(/"(\\\\[A-Za-z]+)"/g), (m) => m[1].replace(/^\\\\/, '\\')))).sort();
 if (katexMacros.length < 500 || !katexMacros.includes('\\alpha')) throw new Error('Could not read the KaTeX macro names');
-const appJs = ['core.js', 'render.js', 'blocks.js', 'editorutil.js', 'livepreview.js', 'anchors.js', 'latexsuite-defaults.js', 'latexsuite.js', 'graph.js', 'plot.js', 'ui.js', 'types.js', 'hotkeys.js', 'panes.js', 'folders.js', 'features.js', 'tags.js', 'stats.js', 'pdfreader.js', 'tour.js', 'pwa.js'].map((f) => r('src/' + f)).join('\n\n')
+const appJs = ['core.js', 'render.js', 'blocks.js', 'editorutil.js', 'livepreview.js', 'anchors.js', 'latexsuite-defaults.js', 'latexsuite.js', 'graph.js', 'plot.js', 'ui.js', 'types.js', 'hotkeys.js', 'panes.js', 'folders.js', 'features.js', 'tags.js', 'stats.js', 'pdfreader.js', 'slides.js', 'tour.js', 'pwa.js'].map((f) => r('src/' + f)).join('\n\n')
   .replace('__ISTARI_ICONS__', icons.trim()).replace('__KATEX_MACROS__', () => JSON.stringify(katexMacros));
 // Istari fonts (SIL OFL 1.1), embedded so that the file never loads anything from the network
 const font = (file, family, style, weight) => `@font-face{font-family:'${family}';font-style:${style};font-weight:${weight};font-display:swap;src:url(data:font/woff2;base64,${readFileSync(join(root, 'vendor/fonts/' + file)).toString('base64')}) format('woff2')}`;
@@ -70,6 +70,15 @@ const thirdParty = [
   ['Istari fonts: EB Garamond, Cormorant Garamond, JetBrains Mono', r('vendor/fonts/OFL-1.1.txt')],
   ['Obsidian LaTeX Suite default snippets (src/latexsuite-defaults.js)', r('vendor/latex-suite-LICENSE.txt')],
   ['pdf.js ' + JSON.parse(r(nm('pdfjs-dist/package.json'))).version + ' (Mozilla, Apache License 2.0)', r(nm('pdfjs-dist/LICENSE'))],
+  ['reveal.js layout, theme values and fragment styles, rewritten in src/slides.js', `MIT License
+
+Copyright (C) 2011-2024 Hakim El Hattab, http://hakim.se, and reveal.js contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.`],
 ];
 const notices = thirdParty.map(([n, t]) => `===== ${n} =====\n${t.trim()}`).join('\n\n');
 writeFileSync(join(root, 'THIRD_PARTY_LICENSES.txt'), notices + '\n');

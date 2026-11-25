@@ -391,6 +391,9 @@ mark.cloze-reveal { background: var(--highlight-background); color: var(--ist-go
 .env { margin: 1em 0; padding: .7em 1.1em 1.05em; border-left: 2px solid var(--ist-gold); background: rgba(196, 162, 77, .055); }
 .env > :last-child { margin-bottom: 0; }
 .env > .env-head + * { margin-top: .3em; }
+/* Block glyphs, as in the Istari theme: a small line icon before the label, in the label's colour */
+.blk-ic { display: inline-block; width: .95em; height: .95em; vertical-align: -.13em; margin-right: .5em; flex: none; opacity: .92; }
+.cm-lp-envhead .blk-ic, .cm-lp-calloutlabel .blk-ic { margin-right: .45em; }
 .env-head { font-variant: small-caps; letter-spacing: var(--track-caps-wide); font-size: 1.02em; font-weight: 500; color: var(--ist-gold); }
 /* "Definition 1: Inner Product": label and name share the small-caps title face; the name is italic */
 .env-name { font-style: italic; font-variant: small-caps; letter-spacing: var(--track-caps-wide); font-weight: 500; color: inherit; }
@@ -1114,3 +1117,18 @@ i.st-key.st-a { background: var(--stat-a); } i.st-key.st-b { background: var(--s
 .hk-foot { display: flex; align-items: center; gap: 14px; margin: 16px 0 22px; padding-top: 10px; border-top: 1px solid var(--ist-rule); }
 .hk-foot .btn { margin-left: auto; flex: none; }
 .shortcuts h3 { margin-top: .4em; }
+
+/* ---------- slides ---------- */
+.slides-present { position: fixed; inset: 0; z-index: 10000; background: #000; }
+.slides-present:fullscreen { width: 100vw; height: 100vh; }
+.slides-print-host { position: fixed; left: -100000px; top: 0; width: 960px; height: 700px; }
+.slides-pane { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: var(--ist-bg0, #0d0c0a); }
+.slides-bar { display: flex; align-items: center; gap: 4px; padding: 6px 10px; border-bottom: 1px solid var(--ist-rule); font-size: 14px; color: var(--ist-text-muted); }
+.slides-bar-title { display: flex; align-items: center; gap: 7px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant: small-caps; letter-spacing: var(--track-caps); color: var(--ist-text); }
+.slides-bar-ic { color: var(--ist-gold); display: inline-flex; }
+.slides-bar-fill { flex: 1; }
+.slides-count { min-width: 4.5em; text-align: center; font-variant-numeric: lining-nums tabular-nums; }
+.slides-present-btn { margin: 0 4px 0 8px; }
+.slides-stage { position: relative; flex: 1; min-height: 0; }
+.slides-host { position: absolute; inset: 0; outline: none; }
+.slides-host:focus-visible { box-shadow: inset 0 0 0 1px var(--ist-gold-dim); }

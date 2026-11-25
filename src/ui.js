@@ -21,6 +21,7 @@ const PLAIN_ICONS = {
   tray: '<path d="M3.5 13.5 6 5.3a1.2 1.2 0 0 1 1.2-.8h9.6a1.2 1.2 0 0 1 1.2.8l2.5 8.2v5.3a1.2 1.2 0 0 1-1.2 1.2H4.7a1.2 1.2 0 0 1-1.2-1.2z"/><path d="M3.5 13.5h4.6l1.4 2.4h5l1.4-2.4h4.6"/><path d="M12 7v4.6M10 9.8l2 1.9 2-1.9"/>',
   broom: '<path d="M15.5 3 10.6 11.6"/><path d="M8.6 10.6l4.6 2.6-1.3 2.9c-.9 2-2.8 3.7-5 4.4l-3.4 1 .9-3.4c.6-2.3 2.1-4.2 4.2-5.4z"/><path d="M6.7 16.4l2.6 1.5M8.3 13.8l2.4 1.4"/>',
   source: '<path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/>',
+  easel: '<rect x="3.5" y="4" width="17" height="11" rx="1"/><path d="M12 2.5V4M12 15v2.5M8 21.5l4-4 4 4"/><path d="M7 8.2h6M7 11.2h4"/>',
   folder: '<path d="M3.5 7V17.8a1.5 1.5 0 0 0 1.5 1.5h14a1.5 1.5 0 0 0 1.5-1.5V9.6A1.5 1.5 0 0 0 19 8.1h-7.2l-2-2.6H5A1.5 1.5 0 0 0 3.5 7z"/>',
 };
 const icon = (name, size = 16) => `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ISTARI_ICONS[name] || PLAIN_ICONS[name] || ''}</svg>`;
@@ -68,6 +69,7 @@ const DEFAULT_SETTINGS = {
   retiredTypes: [], deletedTypes: [], hotkeys: {},
   theme: 'dark', indentWidth: 'normal', indentGuides: true, boldAnchors: false, anchorStrength: 'medium', folderTree: false,
   tabs: null, split: false, splitRatio: 0.5,
+  slidesTheme: 'istari', slidesTransition: 'slide', slidesNumbers: true, slidesControls: true, slidesProgress: true, slidesSize: '960x700', slidesFullscreen: true, slidesAutoFit: true,
   lsEnabled: true, lsDefaults: true, lsAutofraction: true, lsTabout: true, lsMatrix: true, lsEnlarge: true, lsEnlargeSpace: true, lsAutoDelete: true, lsSnippets: '', lsVariables: '',
 };
 
@@ -301,6 +303,7 @@ function buildShell() {
       iconBtn('codex', 'Toggle the note list', toggleSidebar, 'btn-sidebar'),
       h('span', { class: 'mtop-fill' }),
       h('span', { class: 'save-state', id: 'save-state' }),
+      h('button', { class: 'icon-btn', id: 'btn-present', title: 'Present as slides. Right-click: slide preview beside the note', 'aria-label': 'Present as slides', html: icon('easel', 17), onclick: () => presentNote(), oncontextmenu: (e) => { e.preventDefault(); openSlidePreview(); } }),
       iconBtn('eye', 'Read or edit (Ctrl E)', () => setMode(app.settings.mode === 'read' ? 'live' : 'read'), 'btn-mode'),
       iconBtn('more', 'Note actions', (e) => openNoteMenu(e.currentTarget), 'btn-more'),
       iconBtn('spectacles', 'Outline, relations and local graph', togglePanel, 'btn-panel')),
@@ -551,7 +554,7 @@ function bindNoteView() {
   ed.init($('#cm-host'), () => {
     const n = cur(); if (!n) return;
     n.body = ed.getText(); markDirty();
-    renderMentionsSoon(); renderPanelSoon(); renderGhostsSoon();
+    renderMentionsSoon(); renderPanelSoon(); renderGhostsSoon(); slidesNoteChanged(n.id);
   });
   let titleAtFocus = null;
   const title = $('#title');
@@ -719,6 +722,10 @@ function openNoteMenu(anchor) {
     { icon: 'folder', label: 'Move to a folder…', run: () => moveToFolderDialog(c) },
     { icon: 'chainout', label: 'Copy a link to the block at the cursor', run: copyBlockLink },
     '-',
+    { icon: 'easel', label: 'Present as slides', keys: hotkeyHint('slides.present'), run: () => presentNote(c.id) },
+    { icon: 'easel', label: 'Slide preview beside the note', keys: hotkeyHint('slides.preview'), run: () => openSlidePreview(c.id) },
+    { icon: 'copy', label: 'Export the slides as HTML', run: () => exportSlides(c.id) },
+    '-',
     { icon: 'source', label: app.settings.mode === 'source' ? 'Live preview' : 'Source mode', run: () => setMode(app.settings.mode === 'source' ? 'live' : 'source') },
     { icon: 'copy', label: 'Copy as Markdown', run: () => copyText(serializeNote(c), 'Markdown copied') },
     { icon: 'trash', label: 'Move to trash', danger: true, run: () => deleteNote(c.id) });
@@ -735,6 +742,9 @@ function noteContextMenu(anchor, id) {
     '-',
     { icon: 'folder', label: 'Move to a folder…', run: () => moveToFolderDialog(n) },
     { icon: 'copy', label: 'Copy a link to this note', run: () => copyText(linkText(n), 'Link copied') },
+    { icon: 'easel', label: 'Present as slides', run: () => presentNote(id) },
+    '-',
+    { icon: 'trash', label: 'Move to trash', danger: true, run: () => deleteNote(id) },
   ]);
 }
 
