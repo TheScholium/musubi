@@ -1232,7 +1232,7 @@ i.st-key.st-a { background: var(--stat-a); } i.st-key.st-b { background: var(--s
 .tp-card { display: flex; flex-direction: column; gap: 0; padding: 0; border: 1px solid var(--ist-rule); border-radius: 3px; background: none; text-align: left; overflow: hidden; transition: border-color .15s, transform .15s; }
 .tp-card:hover { border-color: var(--border-hover); transform: translateY(-1px); }
 .tp-card.on { border-color: var(--ist-gold-dim); box-shadow: 0 0 0 1px var(--ist-gold-dim); }
-.tp-swatch { position: relative; height: 78px; padding: 11px 12px 0; background: var(--vista) left bottom / calc(var(--vista-w) * 2px) 96px repeat-x, var(--ambient), var(--ist-bg-1); image-rendering: pixelated; color: var(--ist-text); border-bottom: 1px solid var(--ist-rule); }
+.tp-swatch { position: relative; height: 78px; padding: 11px 12px 0; background: var(--vista) 72% bottom / calc(var(--vista-w) * 2px) 96px repeat-x, var(--ambient), var(--ist-bg-1); image-rendering: pixelated; color: var(--ist-text); border-bottom: 1px solid var(--ist-rule); }
 .tp-swatch .tp-sigil { display: inline-block; width: 11px; height: 11px; margin-right: 6px; vertical-align: -1px; background-color: var(--ist-gold); -webkit-mask: var(--ornament) center / contain no-repeat; mask: var(--ornament) center / contain no-repeat; }
 .tp-swatch[data-pixel] .tp-sigil { width: 14px; height: 14px; vertical-align: -2px; background: var(--sigil) center / contain no-repeat; -webkit-mask: none; mask: none; }
 .tp-swatch[data-pixel] .tp-l { display: none; }
@@ -1249,6 +1249,14 @@ i.st-key.st-a { background: var(--stat-a); } i.st-key.st-b { background: var(--s
 .tp-card.on .tp-name { color: var(--ist-gold); }
 .tp-epithet { font-size: 13px; font-style: italic; color: var(--ist-text-faint); line-height: 1.3; }
 .tp-auto { margin-top: 10px; }
+.tp-current-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.tp-current-slot .tp-card { width: 210px; }
+.ov-themes .ov-panel { width: min(860px, 96vw); height: min(780px, 88vh); max-height: none; padding: 0; }
+.themes { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.th-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 22px 26px; }
+.th-body .theme-picker { grid-template-columns: repeat(auto-fill, minmax(185px, 1fr)); gap: 12px; }
+.th-body .tp-group { margin-top: 14px; }
+.th-body .tp-group:first-child { margin-top: 0; }
 
 /* the serif themes carry no pixel art, also on a picker card inside a pixel theme */
 [data-theme]:not([data-theme="kairos"], [data-theme="aion"], [data-theme="chronos"], [data-theme="silva"], [data-theme="mons"], [data-theme="torrens"], [data-theme="bibliotheca"], [data-theme="mars"], [data-theme="ignis"], [data-theme="aurora"], [data-theme="castellum"], [data-theme="shire"], [data-theme="spelunca"], [data-theme="earthrise"], [data-theme="palebluedot"], [data-theme="deepfield"], [data-theme="pluto"], [data-theme="jupiter"]) { --vista: none; --sigil: none; --band: none; }

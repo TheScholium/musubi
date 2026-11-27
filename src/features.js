@@ -476,44 +476,61 @@ function openSettings(tab = 'general') {
     el.addEventListener('change', () => { s[key] = el.checked; saveSettings(); onchange && onchange(); });
     return h('label', { class: 'check' }, el, label);
   };
+  /* Theme: Settings shows only the current theme; the gallery of all themes opens in its own window. */
+  const themeCard = (t, onclick, extra = '') => h('button', {
+    class: 'tp-card' + extra, type: 'button', role: 'radio', 'data-id': t.id, title: t.name + ': ' + t.epithet, onclick,
+  },
+  h('div', { class: 'tp-swatch', 'data-theme': t.attr, 'data-pixel': t.pixel ? '' : null },
+    h('span', { class: 'tp-sigil' }), h('span', { class: 'tp-h' }, 'Theorem'),
+    h('span', { class: 'tp-dots' }, ...['--t-definition', '--t-law', '--t-objection'].map((v) => h('i', { style: { background: 'var(' + v + ')' } }))),
+    h('i', { class: 'tp-l' }), h('i', { class: 'tp-l' })),
+  h('div', { class: 'tp-meta' }, h('span', { class: 'tp-name' }, t.name), h('span', { class: 'tp-epithet' }, t.epithet)));
+  const currentThemeId = () => (s.theme === 'auto' ? (s.themeNight || 'dark') : s.theme);
   const themePicker = () => {
-    const grid = h('div', { class: 'theme-picker', role: 'radiogroup', 'aria-label': 'Theme' });
+    const wrap = h('div', { class: 'check-col tp-current-wrap' });
     const auto = h('input', { type: 'checkbox' });
+    const choose = (t) => {
+      if (t.light) s.theme = 'light';
+      else { s.themeNight = t.id; if (s.theme !== 'auto') s.theme = t.id; }
+      saveSettings(); applyTheme(); paint();
+    };
+    const slot = h('div', { class: 'tp-current-slot' });
     const paint = () => {
       auto.checked = s.theme === 'auto';
-      const cur = s.theme === 'auto' ? (s.themeNight || 'dark') : s.theme;
-      grid.querySelectorAll('.tp-card').forEach((c) => { const on = c.dataset.id === cur; c.classList.toggle('on', on); c.setAttribute('aria-checked', String(on)); });
+      const cur = THEMES.find((t) => t.id === currentThemeId()) || THEMES[0];
+      slot.replaceChildren(themeCard(cur, () => openThemeGallery(choose, currentThemeId), ' tp-current on'));
+      if (galleryPaint) galleryPaint();
     };
-    const commit = () => { saveSettings(); applyTheme(); paint(); };
-    let group = '';
-    for (const t of THEMES) {
-      if (t.group !== group) { group = t.group; grid.appendChild(h('div', { class: 'tp-group' }, group)); }
-      grid.appendChild(h('button', {
-        class: 'tp-card', type: 'button', role: 'radio', 'data-id': t.id, title: t.name + ': ' + t.epithet,
-        onclick: () => {
-          if (t.light) s.theme = 'light';
-          else { s.themeNight = t.id; if (s.theme !== 'auto') s.theme = t.id; }
-          commit();
-        },
-      },
-      h('div', { class: 'tp-swatch', 'data-theme': t.attr, 'data-pixel': t.pixel ? '' : null },
-        h('span', { class: 'tp-sigil' }), h('span', { class: 'tp-h' }, 'Theorem'),
-        h('span', { class: 'tp-dots' }, ...['--t-definition', '--t-law', '--t-objection'].map((v) => h('i', { style: { background: 'var(' + v + ')' } }))),
-        h('i', { class: 'tp-l' }), h('i', { class: 'tp-l' })),
-      h('div', { class: 'tp-meta' }, h('span', { class: 'tp-name' }, t.name), h('span', { class: 'tp-epithet' }, t.epithet))));
-    }
+    let galleryPaint = null;
+    const openThemeGallery = () => {
+      const grid = h('div', { class: 'theme-picker', role: 'radiogroup', 'aria-label': 'Themes' });
+      let group = '';
+      for (const t of THEMES) {
+        if (t.group !== group) { group = t.group; grid.appendChild(h('div', { class: 'tp-group' }, group)); }
+        grid.appendChild(themeCard(t, () => choose(t)));
+      }
+      galleryPaint = () => grid.querySelectorAll('.tp-card').forEach((c) => { const on = c.dataset.id === currentThemeId(); c.classList.toggle('on', on); c.setAttribute('aria-checked', String(on)); });
+      galleryPaint();
+      const gov = overlay('ov-themes', h('div', { class: 'themes' },
+        h('div', { class: 'rv-head' }, h('b', null, 'Themes'), h('span', { class: 'muted' }, THEMES.length + ' themes \u00b7 click one to try it'),
+          h('button', { class: 'icon-btn', title: 'Close', html: icon('x', 18), onclick: () => gov.close() })),
+        h('div', { class: 'th-body' }, grid)), { onClose: () => { galleryPaint = null; } });
+      const on = grid.querySelector('.tp-card.on'); if (on) { on.scrollIntoView({ block: 'center' }); on.focus({ preventScroll: true }); }
+    };
     auto.addEventListener('change', () => {
       if (auto.checked) { if (s.theme !== 'light') s.themeNight = s.theme; s.theme = 'auto'; }
       else s.theme = s.themeNight || 'dark';
-      commit();
+      saveSettings(); applyTheme(); paint();
     });
     paint();
-    return h('div', { class: 'check-col' }, grid, h('label', { class: 'check tp-auto' }, auto, 'Follow the system: Istari Paper by day'));
+    wrap.append(h('div', { class: 'tp-current-row' }, slot, h('button', { class: 'btn tp-explore', type: 'button', onclick: () => openThemeGallery() }, 'Explore themes')),
+      h('label', { class: 'check tp-auto' }, auto, 'Follow the system: Istari Paper by day'));
+    return wrap;
   };
   const row = (label, control, help) => h('div', { class: 'set-row' }, h('div', { class: 'set-label' }, h('b', null, label), help ? h('div', { class: 'muted small' }, help) : null), h('div', { class: 'set-ctl' }, control));
   const renderers = {
     general: () => [
-      row('Theme', themePicker(), 'Twenty-three themes in one design system. The Istari order (Mithrandir, Ithryn Luin, Aiwendil) changes the ground, the pigment and the sigil. The pixel-art themes keep the Istari type for body text and add a pixel-art banner behind the note title, coloured pixel type for titles, top headings, links and bold, a colour sigil before each heading, and a landscape along the foot of the graph. With the system setting, Musubi uses Istari Paper by day and the dark theme you choose by night.'),
+      row('Theme', themePicker(), 'Twenty-three themes in one design system: Istari and Istari Paper, the Istari order, and eighteen pixel-art themes. Click the card or Explore themes to see them all.'),
       row('Bold anchors', h('div', { class: 'check-col' },
         chk('boldAnchors', 'Make the first letters of each word bold', () => { applyTheme(); ed.setAnchors(); renderPreview(); }),
         sel('anchorStrength', [['light', 'Light (about a third of each word)'], ['medium', 'Medium (about two fifths)'], ['strong', 'Strong (about half)']], () => { applyTheme(); ed.setAnchors(); renderPreview(); })),
@@ -720,7 +737,7 @@ These follow the Obsidian plugin LaTeX Suite. Change them in Settings, Mathemati
 const ABOUT_MD = `
 **Musubi** is a free and open-source note platform for Zettelkasten work in mathematics, physics and philosophy. It is one HTML file. It needs no server, no account and no network.
 
-- Version 2.11.0. MIT License. Web app: https://thescholium.github.io/musubi/
+- Version 2.11.1. MIT License. Web app: https://thescholium.github.io/musubi/
 - Set in the Istari design system, with twenty-three themes (Istari and Istari Paper; Mithrandir, Ithryn Luin, Aiwendil; and eighteen pixel-art themes): EB Garamond, Cormorant Garamond, JetBrains Mono and Silkscreen (SIL Open Font License 1.1), embedded in the file.
 - Bundled libraries: CodeMirror 6 and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0), pdf.js (Apache-2.0). Default snippets from Obsidian LaTeX Suite (MIT).
 - Your notes are plain Markdown with YAML front matter. You can read them in any editor, and they work in Obsidian.

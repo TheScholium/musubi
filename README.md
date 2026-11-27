@@ -70,7 +70,7 @@ It is set in **Istari**, a dark, book-like design system: warm ink, parchment te
 **The interface**
 Indentation is drawn wider than two spaces, with a faint guide line at each level, as in a code editor; wrapped lines stay under their indent. The file keeps two spaces for each level, because four spaces before a paragraph make a code block in Markdown. Settings → General → *Indentation* sets the width and turns the guides off.
 
-Settings → General → *Theme*: pick a card. Each card is drawn in its own theme.
+Settings → General → *Theme* shows the current theme. Click it, or *Explore themes*, to open the gallery of all themes in its own window; each card is drawn in its own theme, and a click tries it at once.
 
 | Theme | Named for | Ground and pigment | Heading sigil |
 |---|---|---|---|
@@ -216,7 +216,7 @@ python3 test/test_attach.py    # attachments: location setting, paste and drop, 
 python3 test/test_v26.py       # icon tabs, custom note types, Ctrl/⌘ comma, the knot mark, the philosophy essay and its footnotes (36 checks)
 python3 test/test_archive.py   # a note from the Archive Supernote plugin in folder mode: fields kept, file not rewritten, stable ID, ink image recoloured (7 checks)
 python3 test/test_sandbox.py  # runs inside a sandboxed srcdoc iframe, as an embedded artifact does (6 checks)
-python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list, the 2.8 themes and theme picker, the pixel-art themes (108 checks)
+python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list, the 2.8 themes and theme picker, the pixel-art themes (111 checks)
 ```
 
 ## Privacy
