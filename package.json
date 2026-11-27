@@ -1,11 +1,11 @@
 {
   "name": "musubi",
-  "version": "2.13.1",
+  "version": "2.14.0",
   "description": "An offline, single-file Zettelkasten for mathematics, physics and philosophy.",
   "main": "dist/musubi.html",
   "scripts": {
     "build": "node build.mjs",
-    "test": "node build.mjs && python3 test/test_app.py && python3 test/test_more.py && python3 test/test_folder.py && python3 test/test_latexsuite.py && python3 test/test_pwa.py && python3 test/test_attach.py && python3 test/test_v26.py && python3 test/test_archive.py && python3 test/test_v27.py"
+    "test": "node build.mjs && python3 test/test_app.py && python3 test/test_more.py && python3 test/test_folder.py && python3 test/test_latexsuite.py && python3 test/test_pwa.py && python3 test/test_attach.py && python3 test/test_v26.py && python3 test/test_archive.py && python3 test/test_v27.py && python3 test/test_slides.py"
   },
   "keywords": [
     "zettelkasten",

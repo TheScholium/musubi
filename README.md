@@ -24,6 +24,7 @@ It is set in **Istari**, a dark, book-like design system: warm ink, parchment te
 | Sources | Literature notes with a citekey, citations `[@gettier1963, p. 122]`, BibTeX import and export. |
 | Plots | A code block that starts with ` ```python plot ` draws a figure. numpy, math and matplotlib.pyplot run offline, in a sandbox. |
 | Reading | A PDF reader beside the note: select a passage and *Quote into note* adds it with `[@citekey, p. 12]`. |
+| Talks | **Slides** from any note, in the Advanced Slides (reveal.js) syntax: `---` between slides, `note:` for speaker notes, `<style>` for the deck. A speaker view, an overview, a live preview beside the note, export to one HTML file, and print to PDF. |
 | Retention | Spaced repetition. Named definitions and theorems become flashcards with no extra work; so do `{{c1::cloze}}` and `Q:`/`A:` pairs. A long answer goes in braces, `A:{ … }`, and can hold lists, display math and paragraphs. |
 
 ## Features
@@ -31,14 +32,27 @@ It is set in **Istari**, a dark, book-like design system: warm ink, parchment te
 **Writing**
 - Live preview, source mode (plain Markdown) and read mode. `Ctrl/⌘ E` switches between writing and reading; `Ctrl/⌘ Shift E` toggles source mode.
 - Click a rendered link to open it; `Alt`-click to edit it instead. Click a formula to edit its TeX.
-- Completion for `[[links]]` (with "create note"), `#tags`, `[@citations]`, `:::environments`, LaTeX commands and your own macros.
+- Completion for `[[links]]` (a title with no note yet completes to `[[Title]]`; the note is made when you click the link), `#tags`, `[@citations]`, `:::environments`, LaTeX commands and your own macros.
 - `Ctrl/⌘ B`, `I`, `M` (inline math), `Shift M` (display math), `Shift L` (link), `Shift D` (cloze), `Shift H` (highlight). Lists continue on Enter; `P1.` premises continue too.
 - **LaTeX Suite snippets**, compatible with the Obsidian plugin: `mk` and `dm` open math, `x/` makes a fraction, `sr`, `@a`, `x1`, `RR`, `sum`, `pmat` and about 200 more expand as you type. Tab moves through fields and out of brackets; matrix shortcuts, auto-enlarged brackets, visual snippets on a selection, and undo that keeps what you typed. Paste your own LaTeX Suite snippet file in Settings, Mathematics.
 - **Attachments:** paste or drop any file. Images, PDFs, audio and video show in the note (`![[file]]`); other files become links (`[[file]]`). Settings → Data chooses where new attachments go: a fixed folder, a folder next to each note, the note's own folder, or the vault folder. Musubi finds attachments anywhere in the folder by name or relative path, so Markdown links such as `![fig|300](figures/fig.png)` and `[paper](../library/paper.pdf)` work. PDFs and other large files stay in the folder and are read only when opened; images changed in another app load again.
 - Footnotes, tables (rendered when the cursor is outside), task lists, callouts (`> [!tip]`), highlights (`==…==`), code blocks.
+- Statement blocks and callouts carry a small line glyph before their label, as in the Istari Obsidian theme: a page for theorems, an open book for definitions, a column for axioms and laws, a ticked square for proofs, a lamp for intuitions, scales for arguments, and one for each callout type.
 - A template for each of the 14 note types, editable in Settings.
 - **A list of note types** (Settings → Note types): add a type by name, then choose its marker shape (circle, ring, square, diamond, triangle, star, moon, sun) and an Istari pigment. **Retire** a type to stop offering it for new notes while old notes keep it; **delete** a type to remove it, and Musubi asks which type its notes move to. Each row shows how many notes use the type. **Reset to defaults** at the bottom brings back the 14 built-in types. Types appear in the type menu, the note list, the type key, the graph and `type:` search.
 - **Handwriting from Supernote:** notes from the [Archive](https://github.com/TheScholium/archive) plugin load as they are; images marked `|ink` are drawn in parchment on the dark theme and in black when printed.
+
+**Slides**
+- Any note is a slide deck, written in the syntax of the Obsidian plugin **Advanced Slides**, so decks made there run as they are: `---` alone on a line starts a slide, `--` a slide below it (press ↓), and a line that starts with `note:` begins the speaker notes.
+- A `<style>` block styles the whole deck with reveal.js selectors (`.reveal h2 { … }`, `.reveal .card { … }`); `:root` means the deck. Each deck draws in its own shadow root, so its CSS never reaches the rest of Musubi. Remote `@import` lines are left out, because Musubi makes no network requests; EB Garamond, Cormorant Garamond and JetBrains Mono are already in the file.
+- Raw HTML works with Markdown, mathematics and embeds inside it: columns of `<div>` cards, inline SVG, `![[image.gif|300]]`, `$…$` in headings and tables. A `<div>` left open stays inside its slide.
+- `<!-- slide bg="[[photo.jpg]]" class="…" data-transition="fade" -->` sets a slide; `<!-- element class="fragment" -->` sets the element before it; `+` list items appear one at a time; all the reveal.js fragment styles (fade-up, grow, highlight-red, …). Layouts: `<split even gap="3">` and `<grid drag="40 60" drop="right">`. Another note embedded alone on a line becomes part of the slide.
+- Front matter sets a deck: `theme` (Istari, Istari Paper, and the reveal.js themes black, white, league, beige, sky, night, serif, simple, solarized, moon, blood, dracula, or a `.css` file in the vault), `transition`, `transitionSpeed`, `width`, `height`, `slideNumber`, `controls`, `progress`, `center`, `loop`, `autoSlide`, `bg`, `timeForPresentation`, `autoFit`. Settings → Slides has the defaults.
+- **Present** (the easel at the top of a note, `Ctrl/⌘ Alt P`) starts at the slide under the cursor, in full screen. Slides are drawn at a fixed size (960 × 700 by default) and scaled to the screen. → ↓ Space next, ← ↑ previous, **O** overview, **S** speaker view, **F** full screen, **B** black screen, a number and Enter to jump, **?** the keys, **Esc** to end.
+- **Speaker view** in its own window, for a second screen: the current slide, the next step, the notes (A− A+), a timer with pause and reset, the time left when `timeForPresentation` is set, and the clock. If the browser blocks the window, the speaker view opens inside the presentation.
+- **Auto-fit:** a slide whose content runs past the bottom shrinks just enough to fit (Settings → Slides, or `autoFit: false` in a note, for the Advanced Slides behaviour).
+- **Slide preview** beside the note (right-click the easel, or `Ctrl/⌘ Alt Shift P`): a tab that updates while you type and follows the cursor from slide to slide.
+- **Export** a deck as one HTML file that runs anywhere with its images, fonts, notes, speaker view and overview inside; **present in a new window** for a projector; **print** one page per slide, or save as PDF.
 
 **Plots from Python**
 - A code block that starts with ` ```python plot ` (or ` ```plot `) draws a figure in the Istari pigments, in light and dark. Labels with `$…$` are KaTeX.
@@ -60,6 +74,7 @@ It is set in **Istari**, a dark, book-like design system: warm ink, parchment te
 - **Shortcuts as in other note apps:** `Ctrl/⌘ N` makes a note and selects its title; `Ctrl/⌘ T` and `Ctrl/⌘ W` open and close tabs, `Ctrl/⌘ Shift T` opens the last closed tab again, `Ctrl Tab` or `Ctrl/⌘ Shift ]` goes to the next tab, `Ctrl/⌘ 1`–`9` to a tab, `Ctrl/⌘ O` opens a note by name, `Ctrl/⌘`-click opens a link in a new tab (also on the raw text of a link), and `Alt Enter` follows the link at the cursor. In a browser tab Chrome keeps `Ctrl/⌘ N`, `T` and `W` for itself; the installed app gets them, and the `Alt` versions work everywhere.
 - **Editable hotkeys** (Settings → Hotkeys and syntax), as in Obsidian: about 45 commands, each with one or more keys. Filter by name or key, click **+** and press a key to add it, **×** to remove one, **↺** to reset one command. Musubi marks a key that two commands share, and **Reset all hotkeys** puts back the defaults.
 - **Folder tree** (Settings → General, off at first): a Folders tab. A note's folder is part of its file path, so with a linked folder these are the folders on disk. New folder, rename, delete (notes move up one level), drag notes onto folders, *Move to a folder…*.
+- Right-click a note in the list to open it in a tab or the other pane, move it, present it, or move it to the trash.
 - **Add a link** from the note menu or the `+ link` button: choose a note, and optionally a relation.
 - Renaming a note rewrites every link to it.
 - Under each note, in the Istari "mentions" style: its links, the notes that link to it (with the sentence around each link), and unlinked mentions with a one-click *link*.
@@ -213,6 +228,7 @@ node build.mjs       # bundles CodeMirror, inlines fonts and libraries, writes d
 | `src/plot.js` | The Python subset, numpy, math and pyplot, and the SVG renderer for plots |
 | `src/stats.js` | Review log and statistics |
 | `src/pdfreader.js` | The PDF reader (pdf.js) |
+| `src/slides.js` | Slides: the Advanced Slides syntax, the presenter (also used in exported decks), themes, speaker view, overview, preview tab, export and print |
 | `src/anchors.js` | Bold anchors and the theme list |
 | `src/tour.js` | Onboarding tour with full cleanup, add-link dialog, migration from version 1 |
 | `src/style.css` | The Istari design system for the whole interface: Istari, Istari Paper (also used for print), Mithrandir, Ithryn Luin, Aiwendil, and twenty-eight pixel-art themes |
@@ -230,6 +246,7 @@ python3 test/test_attach.py    # attachments: location setting, paste and drop, 
 python3 test/test_v26.py       # icon tabs, custom note types, Ctrl/⌘ comma, the knot mark, the philosophy essay and its footnotes (36 checks)
 python3 test/test_archive.py   # a note from the Archive Supernote plugin in folder mode: fields kept, file not rewritten, stable ID, ink image recoloured (7 checks)
 python3 test/test_sandbox.py  # runs inside a sandboxed srcdoc iframe, as an embedded artifact does (6 checks)
+python3 test/test_slides.py   # slides: splitting, notes, deck CSS kept to the deck, fragments, vertical slides, split and grid, auto-fit, overview, jump, speaker view, preview tab, export, print; tags not read from CSS; block glyphs; link completion without new notes; delete from the note list (51 checks)
 python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list, the 2.8 themes and theme picker, the pixel-art themes (125 checks)
 ```
 
@@ -239,4 +256,4 @@ Musubi makes no network requests. Notes never leave your device unless you expor
 
 ## Licence
 
-MIT. See `LICENSE`. Third-party notices are in `THIRD_PARTY_LICENSES.txt`: CodeMirror and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0), pdf.js (Apache-2.0), the Istari fonts (SIL OFL 1.1), and the LaTeX Suite default snippets (MIT).
+MIT. See `LICENSE`. Third-party notices are in `THIRD_PARTY_LICENSES.txt`: CodeMirror and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0), pdf.js (Apache-2.0), the Istari fonts (SIL OFL 1.1), the LaTeX Suite default snippets (MIT), and the reveal.js layout and theme values that the slides follow (MIT).

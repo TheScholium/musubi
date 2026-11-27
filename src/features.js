@@ -142,6 +142,7 @@ function commands() {
     { label: 'Toggle context panel', run: togglePanel },
     { label: 'Settings', keys: hotkeyHint('settings.open'), run: () => openSettings() },
     { label: 'Settings: note types', run: () => openSettings('types') },
+    { label: 'Settings: slides', run: () => openSettings('slides') },
     { label: 'Read: Zettelkasten and the Musubi philosophy', run: () => openPhilosophy() },
     { label: 'Hotkeys and syntax', keys: hotkeyHint('help.hotkeys'), run: () => openSettings('shortcuts') },
     { label: 'Import files (Markdown, ZIP, JSON, BibTeX, images)', run: () => $('#file-input').click() },
@@ -166,6 +167,13 @@ function commands() {
     { label: 'Copy a link to the block at the cursor', run: copyBlockLink },
     { label: 'Copy this note as Markdown', run: () => copyText(serializeNote(c), 'Markdown copied') },
     { label: 'Print or save this note as PDF', run: () => { setMode('read'); setTimeout(() => window.print(), 120); } },
+    { label: 'Slides: present this note', keys: hotkeyHint('slides.present'), run: () => presentNote(c.id) },
+    { label: 'Slides: present from the first slide', run: () => presentNote(c.id, { fromStart: true }) },
+    { label: 'Slides: present with the speaker view', run: () => presentNote(c.id, { speaker: true }) },
+    { label: 'Slides: present in a new window (for a projector)', run: () => presentInWindow(c.id) },
+    { label: 'Slides: preview beside the note', keys: hotkeyHint('slides.preview'), run: () => openSlidePreview(c.id) },
+    { label: 'Slides: export as one HTML file', run: () => exportSlides(c.id) },
+    { label: 'Slides: print or save as PDF', run: () => printSlides(c.id) },
     { label: 'Move this note to the trash', run: () => deleteNote(c.id) },
   );
   return list;
@@ -463,7 +471,7 @@ async function openHistory() {
 function openSettings(tab = 'general') {
   let ov;
   const s = app.settings;
-  const tabs = [['general', 'General'], ['editor', 'Editor'], ['math', 'Mathematics'], ['study', 'Study'], ['types', 'Note types'], ['templates', 'Templates'], ['data', 'Data'], ['shortcuts', 'Hotkeys and syntax'], ['install', 'Install as an app'], ['about', 'About']];
+  const tabs = [['general', 'General'], ['editor', 'Editor'], ['math', 'Mathematics'], ['study', 'Study'], ['types', 'Note types'], ['templates', 'Templates'], ['slides', 'Slides'], ['data', 'Data'], ['shortcuts', 'Hotkeys and syntax'], ['install', 'Install as an app'], ['about', 'About']];
   const nav = h('nav', { class: 'set-nav' }); const pane = h('div', { class: 'set-pane' });
   const sel = (key, options, onchange) => {
     const el = h('select', { class: 'input' }, ...options.map(([v, l]) => h('option', { value: v }, l)));
@@ -584,6 +592,18 @@ function openSettings(tab = 'general') {
             h('button', { class: 'btn btn-sm', onclick: () => { sta.value = ''; vta.value = ''; saveLs(); } }, 'Clear')),
           h('details', null, h('summary', { class: 'muted small' }, 'Snippet variables'), h('div', { class: 'muted small' }, 'An object that adds to or replaces ${GREEK}, ${SYMBOL}, ${MORE_SYMBOLS} and ${ACCENT}.'), vta),
           status),
+      ];
+    },
+    slides: () => {
+      const demo = h('div', { class: 'prose', html: renderMarkdown(SLIDES_HELP_MD, { idPrefix: 'sh-' }) });
+      return [
+        h('p', { class: 'muted' }, 'Any note can be a slide deck. The syntax is that of the Obsidian plugin Advanced Slides, so decks you made there run here as they are. Front matter in a note (theme: black, transition: fade, slideNumber: false, width: 1280, height: 720) takes the place of these defaults for that note.'),
+        row('Theme', sel('slidesTheme', SLIDE_THEME_LABELS), 'A <style> block in the deck comes after the theme, so it can change anything.'),
+        row('Transition', sel('slidesTransition', SLIDE_TRANSITIONS.map((t) => [t, t[0].toUpperCase() + t.slice(1)]))),
+        row('Slide size', sel('slidesSize', [['960x700', '960 × 700 (Advanced Slides and reveal.js default)'], ['1280x720', '1280 × 720 (16:9)'], ['1920x1080', '1920 × 1080 (16:9, large)'], ['1024x768', '1024 × 768 (4:3)'], ['1200x900', '1200 × 900 (4:3)']]), 'Slides are drawn at this size and scaled to the screen, so text keeps its place on every screen.'),
+        row('Show', h('div', { class: 'check-col' }, chk('slidesNumbers', 'Slide numbers'), chk('slidesControls', 'Arrows at the bottom right'), chk('slidesProgress', 'A progress line at the bottom'), chk('slidesFullscreen', 'Present in full screen'))),
+        row('Auto-fit', chk('slidesAutoFit', 'Shrink a slide that is too tall to fit'), 'Only a slide whose content runs past the bottom becomes smaller, as little as needed. Off: such a slide shows from the top and the end is cut, as in Advanced Slides. A note can set autoFit: false.'),
+        h('h3', { class: 'set-h' }, 'Syntax and keys'), demo,
       ];
     },
     study: () => {
@@ -732,12 +752,30 @@ These follow the Obsidian plugin LaTeX Suite. Change them in Settings, Mathemati
 - Callouts: \`> [!note] Title\`. Tasks: \`- [ ] item\` (click to tick).
 - Plots: a code block that starts with \`\`\`python plot\` draws a figure. Musubi runs a part of Python offline: numpy (\`np\`), \`math\` and matplotlib.pyplot (\`plt\`): plot, scatter, bar, barh, hist, fill_between, errorbar, step, stem, quiver, axhline, axvline, text, annotate, legend, grid, subplots, log scales, and labels with \`$…$\`. def, for, if, while, lambda, list comprehensions and f-strings work. Files, the network and other modules do not.
 - Attachments: paste or drop any file. \`![[figure.png]]\`, \`![[figure.png|300]]\` (width), \`![[paper.pdf]]\` (a card that can show the PDF), \`![[talk.mp3]]\`, \`[[data.csv]]\` (a link). Markdown paths work too: \`![caption|300](figures/fig.png)\`, \`[paper](../library/paper.pdf)\`, \`[note](Other.md)\`.
+- Slides (the Advanced Slides syntax): \`---\` alone on a line starts a new slide, \`--\` a slide below it. A line that starts with \`note:\` begins the speaker notes of the slide. A \`<style>\` block styles the whole deck (\`.reveal h2 { … }\`). \`<!-- slide bg="#12100e" class="x" -->\` sets the slide; \`<!-- element class="fragment" -->\` sets the element before it. A list with \`+\` shows one item at a time. Layouts: \`<split even gap="3">\` … \`</split>\` (each block is a column), \`<grid drag="40 60" drop="5 20">\` … \`</grid>\` (size and place in percent). Front matter: \`theme\`, \`transition\`, \`width\`, \`height\`, \`slideNumber\`, \`controls\`, \`progress\`, \`center\`, \`bg\`, \`timeForPresentation\`. Settings → Slides has the full list.
+`;
+
+const SLIDES_HELP_MD = `
+| Write | Result |
+|---|---|
+| \`---\` on its own line | A new slide |
+| \`--\` on its own line | A slide below the current one (press ↓) |
+| \`note:\` at the start of a line | The rest of the slide is speaker notes |
+| \`<style> .reveal h2 { color: gold; } </style>\` | CSS for the whole deck. \`:root\` means the deck. |
+| \`<!-- slide bg="[[photo.jpg]]" -->\` | A background: a colour, an image or a gradient. Also \`class\`, \`style\`, \`data-transition\`. |
+| \`<!-- element class="fragment" -->\` | Shows the element before it on the next step. Also fade-up, grow, highlight-red and the other reveal.js fragment styles. |
+| \`+ item\` | List items appear one at a time |
+| \`<split even gap="3">\` | Columns: each block inside is a column. \`left="1" right="2"\` sets widths, \`wrap="2"\` columns per row. |
+| \`<grid drag="40 60" drop="right">\` | A box 40 % wide and 60 % high, at the right. drop takes x y in percent or center, top, bottom, left, right, topleft, … Also bg, align, pad, flow, border, rotate, frag. |
+| \`![[Other note]]\` alone on a line | The other note's text, as part of the slide |
+
+While presenting: → ↓ Space next, ← ↑ previous, **O** overview, **S** speaker view (notes, next slide, timer) in its own window, **F** full screen, **B** black screen, a number and Enter to go to that slide, **?** the keys, **Esc** to end. The present button at the top of a note starts at the slide under the cursor; right-click it for a live preview beside the note that follows the cursor.
 `;
 
 const ABOUT_MD = `
 **Musubi** is a free and open-source note platform for Zettelkasten work in mathematics, physics and philosophy. It is one HTML file. It needs no server, no account and no network.
 
-- Version 2.13.1. MIT License. Web app: https://thescholium.github.io/musubi/
+- Version 2.14.0. MIT License. Web app: https://thescholium.github.io/musubi/
 - Set in the Istari design system, with thirty-three themes (Istari and Istari Paper; Mithrandir, Ithryn Luin, Aiwendil; and twenty-eight pixel-art themes): EB Garamond, Cormorant Garamond, JetBrains Mono and Silkscreen (SIL Open Font License 1.1), embedded in the file.
 - Bundled libraries: CodeMirror 6 and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0), pdf.js (Apache-2.0). Default snippets from Obsidian LaTeX Suite (MIT).
 - Your notes are plain Markdown with YAML front matter. You can read them in any editor, and they work in Obsidian.
@@ -1242,13 +1280,13 @@ async function boot() {
   const t0 = tabOf(panes.notePane);
   let target = hashId || panesStartNote();
   if (!target && !(t0 && t0.k === 'note' && t0.id == null)) target = (vault.get(app.settings.lastNote) && app.settings.lastNote) || (vault.all().sort(byModified)[0] || {}).id;
-  if (tabOf(panes.notePane) && tabOf(panes.notePane).k === 'pdf') activateTab(panes.notePane, panes.list[panes.notePane].active);
+  if (tabOf(panes.notePane) && tabOf(panes.notePane).k !== 'note') activateTab(panes.notePane, panes.list[panes.notePane].active);
   else if (target) openNote(target, { replace: true }); else showEmpty();
   if (panes.split) renderPaneBody(otherPane(panes.notePane));
   document.documentElement.classList.add('ready');
   pwaLaunchAction();
   updateFolderBanner();
-  window.musubi = { app, applyCustomTypes, vault, store, ed, panes, openPdfTab, openStats, openTagManager, plotHtml, listBlocks, applyTheme, setMode, renderPreview, openSettings, renderSidebar, refreshLists, renderMarkdown, extractCards, openNote, createNote, searchNotes, parseNote, serializeNote, importFiles, makeZip, readZip, parseBibtex, dueQueue, graphData, useFolderHandle, folderRescan, startTour, endTour, seedVault, addLinkDialog, lsSnippets, lsParseSource, openReview, openPhilosophy, updateFolderBanner, saveAsset, assetUrl, findAsset, attachmentPath };
+  window.musubi = { app, applyCustomTypes, vault, store, ed, panes, openPdfTab, openStats, openTagManager, plotHtml, listBlocks, applyTheme, setMode, renderPreview, openSettings, renderSidebar, refreshLists, renderMarkdown, extractCards, openNote, createNote, searchNotes, parseNote, serializeNote, importFiles, makeZip, readZip, parseBibtex, dueQueue, graphData, useFolderHandle, folderRescan, startTour, endTour, seedVault, addLinkDialog, lsSnippets, lsParseSource, openReview, openPhilosophy, updateFolderBanner, saveAsset, assetUrl, findAsset, attachmentPath, presentNote, openSlidePreview, buildDeck, slidesHtml, exportSlides, printSlides, slidesState, slideIndexAt };
   if (app.settings.tour && app.settings.tour.active) resumeTour();
   else if (tourDue()) startTour({ firstRun: true });
 }

@@ -334,9 +334,23 @@ function applyMask(text, ranges) {
   return out + text.slice(last);
 }
 
-function maskCode(text) {
+/* Code only: fenced blocks and inline code. */
+function maskCodeOnly(text) {
   const t1 = applyMask(text, fencedRanges(text));
   return applyMask(t1, inlineCodeRanges(t1));
+}
+/* Raw HTML that is not prose: <style> and <script> blocks, comments, and the attributes inside tags.
+   Colours such as #d6ccb4 in a style are not tags, and nothing in them is a link or mathematics. */
+function htmlRanges(t) {
+  const out = [];
+  for (const re of [/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, /<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, /<!--[\s\S]*?-->/g, /<[A-Za-z][\w-]*\s[^<>]*>/g]) {
+    let m; while ((m = re.exec(t))) out.push([m.index, m.index + m[0].length]);
+  }
+  return out;
+}
+function maskCode(text) {
+  const t2 = maskCodeOnly(text);
+  return t2.includes('<') ? applyMask(t2, htmlRanges(t2)) : t2;
 }
 
 /* Math scanner. Works on code-masked text; returns ranges with the TeX source. */

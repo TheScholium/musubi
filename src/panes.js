@@ -26,7 +26,7 @@ function panesRestore() {
   if (t && Array.isArray(t.list)) {
     panes.list = [0, 1].map((i) => {
       const src = t.list[i] || { tabs: [], active: 0 };
-      const tabs = (src.tabs || []).filter((x) => x && (x.k === 'pdf' ? !!x.name : x.id == null || vault.get(x.id)));
+      const tabs = (src.tabs || []).filter((x) => x && (x.k === 'pdf' ? !!x.name : x.k === 'slides' ? !!(x.id && vault.get(x.id)) : x.id == null || vault.get(x.id)));
       return { tabs, active: Math.max(0, Math.min(tabs.length - 1, src.active | 0)) };
     });
     panes.notePane = t.notePane === 1 ? 1 : 0;
@@ -34,7 +34,7 @@ function panesRestore() {
   panes.split = !!app.settings.split && panes.list[1].tabs.length > 0;
   if (!panes.split && panes.list[1].tabs.length) { panes.list[0].tabs.push(...panes.list[1].tabs); panes.list[1] = { tabs: [], active: 0 }; }
   if (!panes.split) panes.notePane = 0;
-  if (tabOf(panes.notePane) && tabOf(panes.notePane).k === 'pdf' && tabOf(otherPane(panes.notePane)) && tabOf(otherPane(panes.notePane)).k === 'note') panes.notePane = otherPane(panes.notePane);
+  if (tabOf(panes.notePane) && tabOf(panes.notePane).k !== 'note' && tabOf(otherPane(panes.notePane)) && tabOf(otherPane(panes.notePane)).k === 'note') panes.notePane = otherPane(panes.notePane);
 }
 
 /* The note the editor should show at start, if the tabs know one. */
@@ -56,7 +56,7 @@ function buildPanes() {
   wrap.addEventListener('mousedown', (e) => {
     const pane = e.target.closest('.pane'); if (!pane) return;
     const p = +pane.dataset.pane;
-    if (p !== panes.notePane && !e.target.closest('.tabbar') && tabOf(p) && tabOf(p).k === 'pdf') markFocusPane(p);
+    if (p !== panes.notePane && !e.target.closest('.tabbar') && tabOf(p) && tabOf(p).k !== 'note') markFocusPane(p);
   }, true);
   applySplit();
 }
@@ -160,7 +160,7 @@ function moveEditorTo(p) {
 function focusPane(p) {
   const t = tabOf(p);
   if (!t) return;
-  if (t.k === 'pdf') { markFocusPane(p); return; }
+  if (t.k !== 'note') { markFocusPane(p); return; }
   if (p !== panes.notePane) moveEditorTo(p);
   if (t.id && vault.get(t.id)) openNote(t.id, { fromPane: true });
   else showEmpty();
@@ -175,6 +175,7 @@ function markFocusPane(p) {
 /* ---------- tab bars ---------- */
 function tabLabel(t) {
   if (t.k === 'pdf') return { text: t.name.replace(/\.pdf$/i, ''), cls: 'tab-pdf', title: t.name };
+  if (t.k === 'slides') { const sn = vault.get(t.id); return { text: (sn ? sn.title : 'Slides'), cls: 'tab-slides', title: 'Slide preview: ' + (sn ? sn.title : '') }; }
   const n = t.id ? vault.get(t.id) : null;
   return n ? { text: n.title || 'Untitled', cls: 't-' + n.type, title: n.title } : { text: 'New tab', cls: 'tab-empty', title: 'New tab' };
 }
@@ -188,7 +189,7 @@ function renderTabbars() {
       const L = tabLabel(t);
       const on = i === P.active;
       const el = h('div', { class: 'tab' + (on ? ' on' : '') + (on && p === panes.notePane && t.k === 'note' ? ' editing' : ''), role: 'tab', 'aria-selected': String(on), tabindex: '0', title: L.title, draggable: 'true', 'data-i': String(i) },
-        t.k === 'pdf' ? h('span', { class: 'tab-ic', html: icon('scroll', 13) }) : h('span', { class: 'dot ' + L.cls }),
+        t.k === 'pdf' ? h('span', { class: 'tab-ic', html: icon('scroll', 13) }) : t.k === 'slides' ? h('span', { class: 'tab-ic', html: icon('easel', 13) }) : h('span', { class: 'dot ' + L.cls }),
         h('span', { class: 'tab-title' }, L.text),
         h('button', { class: 'tab-x', title: 'Close tab (Alt W)', 'aria-label': 'Close tab', onclick: (e) => { e.stopPropagation(); closeTab(p, i); } }, '×'));
       el.addEventListener('click', () => activateTab(p, i));
@@ -251,7 +252,7 @@ function closeTab(p, i) {
   if (P.tabs[i].k === 'pdf' || P.tabs[i].id) { closedTabs.push(Object.assign({}, P.tabs[i])); if (closedTabs.length > 20) closedTabs.shift(); }
   const wasActive = i === P.active;
   if (p === panes.notePane && wasActive && app.current) saveCurrent.flush();
-  if (P.tabs[i].k === 'pdf' && wasActive) destroyPdf(p);
+  if (P.tabs[i].k !== 'note' && wasActive) destroyPdf(p);
   P.tabs.splice(i, 1);
   if (!P.tabs.length) {
     if (panes.split) { closeSplit(p); return; }
@@ -261,7 +262,7 @@ function closeTab(p, i) {
   else if (wasActive) P.active = Math.min(i, P.tabs.length - 1);
   if (!wasActive) { paneDidChange(); return; }
   const t = tabOf(p);
-  if (t.k === 'pdf') { activateTab(p, P.active); return; }
+  if (t.k !== 'note') { activateTab(p, P.active); return; }
   if (p === panes.notePane) { $('#note-scroll').hidden = false; if (t.id && vault.get(t.id)) openNote(t.id, { fromPane: true }); else showEmpty(); }
   else { renderPaneBody(p); paneDidChange(); }
 }
@@ -357,12 +358,22 @@ function renderPaneBody(p) {
     panes.pdf[p] = mountPdf(host, t, p);
     return;
   }
+  if (t.k === 'slides') {
+    const cv = slidesState.previews[p];
+    if (cv && cv.id === t.id && cv.wrap && body.contains(cv.wrap)) return;
+    destroyPdf(p);
+    for (const el of Array.from(body.children)) if (el.id !== 'note-scroll') el.remove();
+    slidesState.previews[p] = mountSlidePreview(body, t, p);
+    return;
+  }
   renderGhost(p);
 }
 
 function destroyPdf(p) {
   const v = panes.pdf[p];
   if (v) { try { v.destroy(); } catch (e) { /* ignore */ } panes.pdf[p] = null; }
+  const sv = slidesState.previews[p];
+  if (sv) { try { sv.destroy(); } catch (e) { /* ignore */ } slidesState.previews[p] = null; }
   const body = $('#pbody' + p); if (body) for (const el of Array.from(body.querySelectorAll('.pdf-host'))) el.remove();
 }
 
@@ -370,7 +381,7 @@ function destroyPdf(p) {
 function renderGhost(p) {
   if (!panes.split && p === 1) return;
   if (p === panes.notePane) return;
-  const t = tabOf(p); const body = $('#pbody' + p); if (!body || !t || t.k !== 'note') { if (t && t.k === 'pdf') renderPaneBody(p); return; }
+  const t = tabOf(p); const body = $('#pbody' + p); if (!body || !t || t.k !== 'note') { if (t && t.k !== 'note') renderPaneBody(p); return; }
   destroyPdf(p);
   let ghost = body.querySelector('.ghost');
   const keep = ghost ? ghost.scrollTop : (t.id && app.cursor.get(t.id) ? app.cursor.get(t.id).top : 0);
@@ -415,14 +426,16 @@ function panesForget(id) {
   for (const p of [0, 1]) {
     const P = panes.list[p];
     for (let i = P.tabs.length - 1; i >= 0; i--) {
-      if (P.tabs[i].k === 'note' && P.tabs[i].id === id) {
-        if (p === panes.notePane && i === P.active) hit = true;
+      if ((P.tabs[i].k === 'note' || P.tabs[i].k === 'slides') && P.tabs[i].id === id) {
+        if (P.tabs[i].k === 'note' && p === panes.notePane && i === P.active) hit = true;
+        if (P.tabs[i].k === 'slides' && i === P.active) destroyPdf(p);
         P.tabs.splice(i, 1); if (P.active > i || P.active >= P.tabs.length) P.active = Math.max(0, P.active - 1);
       }
     }
   }
-  if (panes.split && !panes.list[1].tabs.length) { panes.split = false; applySplit(); $('#pbody1').innerHTML = ''; if (panes.notePane === 1) { panes.notePane = 0; $('#pbody0').innerHTML = ''; $('#pbody0').appendChild($('#note-scroll')); } }
-  if (panes.split && !panes.list[0].tabs.length) { panes.list[0] = panes.list[1]; panes.list[1] = { tabs: [], active: 0 }; panes.split = false; applySplit(); $('#pbody0').innerHTML = ''; $('#pbody0').appendChild($('#note-scroll')); $('#pbody1').innerHTML = ''; panes.notePane = 0; }
+  // keep the editor's page (#note-scroll) before a pane is emptied: it may be inside that pane
+  if (panes.split && !panes.list[1].tabs.length) { const ns = $('#note-scroll'); destroyPdf(1); panes.split = false; applySplit(); $('#pbody1').innerHTML = ''; if (panes.notePane === 1) { panes.notePane = 0; $('#pbody0').innerHTML = ''; } if (ns && !ns.isConnected) $('#pbody0').appendChild(ns); }
+  if (panes.split && !panes.list[0].tabs.length) { const ns = $('#note-scroll'); destroyPdf(0); destroyPdf(1); panes.list[0] = panes.list[1]; panes.list[1] = { tabs: [], active: 0 }; panes.split = false; applySplit(); $('#pbody0').innerHTML = ''; $('#pbody1').innerHTML = ''; if (ns) $('#pbody0').appendChild(ns); panes.notePane = 0; }
   if (!panes.list[panes.notePane].tabs.length) { panes.list[panes.notePane].tabs.push({ k: 'note', id: null }); panes.list[panes.notePane].active = 0; }
   renderTabbars(); renderGhost(otherPane(panes.notePane)); panesSave();
   return hit;
@@ -459,6 +472,7 @@ function reopenClosedTab() {
     if (t.k === 'note' && !vault.get(t.id)) continue;
     if (t.k === 'pdf' && !vault.assets.has(t.name)) continue;
     if (t.k === 'pdf') openPdfTab(t.name, { page: t.page });
+    else if (t.k === 'slides') openSlidePreview(t.id);
     else openNote(t.id, { newTab: true });
     return;
   }

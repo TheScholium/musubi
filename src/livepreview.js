@@ -389,7 +389,7 @@ function lpDecorations(state, an) {
       if (!lineTouch(e.headFrom, e.headTo)) {
         let nameHtml = '';
         if (e.name) nameHtml = lpInline(e.name);
-        const head = e.def.style === 'quote' ? '' : `<span class="env-label">${esc(e.label)}</span>${nameHtml ? `<span class="env-colon">:</span> <span class="env-name">${nameHtml}</span>` : '<span class="env-dot">.</span>'}`;
+        const head = e.def.style === 'quote' ? '' : `${envGlyph(e.kind)}<span class="env-label">${esc(e.label)}</span>${nameHtml ? `<span class="env-colon">:</span> <span class="env-name">${nameHtml}</span>` : '<span class="env-dot">.</span>'}`;
         out.push(Decoration.replace({ widget: new HtmlWidget(head || '&nbsp;', 'cm-lp-envhead' + (head ? '' : ' cm-lp-envhead-empty'), { key: e.kind + e.label + e.name }) }).range(e.headFrom, e.headTo));
       } else markC(e.headFrom, e.headTo, 'cm-lp-src');
       if (closeHidden) {
@@ -484,7 +484,7 @@ function lpDecorations(state, an) {
         break;
       }
       case 'calloutmark':
-        if (!lineTouch(a, b)) out.push(Decoration.replace({ widget: new HtmlWidget(esc(it.label[0].toUpperCase() + it.label.slice(1).toLowerCase()), 'cm-lp-calloutlabel', { key: it.label }) }).range(a, b));
+        if (!lineTouch(a, b)) out.push(Decoration.replace({ widget: new HtmlWidget(calloutGlyph(it.label.toLowerCase()) + esc(it.label[0].toUpperCase() + it.label.slice(1).toLowerCase()), 'cm-lp-calloutlabel', { key: it.label }) }).range(a, b));
         break;
       case 'quotemark': if (!lineTouch(a, b)) hide(a, b); else markC(a, b, 'cm-lp-faint'); break;
       case 'bullet':
@@ -569,13 +569,12 @@ function lpCompletions(context) {
   if ((m = /\[\[([^\[\]\n|]*)$/.exec(before))) {
     const q = m[1]; const from = context.pos - m[0].length;
     const after = context.state.sliceDoc(context.pos, context.pos + 2);
+    // A title with no note yet only completes the link. The note is made later, when the link is clicked.
     const opts = linkSuggestions(q).map((s, i) => ({
-      label: s.create ? s.label : s.note.title, detail: s.detail, boost: 99 - i, type: s.note ? 'type-' + s.note.type : 'create',
+      label: s.create ? s.create : s.note.title, detail: s.create ? 'no note yet' : s.detail, boost: 99 - i, type: s.note ? 'type-' + s.note.type : 'create',
       apply: (view, c, f, t) => {
-        let note = s.note;
-        if (s.create) { note = createNote({ title: s.create, type: 'concept', status: 'draft', body: '' }, { open: false }); toast(`Created “${note.title}”`); }
         const end = after === ']]' ? context.pos + 2 : t;
-        const ins = linkText(note);
+        const ins = s.create ? '[[' + s.create + ']]' : linkText(s.note);
         view.dispatch({ changes: { from, to: Math.max(end, t), insert: ins }, selection: { anchor: from + ins.length } });
       },
     }));
@@ -704,7 +703,7 @@ const ed = {
       this.modeConf.of(this.mode === 'live' ? livePreviewExt(() => cur()) : []),
       this.baConf.of(this.anchorExt()),
       this.spellConf.of(EditorView.contentAttributes.of({ spellcheck: String(app.settings.spellcheck !== false), autocorrect: 'off', autocapitalize: 'sentences' })),
-      EditorView.updateListener.of((u) => { if (u.docChanged && !self.quiet && self.onChange) self.onChange(u); }),
+      EditorView.updateListener.of((u) => { if (u.docChanged && !self.quiet && self.onChange) self.onChange(u); if (u.selectionSet && !self.quiet) slidesOnCursor(u.state.selection.main.head); }),
       EditorView.domEventHandlers({
         mousedown(e, view) { return lpMouseDown(e, view); },
         paste(e, view) { return lpPaste(e, view); },
