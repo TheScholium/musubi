@@ -117,7 +117,7 @@ Settings → General → *Theme* shows the current theme. Click it, or *Explore 
 | | **Water Lilies** (Monet, 1906) | the painting: lily pads, willow, the reflected sky | lily |
 | | **Klimt** (*The Tree of Life*, 1905-11) | the frieze: the spiralling branches and the embrace | gold square |
 
-The five painting themes show the real works, which are in the public domain: each is cropped to a wide band, reduced to 400 x 76 pixels and 36 colours by `tools/paintings.py`, and shown at 3x across the full width of the banner, with a scrim under the title so it stays readable. The sources and their provenance are in `tools/paintings/SOURCES.md`. The three scientists appear through their work, not as portraits.
+The five painting themes show the real works, which are in the public domain: each is cropped to a wide band, reduced to 240 x 46 pixels and 24 colours by `tools/paintings.py`, and shown at 5x across the full width of the banner, with a scrim under the title so it stays readable. The sources and their provenance are in `tools/paintings/SOURCES.md`. The three scientists appear through their work, not as portraits.
 
 The landscapes are drawn at 384 x 48 pixels by `tools/pixelart.py` and tile without a seam; `tools/pixel-themes.py` writes the colour blocks into `src/style.css`.
 

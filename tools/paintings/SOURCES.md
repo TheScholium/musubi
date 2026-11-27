@@ -12,5 +12,5 @@ in the United States (Bridgeman v. Corel, 1999).
 | `water-lilies-1906.jpg` | Claude Monet, *Water Lilies*, 1906 | WikiArt (256 px), via the ArtEmis dataset on GitHub |
 | `tree-of-life.jpg` | Gustav Klimt, *The Tree of Life* (Stoclet Frieze), 1905-11 | WikiArt (256 px), via the ArtEmis dataset on GitHub |
 
-`tools/paintings.py` crops each one to a wide band, reduces it to 400 x 76 pixels and 36 colours, and dithers
+`tools/paintings.py` crops each one to a wide band, reduces it to 240 x 46 pixels and 24 colours, and dithers
 out its sides and lower edge, so that it reads as pixel art across the top of the note and fades into the page.
