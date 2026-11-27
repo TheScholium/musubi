@@ -100,6 +100,7 @@ const saveSrs = debounce(() => { store.setMeta('srs', app.srs).catch(() => {}); 
 function applyTheme() {
   const s = app.settings; const root = document.documentElement;
   root.dataset.theme = resolvedTheme();
+  if (themeInfo(root.dataset.theme).pixel) root.dataset.pixel = ''; else delete root.dataset.pixel;
   root.dataset.anchors = s.boldAnchors ? (s.anchorStrength || 'medium') : 'off';
   const cs = document.querySelector('meta[name="color-scheme"]'); if (cs) cs.content = themeInfo(root.dataset.theme).light ? 'light' : 'dark';
   const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.content = getComputedStyle(root).getPropertyValue('--ist-bg-1').trim() || '#12100e';

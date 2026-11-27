@@ -79,8 +79,13 @@ Settings → General → *Theme*: pick a card. Each card is drawn in its own the
 | **Mithrandir** | Gandalf, the Grey Pilgrim, who kept Narya, the Ring of Fire | storm-grey stone, ash-silver text, an ember pigment, a faint glow from below | flame |
 | **Ithryn Luin** | the Blue Wizards, who went into the East | lapis night, moonlit silver text, a star-blue pigment, star-gold for examples | eight-point star |
 | **Aiwendil** | Radagast, friend of birds, in the forest at Rhosgobel | moss-dark ground, lichen text, a fern-gold pigment, russet for warnings | leaf |
+| **Kairos** | *kairos*, the right moment (and the Kairos focus timer) | pixel deep space, starlight cream, stellar gold, mint for definitions | pixel star |
+| **Aion** | *aion*, unbounded time, the age of the cosmos | pixel violet void, nebula pink, hydrogen teal | pixel orbit |
+| **Chronos** | *chronos*, counted time, and the planet Saturn | pixel ice-blue night, cold light, amber rings | pixel Saturn |
 
-All five use the same type, rules and layout; the note-type pigments, plots, graph, statistics and handwriting from Supernote follow the theme. *Follow the system* uses Istari Paper by day and the dark theme you chose by night. Printing always uses the Paper colours.
+Kairos, Aion and Chronos are the cosmic themes: text in Pixelify Sans, labels and titles in Silkscreen (both embedded, SIL OFL 1.1), a pixel starfield behind the page and the graph, notched pixel frames on buttons, keys and tags, dashed pixel rules, and a soft glow on the active pigment. Mathematics stays in KaTeX and code in JetBrains Mono.
+
+The Istari themes share the same type, rules and layout; the note-type pigments, plots, graph, statistics and handwriting from Supernote follow the theme. *Follow the system* uses Istari Paper by day and the dark theme you chose by night. Printing always uses the Paper colours.
 
 *Bold anchors* make the first letters of each word bold, as a lead-in for the eye, in live preview and read view (light, medium or strong); code, mathematics and links do not change, and neither do the words in the file. Some readers with ADHD say it helps them keep their place. A 2024 controlled study (Acta Psychologica 247, 104304) found no difference in reading speed, so treat it as a comfort setting, not a speed aid.
 
@@ -176,7 +181,7 @@ node build.mjs       # bundles CodeMirror, inlines fonts and libraries, writes d
 | `src/pdfreader.js` | The PDF reader (pdf.js) |
 | `src/anchors.js` | Bold anchors and the theme list |
 | `src/tour.js` | Onboarding tour with full cleanup, add-link dialog, migration from version 1 |
-| `src/style.css` | The Istari design system for the whole interface: Istari, Istari Paper (also used for print), Mithrandir, Ithryn Luin and Aiwendil |
+| `src/style.css` | The Istari design system for the whole interface: Istari, Istari Paper (also used for print), Mithrandir, Ithryn Luin, Aiwendil, and the pixel themes Kairos, Aion and Chronos |
 | `vendor/` | CodeMirror bundle entry and the Istari fonts (OFL) |
 
 ## Tests
@@ -191,7 +196,7 @@ python3 test/test_attach.py    # attachments: location setting, paste and drop, 
 python3 test/test_v26.py       # icon tabs, custom note types, Ctrl/⌘ comma, the knot mark, the philosophy essay and its footnotes (36 checks)
 python3 test/test_archive.py   # a note from the Archive Supernote plugin in folder mode: fields kept, file not rewritten, stable ID, ink image recoloured (7 checks)
 python3 test/test_sandbox.py  # runs inside a sandboxed srcdoc iframe, as an embedded artifact does (6 checks)
-python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list, the 2.8 themes and theme picker (85 checks)
+python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list, the 2.8 themes and theme picker, the 2.9 cosmic themes (100 checks)
 ```
 
 ## Privacy

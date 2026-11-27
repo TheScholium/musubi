@@ -511,7 +511,7 @@ function openSettings(tab = 'general') {
   const row = (label, control, help) => h('div', { class: 'set-row' }, h('div', { class: 'set-label' }, h('b', null, label), help ? h('div', { class: 'muted small' }, help) : null), h('div', { class: 'set-ctl' }, control));
   const renderers = {
     general: () => [
-      row('Theme', themePicker(), 'Five themes in one design system. Mithrandir, Ithryn Luin and Aiwendil are named for the other Istari: each has its own ground, pigment, heading sigil and light behind the page. With the system setting, Musubi uses Istari Paper by day and the dark theme you choose by night.'),
+      row('Theme', themePicker(), 'Eight themes in one design system. Mithrandir, Ithryn Luin and Aiwendil are named for the other Istari: each has its own ground, pigment, heading sigil and light behind the page. Kairos, Aion and Chronos are the cosmic themes, named for the three Greek words for time: pixel type, a starfield and pixel sigils. With the system setting, Musubi uses Istari Paper by day and the dark theme you choose by night.'),
       row('Bold anchors', h('div', { class: 'check-col' },
         chk('boldAnchors', 'Make the first letters of each word bold', () => { applyTheme(); ed.setAnchors(); renderPreview(); }),
         sel('anchorStrength', [['light', 'Light (about a third of each word)'], ['medium', 'Medium (about two fifths)'], ['strong', 'Strong (about half)']], () => { applyTheme(); ed.setAnchors(); renderPreview(); })),
@@ -718,8 +718,8 @@ These follow the Obsidian plugin LaTeX Suite. Change them in Settings, Mathemati
 const ABOUT_MD = `
 **Musubi** is a free and open-source note platform for Zettelkasten work in mathematics, physics and philosophy. It is one HTML file. It needs no server, no account and no network.
 
-- Version 2.8.0. MIT License. Web app: https://thescholium.github.io/musubi/
-- Set in the Istari design system, with five themes (Istari, Istari Paper, Mithrandir, Ithryn Luin, Aiwendil): EB Garamond, Cormorant Garamond and JetBrains Mono (SIL Open Font License 1.1), embedded in the file.
+- Version 2.9.0. MIT License. Web app: https://thescholium.github.io/musubi/
+- Set in the Istari design system, with eight themes (Istari, Istari Paper, Mithrandir, Ithryn Luin, Aiwendil, and the pixel themes Kairos, Aion, Chronos): EB Garamond, Cormorant Garamond, JetBrains Mono, Silkscreen and Pixelify Sans (SIL Open Font License 1.1), embedded in the file.
 - Bundled libraries: CodeMirror 6 and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0), pdf.js (Apache-2.0). Default snippets from Obsidian LaTeX Suite (MIT).
 - Your notes are plain Markdown with YAML front matter. You can read them in any editor, and they work in Obsidian.
 

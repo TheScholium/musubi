@@ -1,5 +1,5 @@
 """Musubi 2.7: navigation arrows, tabs and split view, folder tree, block references, tag manager,
-plots from Python, review statistics, PDF reader, light theme and bold anchors, and the 2.8 themes.
+plots from Python, review statistics, PDF reader, light theme and bold anchors, the 2.8 themes and the 2.9 cosmic themes.
 Run: python3 test/test_v27.py (after node build.mjs)"""
 import base64, os, tempfile
 from playwright.sync_api import sync_playwright
@@ -231,7 +231,7 @@ with sync_playwright() as p:
         seen[tid] = orn
         check(E("document.querySelector('meta[name=\"color-scheme\"]') ? document.querySelector('meta[name=\"color-scheme\"]').content : 'dark'") == 'dark', f'the {tid} theme is a dark scheme')
     E("musubi.openSettings('general')"); pg.wait_for_timeout(400)
-    check(E("document.querySelectorAll('.theme-picker .tp-card').length") == 5, 'the picker shows five themes')
+    check(E("document.querySelectorAll('.theme-picker .tp-card').length") >= 5, 'the picker shows the themes')
     check(E("getComputedStyle(document.querySelector('.tp-card[data-id=\"ithryn\"] .tp-swatch')).backgroundColor") == 'rgb(11, 15, 28)', 'each card is drawn in its own theme')
     pg.click('.tp-card[data-id="mithrandir"]'); pg.wait_for_timeout(200)
     check(E("musubi.app.settings.theme") == 'mithrandir' and E("document.querySelector('.tp-card.on').dataset.id") == 'mithrandir', 'a card chooses the theme')
@@ -243,6 +243,23 @@ with sync_playwright() as p:
     check(E("musubi.app.settings.theme") == 'light' and E("document.documentElement.dataset.theme") == 'istari-light', 'the paper card stops following the system')
     pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
     E("musubi.app.settings.theme = 'dark'; musubi.app.settings.themeNight = 'dark'; musubi.applyTheme()")
+
+    # ---------- 2.9.0: the cosmic pixel themes ----------
+    for tid, bg in [('kairos', 'rgb(7, 6, 12)'), ('aion', 'rgb(11, 7, 20)'), ('chronos', 'rgb(6, 10, 17)')]:
+        E(f"musubi.app.settings.theme = '{tid}'; musubi.applyTheme()")
+        check(E("document.documentElement.dataset.theme") == tid and E("getComputedStyle(document.body).backgroundColor") == bg, f'the {tid} theme applies its ground')
+        check(E("'pixel' in document.documentElement.dataset"), f'the {tid} theme turns on the pixel rules')
+        check('Pixelify Sans' in E("getComputedStyle(document.body).fontFamily"), f'the {tid} theme sets text in Pixelify Sans')
+    check(E("document.fonts.check('16px \"Silkscreen\"') && document.fonts.check('16px \"Pixelify Sans\"')"), 'the pixel fonts are embedded in the file')
+    check(E("getComputedStyle(document.querySelector('.prose') || document.body).fontVariantLigatures") == 'none', 'the pixel themes turn off ligatures')
+    check('data:image/svg+xml' in E("getComputedStyle(document.querySelector('.note-scroll')).backgroundImage"), 'a starfield is drawn behind the page')
+    E("musubi.app.settings.theme = 'mithrandir'; musubi.applyTheme()")
+    check(not E("'pixel' in document.documentElement.dataset") and 'EB Garamond' in E("getComputedStyle(document.body).fontFamily"), 'a serif theme turns the pixel rules off again')
+    E("musubi.openSettings('general')"); pg.wait_for_timeout(400)
+    check(E("document.querySelectorAll('.theme-picker .tp-card').length") == 8, 'the picker shows eight themes')
+    check('Silkscreen' in E("getComputedStyle(document.querySelector('.tp-card[data-id=\"aion\"] .tp-h')).fontFamily") and 'Cormorant' in E("getComputedStyle(document.querySelector('.tp-card[data-id=\"dark\"] .tp-h')).fontFamily"), 'each card shows the type of its own theme')
+    pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
+    E("musubi.app.settings.theme = 'dark'; musubi.applyTheme()")
 
     real = [e for e in errs if 'favicon' not in e]
     check(not real, 'no console errors' + (': ' + '; '.join(real[:4]) if real else ''))

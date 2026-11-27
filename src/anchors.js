@@ -74,13 +74,16 @@ function boldAnchorExt() {
   }, { decorations: (v) => v.decorations });
 }
 
-/* Theme: Istari (dark), Istari Paper (light), the three other Istari (dark), or the system setting. */
+/* Theme: Istari (dark), Istari Paper (light), the three other Istari (dark), the three cosmic pixel themes, or the system setting. */
 const THEMES = [
   { id: 'dark', attr: 'istari', name: 'Istari', epithet: 'Warm ink and one gold pigment' },
   { id: 'light', attr: 'istari-light', name: 'Istari Paper', epithet: 'Dark ink on parchment', light: true },
   { id: 'mithrandir', attr: 'mithrandir', name: 'Mithrandir', epithet: 'Storm-grey, lit by an ember' },
   { id: 'ithryn', attr: 'ithryn', name: 'Ithryn Luin', epithet: 'Lapis night and starlight' },
   { id: 'aiwendil', attr: 'aiwendil', name: 'Aiwendil', epithet: 'Moss, lichen and fern-gold' },
+  { id: 'kairos', attr: 'kairos', name: 'Kairos', epithet: 'Pixel deep space, stellar gold', pixel: true },
+  { id: 'aion', attr: 'aion', name: 'Aion', epithet: 'Pixel nebula, pink and teal', pixel: true },
+  { id: 'chronos', attr: 'chronos', name: 'Chronos', epithet: 'Pixel ice, Saturn amber', pixel: true },
 ];
 const themeQuery = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: light)') : null;
 function themeInfo(attr) { return THEMES.find((t) => t.attr === attr) || THEMES[0]; }
