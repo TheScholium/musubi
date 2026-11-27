@@ -80,22 +80,30 @@ Settings → General → *Theme*: pick a card. Each card is drawn in its own the
 | **Ithryn Luin** | the Blue Wizards, who went into the East | lapis night, moonlit silver text, a star-blue pigment, star-gold for examples | eight-point star |
 | **Aiwendil** | Radagast, friend of birds, in the forest at Rhosgobel | moss-dark ground, lichen text, a fern-gold pigment, russet for warnings | leaf |
 
-**Pixel-art themes.** Ten themes add pixel art to the Istari type. The text stays in EB Garamond, Cormorant and Garamond small capitals, and nothing is drawn behind it. Each theme has its own pixel-art landscape at the foot of the sidebar (the list fades into it), along the foot of the graph and on its picker card; a colour sigil before each second-level heading and as the section break; a pixel colour band under the note title and each top heading; and notched pixel frames on buttons, keys and tags.
+**Pixel-art themes.** Eighteen themes add pixel art to the Istari type. Body text stays in EB Garamond and Cormorant, and nothing is drawn behind it. Each theme has a pixel-art banner across the top of every note, behind the title; the note title, top headings, `[[links]]` and `**bold**` are set in coloured pixel type (Silkscreen, SIL OFL 1.1) with a hard pixel shadow; a colour sigil stands before each second-level heading and as the section break; a pixel colour band runs under the title; the landscape also runs along the foot of the graph and fills the theme's picker card.
 
-| Theme | Landscape | Sigil |
-|---|---|---|
-| **Kairos** (*kairos*, the right moment; after the Kairos focus timer) | a protostar over the gold rim of a dark world | gold star |
-| **Aion** (*aion*, the age of the cosmos) | nebula pillars in pink, teal and violet gas | orbit |
-| **Chronos** (*chronos*, counted time; Saturn) | Saturn over the ice plains of a moon | ringed planet |
-| **Silva** (forest) | pines, mist, fireflies, a crescent moon | pine |
-| **Mons** (mountains) | alpine ranges at dawn, snow caps, alpenglow | peak |
-| **Torrens** (whitewater) | rapids, rocks and foam in a forested gorge | wave |
-| **Bibliotheca** (library) | candlelit shelves of gilt-tooled spines | books |
-| **Mars** | rust dunes, craters, Phobos and Deimos | Mars |
-| **Ignis** (fire) | flames, glowing logs, rising embers | flame |
-| **Aurora** | the northern lights over snow and pines | aurora |
+| Group | Theme | Banner | Sigil |
+|---|---|---|---|
+| Time | **Kairos** (*kairos*, the right moment) | a protostar over the gold rim of a dark world | gold star |
+| | **Aion** (*aion*, the age of the cosmos) | nebula gas, a dust lane, a young cluster | orbit |
+| | **Chronos** (*chronos*, counted time; Saturn) | Saturn over the ice plains of a moon | ringed planet |
+| Landscapes | **Silva** | pines, mist, fireflies, a crescent moon | pine |
+| | **Mons** | alpine ranges at dawn, snow caps, alpenglow | peak |
+| | **Torrens** | a forested gorge, rapids round boulders, a red kayak | wave |
+| | **Spelunca** | stalactites, glowworms, crystals, a still pool | crystal |
+| | **Aurora** | the northern lights over snow and pines | aurora |
+| | **Ignis** | flames, glowing logs, rising embers | flame |
+| | **Mars** | rust dunes, craters, Phobos and Deimos | Mars |
+| Places | **Bibliotheca** | candlelit shelves of gilt-tooled spines | books |
+| | **Castellum** | a castle with pennants and its village at dusk | towers |
+| | **Shire** | round doors in green hills, chimney smoke, a great tree | round door |
+| After NASA images | **Earthrise** (Apollo 8, 1968) | the half-lit Earth above the grey lunar horizon | Earth |
+| | **Pale Blue Dot** (Voyager 1, 1990) | bands of scattered sunlight and one pale blue pixel | the dot |
+| | **Deep Field** (JWST, 2022) | a galaxy cluster, lensed arcs, stars with eight-point spikes | spiked star |
+| | **Pluto** (New Horizons, 2015) | backlit mountains under layers of blue haze | haze |
+| | **Jupiter** (Juno) | the limb of the planet, its belts and the Great Red Spot | Jupiter |
 
-The landscapes are drawn at 256 x 48 pixels by `tools/pixelart.py` and tile without a seam.
+The landscapes are drawn at 384 x 48 pixels by `tools/pixelart.py` and tile without a seam; `tools/pixel-themes.py` writes the colour blocks into `src/style.css`.
 
 The Istari themes share the same type, rules and layout; the note-type pigments, plots, graph, statistics and handwriting from Supernote follow the theme. *Follow the system* uses Istari Paper by day and the dark theme you chose by night. Printing always uses the Paper colours.
 
@@ -193,7 +201,7 @@ node build.mjs       # bundles CodeMirror, inlines fonts and libraries, writes d
 | `src/pdfreader.js` | The PDF reader (pdf.js) |
 | `src/anchors.js` | Bold anchors and the theme list |
 | `src/tour.js` | Onboarding tour with full cleanup, add-link dialog, migration from version 1 |
-| `src/style.css` | The Istari design system for the whole interface: Istari, Istari Paper (also used for print), Mithrandir, Ithryn Luin, Aiwendil, and ten pixel-art themes |
+| `src/style.css` | The Istari design system for the whole interface: Istari, Istari Paper (also used for print), Mithrandir, Ithryn Luin, Aiwendil, and eighteen pixel-art themes |
 | `vendor/` | CodeMirror bundle entry and the Istari fonts (OFL) |
 
 ## Tests
@@ -208,7 +216,7 @@ python3 test/test_attach.py    # attachments: location setting, paste and drop, 
 python3 test/test_v26.py       # icon tabs, custom note types, Ctrl/⌘ comma, the knot mark, the philosophy essay and its footnotes (36 checks)
 python3 test/test_archive.py   # a note from the Archive Supernote plugin in folder mode: fields kept, file not rewritten, stable ID, ink image recoloured (7 checks)
 python3 test/test_sandbox.py  # runs inside a sandboxed srcdoc iframe, as an embedded artifact does (6 checks)
-python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list, the 2.8 themes and theme picker, the pixel-art themes (105 checks)
+python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list, the 2.8 themes and theme picker, the pixel-art themes (108 checks)
 ```
 
 ## Privacy

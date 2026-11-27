@@ -513,7 +513,7 @@ function openSettings(tab = 'general') {
   const row = (label, control, help) => h('div', { class: 'set-row' }, h('div', { class: 'set-label' }, h('b', null, label), help ? h('div', { class: 'muted small' }, help) : null), h('div', { class: 'set-ctl' }, control));
   const renderers = {
     general: () => [
-      row('Theme', themePicker(), 'Fifteen themes in one design system. The Istari order (Mithrandir, Ithryn Luin, Aiwendil) changes the ground, the pigment and the sigil. The pixel-art themes keep the Istari type and add pixel art where there is no text: a landscape at the foot of the sidebar and the graph, a colour sigil before each heading, and a colour band under the title. With the system setting, Musubi uses Istari Paper by day and the dark theme you choose by night.'),
+      row('Theme', themePicker(), 'Twenty-three themes in one design system. The Istari order (Mithrandir, Ithryn Luin, Aiwendil) changes the ground, the pigment and the sigil. The pixel-art themes keep the Istari type for body text and add a pixel-art banner behind the note title, coloured pixel type for titles, top headings, links and bold, a colour sigil before each heading, and a landscape along the foot of the graph. With the system setting, Musubi uses Istari Paper by day and the dark theme you choose by night.'),
       row('Bold anchors', h('div', { class: 'check-col' },
         chk('boldAnchors', 'Make the first letters of each word bold', () => { applyTheme(); ed.setAnchors(); renderPreview(); }),
         sel('anchorStrength', [['light', 'Light (about a third of each word)'], ['medium', 'Medium (about two fifths)'], ['strong', 'Strong (about half)']], () => { applyTheme(); ed.setAnchors(); renderPreview(); })),
@@ -720,8 +720,8 @@ These follow the Obsidian plugin LaTeX Suite. Change them in Settings, Mathemati
 const ABOUT_MD = `
 **Musubi** is a free and open-source note platform for Zettelkasten work in mathematics, physics and philosophy. It is one HTML file. It needs no server, no account and no network.
 
-- Version 2.10.0. MIT License. Web app: https://thescholium.github.io/musubi/
-- Set in the Istari design system, with fifteen themes (Istari and Istari Paper; Mithrandir, Ithryn Luin, Aiwendil; and ten pixel-art themes): EB Garamond, Cormorant Garamond and JetBrains Mono (SIL Open Font License 1.1), embedded in the file.
+- Version 2.11.0. MIT License. Web app: https://thescholium.github.io/musubi/
+- Set in the Istari design system, with twenty-three themes (Istari and Istari Paper; Mithrandir, Ithryn Luin, Aiwendil; and eighteen pixel-art themes): EB Garamond, Cormorant Garamond, JetBrains Mono and Silkscreen (SIL Open Font License 1.1), embedded in the file.
 - Bundled libraries: CodeMirror 6 and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0), pdf.js (Apache-2.0). Default snippets from Obsidian LaTeX Suite (MIT).
 - Your notes are plain Markdown with YAML front matter. You can read them in any editor, and they work in Obsidian.
 

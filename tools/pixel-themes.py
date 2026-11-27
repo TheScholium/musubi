@@ -55,7 +55,43 @@ T['aurora'] = ('Aurora, the northern lights: polar navy, snow text, aurora green
   acc='#6ff2b8', dim='#2f9a74', on='#03140c', ahov='#9cf6cf', link='#7ef4c0', lhov='#aaf8d6', verd='#6ff2b8', slate='#9aa8f0', plum='#b49aff',
   red='#f07080', orange='#f0b878', cyan='#88d0f0', pink='#e8a0d0', warn='#f4aab4', err='#f07888', lit='#dfe8f2', statb='#b49aff', hi='#b49aff',
   code=['#b8c6da', '#6ff2b8', '#8f9eb8', '#c8b8ff'], gl='#1c2842', gt='#c0cce0', gp='#33456a', glows=['rgba(111, 242, 184, .05) 50% 0', 'rgba(180, 154, 255, .045) 85% 0'], ink='invert(.92) sepia(.3) hue-rotate(110deg) saturate(1.2)'))
-ORDER = ['kairos', 'aion', 'chronos', 'silva', 'mons', 'torrens', 'bibliotheca', 'mars', 'ignis', 'aurora']
+
+def spec(bg, rule, bh, text, bright, muted, faint, acc, dim, on, ahov, link, lhov, verd, slate, plum, red, orange, cyan, pink, warn, err, lit, statb, hi, code, gl, gt, gp, glows, ink, bold=None):
+    return dict(bg=bg, rule=rule, bh=bh, text=text, bright=bright, muted=muted, faint=faint, acc=acc, dim=dim, on=on, ahov=ahov, link=link, lhov=lhov, verd=verd, slate=slate, plum=plum,
+                red=red, orange=orange, cyan=cyan, pink=pink, warn=warn, err=err, lit=lit, statb=statb, hi=hi, code=code, gl=gl, gt=gt, gp=gp, glows=glows, ink=ink, bold=bold)
+T['castellum'] = ('Castellum, a castle at dusk: night-violet stone, torchlit text, heraldic gold and red.', spec(
+  ['#0b0810', '#110c17', '#0e0a14', '#1d1626'], '#2c2238', '#43354f', '#e6dccf', '#f6eee2', '#a497a8', '#7f7286', '#e6b85c', '#9a7a3a', '#140e04', '#f0cc80', '#ecc070', '#f4d698',
+  '#7aa88a', '#8a9cd0', '#b48ab8', '#d0503c', '#e8935a', '#88b0c8', '#d890a0', '#eca090', '#d85a46', '#f0d8a8', '#d0503c', '#d0503c',
+  ['#c8bccb', '#e6b85c', '#a497a8', '#f0d8a8'], '#2f2540', '#cfc4d2', '#4a3c5a', ['rgba(224, 154, 90, .06) 50% 0', 'rgba(208, 80, 60, .035) 15% 100%'], 'invert(.9) sepia(.45) saturate(.9)', '#e8604a'))
+T['shire'] = ('Shire, round doors in green hills: hedge-dark ground, cream text, golden-hour gold, grass green.', spec(
+  ['#0a0d08', '#10140d', '#0d110a', '#1b2216'], '#26301e', '#3a4a2e', '#e6e2cc', '#f6f2de', '#a4a48a', '#7e8068', '#e6c25a', '#9a8238', '#141004', '#f0d480', '#ecc86a', '#f4dc94',
+  '#8cc66a', '#8aaad0', '#b494b8', '#d0603c', '#e8a05a', '#88c0c8', '#e09aa0', '#eeaa90', '#d86a4e', '#f4d39a', '#8cc66a', '#8cc66a',
+  ['#c4c4ac', '#e6c25a', '#a4a48a', '#b8d890'], '#2a3622', '#cfd0b8', '#44563a', ['rgba(244, 211, 154, .06) 50% 0', 'rgba(140, 198, 106, .035) 20% 100%'], 'invert(.9) sepia(.4) hue-rotate(20deg) saturate(.9)', '#8cc66a'))
+T['spelunca'] = ('Spelunca, a cave: stone-black ground, pale text, glowworm cyan, amethyst.', spec(
+  ['#060509', '#0a080f', '#08070c', '#15121c'], '#221d2c', '#352d44', '#dedae8', '#f2eff8', '#9a94ac', '#76708a', '#7ff0ff', '#3a9aaa', '#03141a', '#a8f6ff', '#90f2ff', '#b8f8ff',
+  '#7fe0c0', '#9aaaf0', '#b48aff', '#f07890', '#f0b878', '#7ff0ff', '#e8a0d8', '#f4aab8', '#f07a90', '#e6d6ff', '#b48aff', '#b48aff',
+  ['#bcb6cc', '#7ff0ff', '#9a94ac', '#d0b8ff'], '#241f30', '#c6c0d6', '#3e3550', ['rgba(127, 240, 255, .045) 50% 0', 'rgba(180, 138, 255, .04) 80% 100%'], 'invert(.92) sepia(.3) hue-rotate(160deg) saturate(1.2)', '#c8a4ff'))
+T['earthrise'] = ('Earthrise, after Apollo 8 (1968): lunar grey and black, the blue of the rising Earth.', spec(
+  ['#050506', '#09090b', '#070708', '#141417'], '#232327', '#36363c', '#e2e2e0', '#f6f6f4', '#a2a29c', '#7c7c78', '#6a9aff', '#3a62b8', '#040a18', '#94b8ff', '#80aaff', '#a8c4ff',
+  '#7ab890', '#9ab4ff', '#b8a0e0', '#e8705a', '#e8b070', '#8ac8f0', '#e8a0b8', '#f0aa9a', '#e8786a', '#d2d0c8', '#d2d0c8', '#f4f6ff',
+  ['#c2c2be', '#6a9aff', '#a2a29c', '#b8d0a0'], '#26262b', '#cacac6', '#3e3e44', ['rgba(106, 154, 255, .05) 60% 0', 'rgba(210, 208, 200, .03) 50% 100%'], 'invert(.92) grayscale(1) brightness(1.04)', '#d2d0c8'))
+T['palebluedot'] = ('Pale Blue Dot, after Voyager 1 (1990): umber dark, the warm bands of scattered sunlight, one pale blue.', spec(
+  ['#070504', '#0c0907', '#0a0705', '#18120e'], '#2a2019', '#403126', '#e4d8cc', '#f4ece2', '#a8968a', '#83736a', '#a8c8ff', '#5a78a8', '#060c18', '#c4daff', '#b4d0ff', '#d0e2ff',
+  '#88b8a8', '#a8c8ff', '#b8a0c8', '#d87050', '#d8a070', '#a8c8ff', '#d8a0a8', '#e8b0a0', '#e07a60', '#e8c8a0', '#d8a070', '#d8a070',
+  ['#c8bcb0', '#a8c8ff', '#a8968a', '#e8c8a0'], '#2e231b', '#d0c4b8', '#4a3a2e', ['rgba(216, 160, 112, .055) 40% 0', 'rgba(168, 200, 255, .035) 75% 0'], 'invert(.9) sepia(.5) saturate(.8)', '#e8c8a0'))
+T['deepfield'] = ('Deep Field, after the first JWST image (2022): the black between galaxies, lensed-arc orange, starlight.', spec(
+  ['#040408', '#08070e', '#06060b', '#121019'], '#211d2c', '#342e44', '#e6e0d8', '#f8f2ea', '#a49cac', '#7e7688', '#ffb070', '#b06a3a', '#180c04', '#ffc898', '#ffbc84', '#ffd4ac',
+  '#88c8b0', '#9ab8f0', '#b48ac8', '#ff7a5a', '#ffc070', '#9ab8f0', '#e89ac0', '#ffb09a', '#ff7a60', '#fff4d8', '#9ab8f0', '#9ab8f0',
+  ['#c6c0cc', '#ffb070', '#a49cac', '#9ab8f0'], '#25202f', '#cec8d4', '#3e3650', ['rgba(255, 176, 112, .05) 45% 0', 'rgba(154, 184, 240, .04) 85% 0'], 'invert(.92) sepia(.3) saturate(1.1)', '#9ab8f0'))
+T['pluto'] = ('Pluto, after New Horizons (2015): night-blue ground, haze-blue light, the beige of the heart.', spec(
+  ['#04060b', '#070a12', '#05080f', '#0f1524'], '#19223a', '#293758', '#dce4f2', '#f0f4fc', '#8e9ab6', '#6a7696', '#9ac8ff', '#4a7ab8', '#04101e', '#bcdcff', '#a8d0ff', '#c8e2ff',
+  '#7ad0c0', '#9ac8ff', '#b4a4f0', '#f07a7a', '#f0c080', '#9ac8ff', '#e8a8c8', '#f4b0b0', '#f08080', '#e8dcc8', '#f0c080', '#f0c080',
+  ['#b8c4da', '#9ac8ff', '#8e9ab6', '#e8dcc8'], '#1c2640', '#c0cadf', '#33426a', ['rgba(154, 200, 255, .065) 50% 0', 'rgba(232, 220, 200, .025) 80% 100%'], 'invert(.92) sepia(.3) hue-rotate(180deg) saturate(1.2)', '#e8dcc8'))
+T['jupiter'] = ('Jupiter, after Juno: umber dark, cream zones, rust belts, the Great Red Spot.', spec(
+  ['#0a0705', '#100b08', '#0d0906', '#1e1610'], '#30241a', '#4a3828', '#efe4d0', '#fbf4e6', '#b4a08a', '#8c7a66', '#e89a6a', '#a85a3a', '#180a04', '#f0b890', '#eea878', '#f4c4a0',
+  '#a0b890', '#9ab0d0', '#c0a0b0', '#d0563a', '#e8b878', '#9ac0d0', '#e0a0a0', '#f0b09a', '#d86048', '#efe4cc', '#d8b88e', '#d8b88e',
+  ['#d0c0aa', '#e89a6a', '#b4a08a', '#efe4cc'], '#34281d', '#d6c8b2', '#544030', ['rgba(232, 154, 106, .055) 50% 0', 'rgba(216, 184, 142, .035) 20% 100%'], 'invert(.9) sepia(.55) saturate(1.1)', '#efd8a8'))
+ORDER = ['kairos', 'aion', 'chronos', 'silva', 'mons', 'torrens', 'bibliotheca', 'mars', 'ignis', 'aurora', 'castellum', 'shire', 'spelunca', 'earthrise', 'palebluedot', 'deepfield', 'pluto', 'jupiter']
 def block(k):
     note, s = T[k]; a = rgb(s['acc']); w = rgb(s['warn']); t = rgb(s['text']); bg0 = rgb(s['bg'][0])
     g = ',\n             '.join(f'radial-gradient(ellipse 60% 300px at {pos}, {col}, transparent 70%)' for col, pos in (x.rsplit(' ', 2)[0] and (x[:x.index(')') + 1], x[x.index(')') + 2:]) for x in s['glows']))
@@ -87,7 +123,8 @@ def block(k):
   --scroll-thumb: {s['rule']}; --scroll-thumb-hover: {s['bh']}; --math-src-bg: rgba({bg0}, .7); --pdf-dark-page: {s['bg'][3]};
   --ink-filter: {s['ink']};
   --ambient: {g};
-  --vista: {A[k]['vista']};
+  --vista: {A[k]['vista']}; --vista-w: {A[k]['w']};
+  --px-bold: {s.get('bold') or s['verd']};
   --sigil: {A[k]['sigil']};
   --band: {A[k]['band']};
 }}
@@ -137,8 +174,9 @@ SHARED = '''
 '''
 HEAD = '''
 /* ---------- the pixel themes ----------
-   Kairos, Aion and Chronos are named for the three Greek words for time; Silva, Mons, Torrens,
-   Bibliotheca, Mars, Ignis and Aurora are landscapes, with Latin names. Each has its own pixel-art
+   Kairos, Aion and Chronos are named for the three Greek words for time; Silva, Mons, Torrens, Spelunca,
+   Aurora, Ignis and Mars are landscapes; Bibliotheca, Castellum and Shire are places; Earthrise, Pale Blue Dot,
+   Deep Field, Pluto and Jupiter follow famous NASA images. Each has its own pixel-art
    landscape, colour sigil and colour band. The text stays in the Istari type. */
 '''
 css = HEAD + ''.join(block(k) for k in ORDER) + '\n'

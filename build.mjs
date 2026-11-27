@@ -46,13 +46,20 @@ if (katexMacros.length < 500 || !katexMacros.includes('\\alpha')) throw new Erro
 const appJs = ['core.js', 'render.js', 'blocks.js', 'editorutil.js', 'livepreview.js', 'anchors.js', 'latexsuite-defaults.js', 'latexsuite.js', 'graph.js', 'plot.js', 'ui.js', 'types.js', 'hotkeys.js', 'panes.js', 'folders.js', 'features.js', 'tags.js', 'stats.js', 'pdfreader.js', 'tour.js', 'pwa.js'].map((f) => r('src/' + f)).join('\n\n')
   .replace('__ISTARI_ICONS__', icons.trim()).replace('__KATEX_MACROS__', () => JSON.stringify(katexMacros));
 // Istari fonts (SIL OFL 1.1), embedded so that the file never loads anything from the network
-const font = (file, family, style, weight) => `@font-face{font-family:'${family}';font-style:${style};font-weight:${weight};font-display:swap;src:url(data:font/woff2;base64,${readFileSync(join(root, 'vendor/fonts/' + file)).toString('base64')}) format('woff2')}`;
+const LATIN = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD';
+const LATIN_EXT = 'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF';
+const font = (file, family, style, weight, range) => `@font-face{font-family:'${family}';font-style:${style};font-weight:${weight};font-display:swap;${range ? 'unicode-range:' + range + ';' : ''}src:url(data:font/woff2;base64,${readFileSync(join(root, 'vendor/fonts/' + file)).toString('base64')}) format('woff2')}`;
 const fontCss = [
   font('eb-garamond-normal.woff2', 'EB Garamond', 'normal', '400 800'),
   font('eb-garamond-italic.woff2', 'EB Garamond', 'italic', '400 800'),
   font('cormorant-garamond-normal.woff2', 'Cormorant Garamond', 'normal', '300 700'),
   font('cormorant-garamond-italic.woff2', 'Cormorant Garamond', 'italic', '300 700'),
   font('jetbrains-mono-normal.woff2', 'JetBrains Mono', 'normal', '100 800'),
+  // Silkscreen, for the coloured pixel titles, links and bold text of the pixel-art themes
+  ...[['', LATIN], ['-ext', LATIN_EXT]].flatMap(([x, range]) => [
+    font(`silkscreen-latin${x}-400-normal.woff2`, 'Silkscreen', 'normal', '400', range),
+    font(`silkscreen-latin${x}-700-normal.woff2`, 'Silkscreen', 'normal', '700', range),
+  ]),
 ].join('\n');
 const app = safeScript(`(function () {\n'use strict';\n${seedJs}\n${appJs.replace(/^'use strict';$/m, '')}\n})();`);
 
@@ -68,6 +75,7 @@ const thirdParty = [
   ['DOMPurify ' + JSON.parse(r(nm('dompurify/package.json'))).version, 'DOMPurify is (c) Cure53 and other contributors. It is released under the Apache License 2.0 and the Mozilla Public License 2.0. Full texts: https://github.com/cure53/DOMPurify/blob/main/LICENSE'],
   ['CodeMirror ' + JSON.parse(r(nm('@codemirror/view/package.json'))).version + ' and Lezer', r(nm('@codemirror/view/LICENSE'))],
   ['Istari fonts: EB Garamond, Cormorant Garamond, JetBrains Mono', r('vendor/fonts/OFL-1.1.txt')],
+  ['Silkscreen (pixel-art themes)', r('vendor/fonts/OFL-Silkscreen.txt')],
   ['Obsidian LaTeX Suite default snippets (src/latexsuite-defaults.js)', r('vendor/latex-suite-LICENSE.txt')],
   ['pdf.js ' + JSON.parse(r(nm('pdfjs-dist/package.json'))).version + ' (Mozilla, Apache License 2.0)', r(nm('pdfjs-dist/LICENSE'))],
 ];
