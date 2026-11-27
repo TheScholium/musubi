@@ -530,7 +530,7 @@ function openSettings(tab = 'general') {
   const row = (label, control, help) => h('div', { class: 'set-row' }, h('div', { class: 'set-label' }, h('b', null, label), help ? h('div', { class: 'muted small' }, help) : null), h('div', { class: 'set-ctl' }, control));
   const renderers = {
     general: () => [
-      row('Theme', themePicker(), 'Thirty-seven themes in one design system: Istari and Istari Paper, the Istari order, and thirty-two pixel-art themes. Click the card or Explore themes to see them all.'),
+      row('Theme', themePicker(), 'Thirty-three themes in one design system: Istari and Istari Paper, the Istari order, and twenty-eight pixel-art themes. Click the card or Explore themes to see them all.'),
       row('Bold anchors', h('div', { class: 'check-col' },
         chk('boldAnchors', 'Make the first letters of each word bold', () => { applyTheme(); ed.setAnchors(); renderPreview(); }),
         sel('anchorStrength', [['light', 'Light (about a third of each word)'], ['medium', 'Medium (about two fifths)'], ['strong', 'Strong (about half)']], () => { applyTheme(); ed.setAnchors(); renderPreview(); })),
@@ -737,8 +737,8 @@ These follow the Obsidian plugin LaTeX Suite. Change them in Settings, Mathemati
 const ABOUT_MD = `
 **Musubi** is a free and open-source note platform for Zettelkasten work in mathematics, physics and philosophy. It is one HTML file. It needs no server, no account and no network.
 
-- Version 2.13.0. MIT License. Web app: https://thescholium.github.io/musubi/
-- Set in the Istari design system, with thirty-seven themes (Istari and Istari Paper; Mithrandir, Ithryn Luin, Aiwendil; and thirty-two pixel-art themes): EB Garamond, Cormorant Garamond, JetBrains Mono and Silkscreen (SIL Open Font License 1.1), embedded in the file.
+- Version 2.13.1. MIT License. Web app: https://thescholium.github.io/musubi/
+- Set in the Istari design system, with thirty-three themes (Istari and Istari Paper; Mithrandir, Ithryn Luin, Aiwendil; and twenty-eight pixel-art themes): EB Garamond, Cormorant Garamond, JetBrains Mono and Silkscreen (SIL Open Font License 1.1), embedded in the file.
 - Bundled libraries: CodeMirror 6 and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0), pdf.js (Apache-2.0). Default snippets from Obsidian LaTeX Suite (MIT).
 - Your notes are plain Markdown with YAML front matter. You can read them in any editor, and they work in Obsidian.
 

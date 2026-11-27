@@ -1259,12 +1259,12 @@ i.st-key.st-a { background: var(--stat-a); } i.st-key.st-b { background: var(--s
 .th-body .tp-group:first-child { margin-top: 0; }
 
 /* the serif themes carry no pixel art, also on a picker card inside a pixel theme */
-[data-theme]:not([data-theme="kairos"], [data-theme="aion"], [data-theme="chronos"], [data-theme="silva"], [data-theme="mons"], [data-theme="torrens"], [data-theme="bibliotheca"], [data-theme="mars"], [data-theme="ignis"], [data-theme="aurora"], [data-theme="castellum"], [data-theme="shire"], [data-theme="spelunca"], [data-theme="earthrise"], [data-theme="palebluedot"], [data-theme="deepfield"], [data-theme="pluto"], [data-theme="jupiter"], [data-theme="solarpunk"], [data-theme="urbs"], [data-theme="flora"], [data-theme="crystallum"], [data-theme="cortex"], [data-theme="medicina"], [data-theme="leonardo"], [data-theme="newton"], [data-theme="einstein"], [data-theme="starrynight"], [data-theme="scream"], [data-theme="greatwave"], [data-theme="waterlilies"], [data-theme="klimt"]) { --vista: none; --sigil: none; --band: none; }
+[data-theme]:not([data-theme="kairos"], [data-theme="aion"], [data-theme="chronos"], [data-theme="silva"], [data-theme="mons"], [data-theme="torrens"], [data-theme="bibliotheca"], [data-theme="mars"], [data-theme="aurora"], [data-theme="shire"], [data-theme="earthrise"], [data-theme="palebluedot"], [data-theme="deepfield"], [data-theme="pluto"], [data-theme="jupiter"], [data-theme="solarpunk"], [data-theme="urbs"], [data-theme="flora"], [data-theme="cortex"], [data-theme="medicina"], [data-theme="leonardo"], [data-theme="newton"], [data-theme="einstein"], [data-theme="starrynight"], [data-theme="scream"], [data-theme="greatwave"], [data-theme="waterlilies"], [data-theme="klimt"]) { --vista: none; --sigil: none; --band: none; }
 
 /* ---------- the pixel themes ----------
-   Kairos, Aion and Chronos are named for the three Greek words for time; Silva, Mons, Torrens, Spelunca,
-   Aurora, Ignis and Mars are landscapes; Bibliotheca, Castellum and Shire are places; Earthrise, Pale Blue Dot,
-   Deep Field, Pluto and Jupiter follow famous NASA images; Solarpunk, Urbs, Flora, Crystallum, Cortex and Medicina
+   Kairos, Aion and Chronos are named for the three Greek words for time; Silva, Mons, Torrens,
+   Aurora and Mars are landscapes; Bibliotheca and Shire are places; Earthrise, Pale Blue Dot,
+   Deep Field, Pluto and Jupiter follow famous NASA images; Solarpunk, Urbs, Flora, Cortex and Medicina
    are subjects; Leonardo, Newton and Einstein follow their notebooks and work; and five follow paintings in the public domain. Each has its own pixel-art
    landscape, colour sigil and colour band. The text stays in the Istari type. */
 /* Kairos, the right moment (after the Kairos focus timer): deep space, starlight cream, stellar gold, mint. */
@@ -1539,40 +1539,6 @@ i.st-key.st-a { background: var(--stat-a); } i.st-key.st-b { background: var(--s
   --sigil: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAJCAYAAAALpr0TAAAAbUlEQVR42mNkQAJXUqz+I/N15hxjhLGZkBXJ2JgxyNiYYdXIiKzoyZFTyAYy7L72isFVS4xBZ84xRkZ062AKGBgYGFy1xOBiLNgUoCvCUIguiWw9E8xnyKaha9aZc4yRCRYM6KbBNMIMYiQ2HAFeTTBDUW8o3QAAAABJRU5ErkJggg==");
   --band: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAACCAYAAAAesF8hAAAAU0lEQVR42mOstlL7z4AELBX4GY4/+IhCkwJUtaQYbl97hkLjA+8NvBkEL2zFS+MDTOgC6I4//uAjXBwbjQ7QHX/72jO4ODYgeGErBo3uCWR5dAAAGqpD/+eqQC4AAAAASUVORK5CYII=");
 }
-/* Ignis, fire: charcoal ground, ash-warm text, flame orange, ember gold. */
-[data-theme="ignis"] {
-  color-scheme: dark;
-  --ist-bg-0: #0b0605; --ist-bg-1: #110907; --ist-bg-2: #0e0706; --ist-bg-3: #1e110d;
-  --ist-rule: #311b15; --border-hover: #4c2a20;
-  --ist-text: #efdccc; --ist-text-bright: #fbefe4; --ist-text-muted: #b29482; --ist-text-faint: #8c7060;
-  --ist-gold: #ff8a3a; --ist-gold-dim: #b0521f; --ist-verdigris: #9cc08a; --ist-slate: #9ab0d8; --ist-plum: #c49ab4;
-  --ist-oxblood: #ff5a3a; --ist-warn: #ffb09a; --text-on-accent: #1a0803; --text-accent-hover: #ffa868;
-  --link-color: #ff9a52; --link-color-hover: #ffbb88; --link-underline: rgba(255, 154, 82, .48);
-  --text-error: #ff6a4a; --accent-rgb: 255, 138, 58; --warn-rgb: 255, 176, 154; --ink-rgb: 11, 6, 5;
-  --selection: rgba(255, 138, 58, .24); --text-selection: rgba(255, 138, 58, .2);
-  --highlight-background: rgba(255, 192, 70, .2); --hover: rgba(239, 220, 204, .045); --active-item: rgba(255, 138, 58, .08);
-  --menu-hover: rgba(255, 138, 58, .1); --tag-border: rgba(255, 138, 58, .34); --candle-glow: rgba(255, 138, 58, .05);
-  --cover: rgba(11, 6, 5, .86);
-  --code-normal: #d0b8a8; --code-keyword: #ff8a3a; --code-operator: #b29482; --code-string: #ffd890;
-  --c-red: #ff5a3a; --c-orange: #ffc046; --c-cyan: #8ab8c8; --c-pink: #f09aa0;
-  --graph-line: #38201a; --graph-text: #d8c0b0; --graph-edge: #38201a; --graph-plain: #58322a; --lg-plain: #58322a;
-  --shadow-popover: 0 12px 40px rgba(0, 0, 0, .7); --shadow-notice: 0 6px 22px rgba(0, 0, 0, .7);
-  --shadow-tooltip: 0 0 0 1px #311b15, 0 6px 22px rgba(0, 0, 0, .7);
-  --t-concept: #b29482; --t-question: #ffc046; --t-literature: #ffe0a0; --t-person: #f09aa0; --t-structure: #fbefe4;
-  --t-definition: #9cc08a; --t-theorem: #ff8a3a; --t-proof: #b29482; --t-example: #ffe0a0;
-  --t-law: #9ab0d8; --t-derivation: #ffc046;
-  --t-argument: #c49ab4; --t-objection: #ff5a3a; --t-position: #9cc08a;
-  --rel-pro: #9cc08a; --rel-con: #ff5a3a; --rel-struct: #9ab0d8; --rel-seq: #b29482;
-  --stat-a: #ff8a3a; --stat-b: #ffc046;
-  --scroll-thumb: #311b15; --scroll-thumb-hover: #4c2a20; --math-src-bg: rgba(11, 6, 5, .7); --pdf-dark-page: #1e110d;
-  --ink-filter: invert(.9) sepia(.6) hue-rotate(-20deg) saturate(1.5);
-  --ambient: radial-gradient(ellipse 60% 300px at 50% 100%, rgba(255, 138, 58, .07), transparent 70%),
-             radial-gradient(ellipse 60% 300px at 50% 0, rgba(255, 192, 70, .035), transparent 70%);
-  --vista: url("data:image/png;base64,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"); --vista-w: 384;
-  --px-bold: #9cc08a;
-  --sigil: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAdklEQVR42mNgQAMXLGT+M2ABTNgEsSlmwqcAmc+CLqgfxAfhM8j8NzjxhPGCBYRmQTYBpgjGvsCAMJEJZhpckZ0MBKNpRPUMVAEGG5evGbSqMIRYGBgYGAxOPGG8wCDzX5/hCUT0UBaGQkZC4Wdw4gkjAwMDAwAZUyV78oYerwAAAABJRU5ErkJggg==");
-  --band: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAACCAYAAAAesF8hAAAAUUlEQVR42mNcoSL2nwEJWKiwMZy48wuFJgXIO/ExPNz3CYXGCxLaGBgWVOGn8QAmdAF0x5+48wsujo1GB+iOf7jvE1wcK1hQhUmjewJZHg0AAEWQO57mJeBXAAAAAElFTkSuQmCC");
-}
 /* Aurora, the northern lights: polar navy, snow text, aurora green with violet. */
 [data-theme="aurora"] {
   color-scheme: dark;
@@ -1607,40 +1573,6 @@ i.st-key.st-a { background: var(--stat-a); } i.st-key.st-b { background: var(--s
   --sigil: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAICAYAAAAvOAWIAAAAXklEQVR42mNY0v7/PwMegCK/pP3/f2wacIkzxD/ZgiKBzodpZoJxdsduhStkYGBgiKlkZMTqFJgiGMZmMwMDAwMTusRCGR9GZA3IbEaYwEIZH0ZsCmAGYJVAdxayGABjNU7WozlJQQAAAABJRU5ErkJggg==");
   --band: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAACCAYAAAAesF8hAAAAUklEQVR42mNUMvL6z4AEKjy3MnRs90ahSQH7UjcyOM32R6HxgXYOJ4bKH/vw0vgAE7oAuuM7tnvDxbHR6ADd8U6z/eHi2EDlj30YNLonkOXRAQA6eED40Ks+DAAAAABJRU5ErkJggg==");
 }
-/* Castellum, a castle at dusk: night-violet stone, torchlit text, heraldic gold and red. */
-[data-theme="castellum"] {
-  color-scheme: dark;
-  --ist-bg-0: #0b0810; --ist-bg-1: #110c17; --ist-bg-2: #0e0a14; --ist-bg-3: #1d1626;
-  --ist-rule: #2c2238; --border-hover: #43354f;
-  --ist-text: #e6dccf; --ist-text-bright: #f6eee2; --ist-text-muted: #a497a8; --ist-text-faint: #7f7286;
-  --ist-gold: #e6b85c; --ist-gold-dim: #9a7a3a; --ist-verdigris: #7aa88a; --ist-slate: #8a9cd0; --ist-plum: #b48ab8;
-  --ist-oxblood: #d0503c; --ist-warn: #eca090; --text-on-accent: #140e04; --text-accent-hover: #f0cc80;
-  --link-color: #ecc070; --link-color-hover: #f4d698; --link-underline: rgba(236, 192, 112, .48);
-  --text-error: #d85a46; --accent-rgb: 230, 184, 92; --warn-rgb: 236, 160, 144; --ink-rgb: 11, 8, 16;
-  --selection: rgba(230, 184, 92, .24); --text-selection: rgba(230, 184, 92, .2);
-  --highlight-background: rgba(208, 80, 60, .2); --hover: rgba(230, 220, 207, .045); --active-item: rgba(230, 184, 92, .08);
-  --menu-hover: rgba(230, 184, 92, .1); --tag-border: rgba(230, 184, 92, .34); --candle-glow: rgba(230, 184, 92, .05);
-  --cover: rgba(11, 8, 16, .86);
-  --code-normal: #c8bccb; --code-keyword: #e6b85c; --code-operator: #a497a8; --code-string: #f0d8a8;
-  --c-red: #d0503c; --c-orange: #e8935a; --c-cyan: #88b0c8; --c-pink: #d890a0;
-  --graph-line: #2f2540; --graph-text: #cfc4d2; --graph-edge: #2f2540; --graph-plain: #4a3c5a; --lg-plain: #4a3c5a;
-  --shadow-popover: 0 12px 40px rgba(0, 0, 0, .7); --shadow-notice: 0 6px 22px rgba(0, 0, 0, .7);
-  --shadow-tooltip: 0 0 0 1px #2c2238, 0 6px 22px rgba(0, 0, 0, .7);
-  --t-concept: #a497a8; --t-question: #e8935a; --t-literature: #f0d8a8; --t-person: #d890a0; --t-structure: #f6eee2;
-  --t-definition: #7aa88a; --t-theorem: #e6b85c; --t-proof: #a497a8; --t-example: #f0d8a8;
-  --t-law: #8a9cd0; --t-derivation: #e8935a;
-  --t-argument: #b48ab8; --t-objection: #d0503c; --t-position: #7aa88a;
-  --rel-pro: #7aa88a; --rel-con: #d0503c; --rel-struct: #8a9cd0; --rel-seq: #a497a8;
-  --stat-a: #e6b85c; --stat-b: #d0503c;
-  --scroll-thumb: #2c2238; --scroll-thumb-hover: #43354f; --math-src-bg: rgba(11, 8, 16, .7); --pdf-dark-page: #1d1626;
-  --ink-filter: invert(.9) sepia(.45) saturate(.9);
-  --ambient: radial-gradient(ellipse 60% 300px at 50% 0, rgba(224, 154, 90, .06), transparent 70%),
-             radial-gradient(ellipse 60% 300px at 15% 100%, rgba(208, 80, 60, .035), transparent 70%);
-  --vista: url("data:image/png;base64,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"); --vista-w: 384;
-  --px-bold: #e8604a;
-  --sigil: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAJCAYAAAAGuM1UAAAAYklEQVR42mO44KL/nwEN4BNjIqQAQ4xkG3bZZDIwMDAwdDXM+A+jd9lkovAZGBgYYOoYYQLEgLKGDEYmZIFS/8sMp86cY8AnxoIs2b1Rl8HMBNVUdDEmXFbjchYTLsW4NAEAD1I2vB51Sn0AAAAASUVORK5CYII=");
-  --band: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAACCAYAAAAesF8hAAAAU0lEQVR42mO00vH6z4AEAvi+MWz4xIVCkwLCEqQYVi14hkLjA/KmggwPT7/HS+MDTOgC6I7f8IkLLo6NRgfojl+14BlcHBt4ePo9Bo3uCWR5dAAA8ZJDuF0RktEAAAAASUVORK5CYII=");
-}
 /* Shire, round doors in green hills: hedge-dark ground, cream text, golden-hour gold, grass green. */
 [data-theme="shire"] {
   color-scheme: dark;
@@ -1674,40 +1606,6 @@ i.st-key.st-a { background: var(--stat-a); } i.st-key.st-b { background: var(--s
   --px-bold: #8cc66a;
   --sigil: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAICAYAAAAvOAWIAAAAW0lEQVR42mNkQALRU0L/M6CBpTmrGWFsRnSFigrCcIX3H7xF0cCIrDBWxBjdYIbFb87CNTAiKyw/tAlDcaedH1wDEwMJAKfig2lqxCu2n3ULQ4yxZkvGf2KdAQDvTx/mx10/GwAAAABJRU5ErkJggg==");
   --band: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAACCAYAAAAesF8hAAAAU0lEQVR42mP0qgr5z4AEjKxEGM4de4NCkwJi/txgWMKigULjAzLKUQxP7i7DS+MDTOgC6I4/d+wNXBwbjQ7QHb+ERQMujg08ubsMg0b3BLI8OgAA7mZEoKXeRmEAAAAASUVORK5CYII=");
-}
-/* Spelunca, a cave: stone-black ground, pale text, glowworm cyan, amethyst. */
-[data-theme="spelunca"] {
-  color-scheme: dark;
-  --ist-bg-0: #060509; --ist-bg-1: #0a080f; --ist-bg-2: #08070c; --ist-bg-3: #15121c;
-  --ist-rule: #221d2c; --border-hover: #352d44;
-  --ist-text: #dedae8; --ist-text-bright: #f2eff8; --ist-text-muted: #9a94ac; --ist-text-faint: #76708a;
-  --ist-gold: #7ff0ff; --ist-gold-dim: #3a9aaa; --ist-verdigris: #7fe0c0; --ist-slate: #9aaaf0; --ist-plum: #b48aff;
-  --ist-oxblood: #f07890; --ist-warn: #f4aab8; --text-on-accent: #03141a; --text-accent-hover: #a8f6ff;
-  --link-color: #90f2ff; --link-color-hover: #b8f8ff; --link-underline: rgba(144, 242, 255, .48);
-  --text-error: #f07a90; --accent-rgb: 127, 240, 255; --warn-rgb: 244, 170, 184; --ink-rgb: 6, 5, 9;
-  --selection: rgba(127, 240, 255, .24); --text-selection: rgba(127, 240, 255, .2);
-  --highlight-background: rgba(180, 138, 255, .2); --hover: rgba(222, 218, 232, .045); --active-item: rgba(127, 240, 255, .08);
-  --menu-hover: rgba(127, 240, 255, .1); --tag-border: rgba(127, 240, 255, .34); --candle-glow: rgba(127, 240, 255, .05);
-  --cover: rgba(6, 5, 9, .86);
-  --code-normal: #bcb6cc; --code-keyword: #7ff0ff; --code-operator: #9a94ac; --code-string: #d0b8ff;
-  --c-red: #f07890; --c-orange: #f0b878; --c-cyan: #7ff0ff; --c-pink: #e8a0d8;
-  --graph-line: #241f30; --graph-text: #c6c0d6; --graph-edge: #241f30; --graph-plain: #3e3550; --lg-plain: #3e3550;
-  --shadow-popover: 0 12px 40px rgba(0, 0, 0, .7); --shadow-notice: 0 6px 22px rgba(0, 0, 0, .7);
-  --shadow-tooltip: 0 0 0 1px #221d2c, 0 6px 22px rgba(0, 0, 0, .7);
-  --t-concept: #9a94ac; --t-question: #f0b878; --t-literature: #e6d6ff; --t-person: #e8a0d8; --t-structure: #f2eff8;
-  --t-definition: #7fe0c0; --t-theorem: #7ff0ff; --t-proof: #9a94ac; --t-example: #e6d6ff;
-  --t-law: #9aaaf0; --t-derivation: #f0b878;
-  --t-argument: #b48aff; --t-objection: #f07890; --t-position: #7fe0c0;
-  --rel-pro: #7fe0c0; --rel-con: #f07890; --rel-struct: #9aaaf0; --rel-seq: #9a94ac;
-  --stat-a: #7ff0ff; --stat-b: #b48aff;
-  --scroll-thumb: #221d2c; --scroll-thumb-hover: #352d44; --math-src-bg: rgba(6, 5, 9, .7); --pdf-dark-page: #15121c;
-  --ink-filter: invert(.92) sepia(.3) hue-rotate(160deg) saturate(1.2);
-  --ambient: radial-gradient(ellipse 60% 300px at 50% 0, rgba(127, 240, 255, .045), transparent 70%),
-             radial-gradient(ellipse 60% 300px at 80% 100%, rgba(180, 138, 255, .04), transparent 70%);
-  --vista: url("data:image/png;base64,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"); --vista-w: 384;
-  --px-bold: #c8a4ff;
-  --sigil: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAICAYAAADN5B7xAAAAR0lEQVR42mP0coj4z0Ak2HZgBSPTtgMrGNEF8bGZsCnGpQkF4HMaQWfXf/iPUwETLsUP/mDXxITPZGyaGE10HIgOVgYGBgYAmQUqQAUkLywAAAAASUVORK5CYII=");
-  --band: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAACCAYAAAAesF8hAAAATklEQVR42mM00XH4z4AEGuL2MzQsckShSQGn0xgYTGeh0vhAIg8Dw/wv+Gl8gAldAN3xDYsc4eLYaHSA7njTWQhxbGD+F0wa3RPI8ugAAC8fMlSZsLd7AAAAAElFTkSuQmCC");
 }
 /* Earthrise, after Apollo 8 (1968): lunar grey and black, the blue of the rising Earth. */
 [data-theme="earthrise"] {
@@ -1980,40 +1878,6 @@ i.st-key.st-a { background: var(--stat-a); } i.st-key.st-b { background: var(--s
   --px-bold: #f4c430;
   --sigil: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAKCAYAAABmBXS+AAAAZ0lEQVR42mNggIIPXRv+MyABZD4TsgAumomBgYFBoCyAEabryxEDuAkwcRSTWKwaGJBprCb9OQaRhNFYTWJgYGDgsbnAiMszcAHbLqv/WBXAQNQKr/8wRXiBbZfV/6gVXv8JKkIXAwAiKz/pwi9+wQAAAABJRU5ErkJggg==");
   --band: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAACCAYAAAAesF8hAAAAUklEQVR42mPU8jL5z4AECgyWMEy4EINCkwLCBG4wrPqggULjAyxWDQx/jjXgpfEBJnQBdMdPuBADF8dGowN0x6/6oAEXxwb+HGvAoNE9gSyPDgA31UJnx3QhhQAAAABJRU5ErkJggg==");
-}
-/* Crystallum, a crystal cave: geode violet, quartz-white text, amethyst, rose quartz, clear quartz. */
-[data-theme="crystallum"] {
-  color-scheme: dark;
-  --ist-bg-0: #08060e; --ist-bg-1: #0d0a16; --ist-bg-2: #0b0812; --ist-bg-3: #1a1428;
-  --ist-rule: #2f293c; --border-hover: #433d51;
-  --ist-text: #e8e2f4; --ist-text-bright: #f2eff9; --ist-text-muted: #a49ab8; --ist-text-faint: #776f87;
-  --ist-gold: #c494ff; --ist-gold-dim: #7e5ab8; --ist-verdigris: #7fe0c8; --ist-slate: #9ac0f0; --ist-plum: #c494ff;
-  --ist-oxblood: #f07890; --ist-warn: #f6aebc; --text-on-accent: #050408; --text-accent-hover: #d3afff;
-  --link-color: #cea6ff; --link-color-hover: #ddc1ff; --link-underline: rgba(206, 166, 255, .48);
-  --text-error: #f07890; --accent-rgb: 196, 148, 255; --warn-rgb: 246, 174, 188; --ink-rgb: 8, 6, 14;
-  --selection: rgba(196, 148, 255, .24); --text-selection: rgba(196, 148, 255, .2);
-  --highlight-background: rgba(240, 160, 188, .2); --hover: rgba(232, 226, 244, .045); --active-item: rgba(196, 148, 255, .08);
-  --menu-hover: rgba(196, 148, 255, .1); --tag-border: rgba(196, 148, 255, .34); --candle-glow: rgba(196, 148, 255, .05);
-  --cover: rgba(8, 6, 14, .86);
-  --code-normal: #cdc5dc; --code-keyword: #c494ff; --code-operator: #a49ab8; --code-string: #f0e0ff;
-  --c-red: #f07890; --c-orange: #f0b878; --c-cyan: #b8e4f0; --c-pink: #f0a0bc;
-  --graph-line: #332d40; --graph-text: #d2ccde; --graph-edge: #332d40; --graph-plain: #4e485b; --lg-plain: #4e485b;
-  --shadow-popover: 0 12px 40px rgba(0, 0, 0, .7); --shadow-notice: 0 6px 22px rgba(0, 0, 0, .7);
-  --shadow-tooltip: 0 0 0 1px #2f293c, 0 6px 22px rgba(0, 0, 0, .7);
-  --t-concept: #a49ab8; --t-question: #f0b878; --t-literature: #f0e0ff; --t-person: #f0a0bc; --t-structure: #f2eff9;
-  --t-definition: #7fe0c8; --t-theorem: #c494ff; --t-proof: #a49ab8; --t-example: #f0e0ff;
-  --t-law: #9ac0f0; --t-derivation: #f0b878;
-  --t-argument: #c494ff; --t-objection: #f07890; --t-position: #7fe0c8;
-  --rel-pro: #7fe0c8; --rel-con: #f07890; --rel-struct: #9ac0f0; --rel-seq: #a49ab8;
-  --stat-a: #c494ff; --stat-b: #f0a0bc;
-  --scroll-thumb: #2f293c; --scroll-thumb-hover: #433d51; --math-src-bg: rgba(8, 6, 14, .7); --pdf-dark-page: #1a1428;
-  --ink-filter: invert(.92) sepia(.3) hue-rotate(230deg) saturate(1.3);
-  --ambient: radial-gradient(ellipse 60% 300px at 55% 100%, rgba(196, 148, 255, .07), transparent 70%),
-             radial-gradient(ellipse 60% 300px at 15% 0, rgba(240, 160, 188, .04), transparent 70%);
-  --vista: url("data:image/png;base64,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"); --vista-w: 384;
-  --px-bold: #b8e4f0;
-  --sigil: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAYUlEQVR42mNgQAP/////jy7GhMy5seX//4WFDxmyrFb8x6roxhZUE5AVMjEQAais6MaW//81fBgZkSWmHYtghLmLCd3B6CDLasV/JgYGBoYTezC9fWPL//9mZhYMDAwMDADXAChdZl7dpwAAAABJRU5ErkJggg==");
-  --band: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAACCAYAAAAesF8hAAAAU0lEQVR42mPMslrxnwEJmJlZMJw6dQKFJgUEGNxh2HBBBYXGB064mDBY7DmDl8YHmNAF0B1/6tQJuDg2Gh2gO37DBRW4ODZgsecMBo3uCWR5dAAA6FhDR7OOr3kAAAAASUVORK5CYII=");
 }
 /* Cortex, neurons in Brainbow colours: tissue-dark navy, pale text, fluorescent green, magenta, cyan. */
 [data-theme="cortex"] {
@@ -2399,8 +2263,11 @@ i.st-key.st-a { background: var(--stat-a); } i.st-key.st-b { background: var(--s
   background: var(--sigil) center / 22px 22px no-repeat, var(--ist-bg-1); image-rendering: pixelated; }
 /* a pixel colour band under each heading of the first level and under the note title */
 :root[data-pixel] :is(.prose h1, .cm-h1)::after { width: 96px; height: 4px; background: var(--band) left / 96px 4px no-repeat; image-rendering: pixelated; }
-:root[data-pixel] .props { position: relative; }
-:root[data-pixel] .props::after { content: ''; position: absolute; left: 0; bottom: -1px; width: 96px; height: 4px; background: var(--band) left / 96px 4px no-repeat; image-rendering: pixelated; pointer-events: none; }
+:root[data-pixel] .props { position: relative; padding-left: 10px; padding-right: 10px; margin-left: -10px; margin-right: -10px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ist-bg-1) 90%, transparent), color-mix(in srgb, var(--ist-bg-1) 78%, transparent)); }
+:root[data-pixel] .props, :root[data-pixel] .props select, :root[data-pixel] .props button { color: var(--ist-text); text-shadow: 0 0 4px var(--ist-bg-1), 0 1px 2px var(--ist-bg-1); }
+:root[data-pixel] .props .muted, :root[data-pixel] .props-more { color: var(--ist-text-muted); }
+:root[data-pixel] .props::after { content: ''; position: absolute; left: 10px; bottom: -1px; width: 96px; height: 4px; background: var(--band) left / 96px 4px no-repeat; image-rendering: pixelated; pointer-events: none; }
 /* notched pixel frames: a 1-pixel border with the corner pixel left out */
 :root[data-pixel] .btn { --pxb: var(--ist-gold-dim); border-color: transparent; border-radius: 0; box-shadow: 0 -1px 0 var(--pxb), 0 1px 0 var(--pxb), -1px 0 0 var(--pxb), 1px 0 0 var(--pxb); }
 :root[data-pixel] .btn-danger { --pxb: rgba(var(--warn-rgb), .5); }
@@ -2433,11 +2300,8 @@ i.st-key.st-a { background: var(--stat-a); } i.st-key.st-b { background: var(--s
 [data-theme="torrens"] { --pg-gold: #7fe0e0; --pg-ochre: #f0b070; --pg-vermilion: #f07a6a; --pg-oxblood: #a6594f; --pg-rose: #e8a0b8; --pg-plum: #b0a0d8; --pg-slate: #8fb4e0; --pg-sky: #7fe0ae; --pg-verdigris: #6fd876; --pg-moss: #6fb185; --pg-parchment: #eaf7f6; --pg-bone: #b8c4c1; --pg-ash: #8a9aaa; }
 [data-theme="bibliotheca"] { --pg-gold: #d9ae55; --pg-ochre: #d48c4e; --pg-vermilion: #c8584a; --pg-oxblood: #8d3f35; --pg-rose: #c88a94; --pg-plum: #b08aaa; --pg-slate: #8a9cc0; --pg-sky: #88aab0; --pg-verdigris: #6f9e7a; --pg-moss: #a4a668; --pg-parchment: #cdb98e; --pg-bone: #f4ead4; --pg-ash: #a8957a; }
 [data-theme="mars"] { --pg-gold: #f08a54; --pg-ochre: #f0a860; --pg-vermilion: #e8604a; --pg-oxblood: #a44435; --pg-rose: #e09a9a; --pg-plum: #b894b0; --pg-slate: #8fb4e0; --pg-sky: #8f96e0; --pg-verdigris: #88b0a0; --pg-moss: #bc9d7a; --pg-parchment: #e8c8a0; --pg-bone: #f8ece2; --pg-ash: #b0827e; }
-[data-theme="ignis"] { --pg-gold: #ff8a3a; --pg-ochre: #ffc046; --pg-vermilion: #ff5a3a; --pg-oxblood: #b3402a; --pg-rose: #f09aa0; --pg-plum: #c49ab4; --pg-slate: #9ab0d8; --pg-sky: #8ab8c8; --pg-verdigris: #9cc08a; --pg-moss: #cea562; --pg-parchment: #ffe0a0; --pg-bone: #fbefe4; --pg-ash: #b29482; }
 [data-theme="aurora"] { --pg-gold: #6ff2b8; --pg-ochre: #f0b878; --pg-vermilion: #f07080; --pg-oxblood: #a5505e; --pg-rose: #e8a0d0; --pg-plum: #b49aff; --pg-slate: #9aa8f0; --pg-sky: #88d0f0; --pg-verdigris: #6ff2e8; --pg-moss: #6ff295; --pg-parchment: #dfe8f2; --pg-bone: #99a0a8; --pg-ash: #8f8fb8; }
-[data-theme="castellum"] { --pg-gold: #e6b85c; --pg-ochre: #e8935a; --pg-vermilion: #d0503c; --pg-oxblood: #933a30; --pg-rose: #d890a0; --pg-plum: #b48ab8; --pg-slate: #8a9cd0; --pg-sky: #88b0c8; --pg-verdigris: #7aa88a; --pg-moss: #b0b073; --pg-parchment: #f0d8a8; --pg-bone: #f6eee2; --pg-ash: #a497a8; }
 [data-theme="shire"] { --pg-gold: #e6c25a; --pg-ochre: #e8a05a; --pg-vermilion: #d0603c; --pg-oxblood: #93482d; --pg-rose: #e09aa0; --pg-plum: #b494b8; --pg-slate: #8aaad0; --pg-sky: #88c0c8; --pg-verdigris: #8cc66a; --pg-moss: #b9c462; --pg-parchment: #f4d39a; --pg-bone: #f6f2de; --pg-ash: #a4a48a; }
-[data-theme="spelunca"] { --pg-gold: #7ff0ff; --pg-ochre: #f0b878; --pg-vermilion: #f07890; --pg-oxblood: #a65467; --pg-rose: #e8a0d8; --pg-plum: #b48aff; --pg-slate: #9aaaf0; --pg-sky: #7fc1ff; --pg-verdigris: #7fe0c0; --pg-moss: #7fcae8; --pg-parchment: #e6d6ff; --pg-bone: #f2eff8; --pg-ash: #9a94ac; }
 [data-theme="earthrise"] { --pg-gold: #6a9aff; --pg-ochre: #e8b070; --pg-vermilion: #e8705a; --pg-oxblood: #a14f41; --pg-rose: #e8a0b8; --pg-plum: #b8a0e0; --pg-slate: #9ab4ff; --pg-sky: #8ac8f0; --pg-verdigris: #7ab890; --pg-moss: #7289c8; --pg-parchment: #d2d0c8; --pg-bone: #9d9d9c; --pg-ash: #7d7c7b; }
 [data-theme="palebluedot"] { --pg-gold: #a8c8ff; --pg-ochre: #d8a070; --pg-vermilion: #d87050; --pg-oxblood: #974f39; --pg-rose: #d8a0a8; --pg-plum: #b8a0c8; --pg-slate: #a8a8ff; --pg-sky: #a8dfff; --pg-verdigris: #88b8a8; --pg-moss: #98d0d4; --pg-parchment: #e8c8a0; --pg-bone: #f4ece2; --pg-ash: #a8968a; }
 [data-theme="deepfield"] { --pg-gold: #ffb070; --pg-ochre: #fff470; --pg-vermilion: #ff7a5a; --pg-oxblood: #b05542; --pg-rose: #e89ac0; --pg-plum: #b48ac8; --pg-slate: #9ab8f0; --pg-sky: #9c9af0; --pg-verdigris: #88c8b0; --pg-moss: #c4bc90; --pg-parchment: #fff4d8; --pg-bone: #f8eaea; --pg-ash: #a49cac; }
@@ -2446,7 +2310,6 @@ i.st-key.st-a { background: var(--stat-a); } i.st-key.st-b { background: var(--s
 [data-theme="solarpunk"] { --pg-gold: #f4c840; --pg-ochre: #f0a050; --pg-vermilion: #e0704e; --pg-oxblood: #9c543b; --pg-rose: #e898b0; --pg-plum: #b49ad0; --pg-slate: #7aa8e0; --pg-sky: #6ac8c8; --pg-verdigris: #6cc46a; --pg-moss: #b0c655; --pg-parchment: #f4dc8a; --pg-bone: #eff2ea; --pg-ash: #97a894; }
 [data-theme="urbs"] { --pg-gold: #ffb04a; --pg-ochre: #fff24a; --pg-vermilion: #ff5f7a; --pg-oxblood: #b04459; --pg-rose: #ff5fa8; --pg-plum: #c49aff; --pg-slate: #7ad8ff; --pg-sky: #7aa7ff; --pg-verdigris: #6ae0c0; --pg-moss: #b4c885; --pg-parchment: #ffe0a0; --pg-bone: #ecedf3; --pg-ash: #8e94b0; }
 [data-theme="flora"] { --pg-gold: #f08ab0; --pg-ochre: #f4a03a; --pg-vermilion: #e8504a; --pg-oxblood: #a33a39; --pg-rose: #f08a8b; --pg-plum: #b49aee; --pg-slate: #9aaee8; --pg-sky: #7ad0d8; --pg-verdigris: #7cc46a; --pg-moss: #b6a78d; --pg-parchment: #f4e070; --pg-bone: #f5eef3; --pg-ash: #a898aa; }
-[data-theme="crystallum"] { --pg-gold: #c494ff; --pg-ochre: #f0b878; --pg-vermilion: #f07890; --pg-oxblood: #a75569; --pg-rose: #f0a0bc; --pg-plum: #949eff; --pg-slate: #9ac0f0; --pg-sky: #b8e4f0; --pg-verdigris: #7fe0c8; --pg-moss: #a2a2e4; --pg-parchment: #f0e0ff; --pg-bone: #bcbbc6; --pg-ash: #a49ab8; }
 [data-theme="cortex"] { --pg-gold: #7cf07a; --pg-ochre: #ffd84a; --pg-vermilion: #ff5f8a; --pg-oxblood: #b04363; --pg-rose: #ff5fb0; --pg-plum: #b48aff; --pg-slate: #9ab0ff; --pg-sky: #5fe8ff; --pg-verdigris: #5fffec; --pg-moss: #6eecbc; --pg-parchment: #e8f0d8; --pg-bone: #edf0f6; --pg-ash: #8e98ae; }
 [data-theme="medicina"] { --pg-gold: #6cffa8; --pg-ochre: #ffc070; --pg-vermilion: #ff4a5a; --pg-oxblood: #af3641; --pg-rose: #ff8aa0; --pg-plum: #b8a0e0; --pg-slate: #88c0f0; --pg-sky: #7ae0e8; --pg-verdigris: #6cffde; --pg-moss: #6cff81; --pg-parchment: #e8fff0; --pg-bone: #b8bfba; --pg-ash: #8aa496; }
 [data-theme="leonardo"] { --pg-gold: #d07a50; --pg-ochre: #d8a060; --pg-vermilion: #c8504a; --pg-oxblood: #8e3b35; --pg-rose: #c88a90; --pg-plum: #b090a0; --pg-slate: #9aa8c0; --pg-sky: #8ab0b0; --pg-verdigris: #9ab08a; --pg-moss: #b5956d; --pg-parchment: #d8bc8c; --pg-bone: #f2ece0; --pg-ash: #a8897a; }

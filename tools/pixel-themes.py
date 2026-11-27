@@ -48,11 +48,6 @@ T['mars'] = ('Mars: rust and umber ground, dust-pale text, butterscotch sky, the
   acc='#f08a54', dim='#a85a34', on='#180904', ahov='#f6a678', link='#f4986a', lhov='#f8b896', verd='#88b0a0', slate='#8fb4e0', plum='#b894b0',
   red='#e8604a', orange='#f0a860', cyan='#8fb4e0', pink='#e09a9a', warn='#f4ae96', err='#ee6e58', lit='#e8c8a0', statb='#8fb4e0', hi='#d9844f',
   code=['#cdb4a6', '#f08a54', '#b0907e', '#e8c8a0'], gl='#3a2219', gt='#d4bcae', gp='#5a3528', glows=['rgba(201, 139, 92, .06) 50% 0', 'rgba(143, 180, 224, .035) 85% 100%'], ink='invert(.9) sepia(.5) hue-rotate(-15deg) saturate(1.2)'))
-T['ignis'] = ('Ignis, fire: charcoal ground, ash-warm text, flame orange, ember gold.', dict(
-  bg=['#0b0605', '#110907', '#0e0706', '#1e110d'], rule='#311b15', bh='#4c2a20', text='#efdccc', bright='#fbefe4', muted='#b29482', faint='#8c7060',
-  acc='#ff8a3a', dim='#b0521f', on='#1a0803', ahov='#ffa868', link='#ff9a52', lhov='#ffbb88', verd='#9cc08a', slate='#9ab0d8', plum='#c49ab4',
-  red='#ff5a3a', orange='#ffc046', cyan='#8ab8c8', pink='#f09aa0', warn='#ffb09a', err='#ff6a4a', lit='#ffe0a0', statb='#ffc046', hi='#ffc046',
-  code=['#d0b8a8', '#ff8a3a', '#b29482', '#ffd890'], gl='#38201a', gt='#d8c0b0', gp='#58322a', glows=['rgba(255, 138, 58, .07) 50% 100%', 'rgba(255, 192, 70, .035) 50% 0'], ink='invert(.9) sepia(.6) hue-rotate(-20deg) saturate(1.5)'))
 T['aurora'] = ('Aurora, the northern lights: polar navy, snow text, aurora green with violet.', dict(
   bg=['#04070f', '#070b16', '#060912', '#0f1626'], rule='#18223a', bh='#283656', text='#dde6f2', bright='#f2f6fc', muted='#8f9eb8', faint='#6b7b98',
   acc='#6ff2b8', dim='#2f9a74', on='#03140c', ahov='#9cf6cf', link='#7ef4c0', lhov='#aaf8d6', verd='#6ff2b8', slate='#9aa8f0', plum='#b49aff',
@@ -62,18 +57,10 @@ T['aurora'] = ('Aurora, the northern lights: polar navy, snow text, aurora green
 def spec(bg, rule, bh, text, bright, muted, faint, acc, dim, on, ahov, link, lhov, verd, slate, plum, red, orange, cyan, pink, warn, err, lit, statb, hi, code, gl, gt, gp, glows, ink, bold=None):
     return dict(bg=bg, rule=rule, bh=bh, text=text, bright=bright, muted=muted, faint=faint, acc=acc, dim=dim, on=on, ahov=ahov, link=link, lhov=lhov, verd=verd, slate=slate, plum=plum,
                 red=red, orange=orange, cyan=cyan, pink=pink, warn=warn, err=err, lit=lit, statb=statb, hi=hi, code=code, gl=gl, gt=gt, gp=gp, glows=glows, ink=ink, bold=bold)
-T['castellum'] = ('Castellum, a castle at dusk: night-violet stone, torchlit text, heraldic gold and red.', spec(
-  ['#0b0810', '#110c17', '#0e0a14', '#1d1626'], '#2c2238', '#43354f', '#e6dccf', '#f6eee2', '#a497a8', '#7f7286', '#e6b85c', '#9a7a3a', '#140e04', '#f0cc80', '#ecc070', '#f4d698',
-  '#7aa88a', '#8a9cd0', '#b48ab8', '#d0503c', '#e8935a', '#88b0c8', '#d890a0', '#eca090', '#d85a46', '#f0d8a8', '#d0503c', '#d0503c',
-  ['#c8bccb', '#e6b85c', '#a497a8', '#f0d8a8'], '#2f2540', '#cfc4d2', '#4a3c5a', ['rgba(224, 154, 90, .06) 50% 0', 'rgba(208, 80, 60, .035) 15% 100%'], 'invert(.9) sepia(.45) saturate(.9)', '#e8604a'))
 T['shire'] = ('Shire, round doors in green hills: hedge-dark ground, cream text, golden-hour gold, grass green.', spec(
   ['#0a0d08', '#10140d', '#0d110a', '#1b2216'], '#26301e', '#3a4a2e', '#e6e2cc', '#f6f2de', '#a4a48a', '#7e8068', '#e6c25a', '#9a8238', '#141004', '#f0d480', '#ecc86a', '#f4dc94',
   '#8cc66a', '#8aaad0', '#b494b8', '#d0603c', '#e8a05a', '#88c0c8', '#e09aa0', '#eeaa90', '#d86a4e', '#f4d39a', '#8cc66a', '#8cc66a',
   ['#c4c4ac', '#e6c25a', '#a4a48a', '#b8d890'], '#2a3622', '#cfd0b8', '#44563a', ['rgba(244, 211, 154, .06) 50% 0', 'rgba(140, 198, 106, .035) 20% 100%'], 'invert(.9) sepia(.4) hue-rotate(20deg) saturate(.9)', '#8cc66a'))
-T['spelunca'] = ('Spelunca, a cave: stone-black ground, pale text, glowworm cyan, amethyst.', spec(
-  ['#060509', '#0a080f', '#08070c', '#15121c'], '#221d2c', '#352d44', '#dedae8', '#f2eff8', '#9a94ac', '#76708a', '#7ff0ff', '#3a9aaa', '#03141a', '#a8f6ff', '#90f2ff', '#b8f8ff',
-  '#7fe0c0', '#9aaaf0', '#b48aff', '#f07890', '#f0b878', '#7ff0ff', '#e8a0d8', '#f4aab8', '#f07a90', '#e6d6ff', '#b48aff', '#b48aff',
-  ['#bcb6cc', '#7ff0ff', '#9a94ac', '#d0b8ff'], '#241f30', '#c6c0d6', '#3e3550', ['rgba(127, 240, 255, .045) 50% 0', 'rgba(180, 138, 255, .04) 80% 100%'], 'invert(.92) sepia(.3) hue-rotate(160deg) saturate(1.2)', '#c8a4ff'))
 T['earthrise'] = ('Earthrise, after Apollo 8 (1968): lunar grey and black, the blue of the rising Earth.', spec(
   ['#050506', '#09090b', '#070708', '#141417'], '#232327', '#36363c', '#e2e2e0', '#f6f6f4', '#a2a29c', '#7c7c78', '#6a9aff', '#3a62b8', '#040a18', '#94b8ff', '#80aaff', '#a8c4ff',
   '#7ab890', '#9ab4ff', '#b8a0e0', '#e8705a', '#e8b070', '#8ac8f0', '#e8a0b8', '#f0aa9a', '#e8786a', '#d2d0c8', '#d2d0c8', '#f4f6ff',
@@ -107,8 +94,6 @@ T['urbs'] = quick('Urbs, a city at night: tower-dark navy, window-light text, so
   '#6ae0c0', '#7ad8ff', '#c49aff', '#ff5f7a', '#ffb04a', '#7ad8ff', '#ff5fa8', '#ffe0a0', '#ff5fa8', '#ff6ab4', ['rgba(255, 176, 74, .05) 50% 0', 'rgba(255, 95, 168, .04) 85% 100%'], 'invert(.92) sepia(.3) hue-rotate(190deg) saturate(1.1)')
 T['flora'] = quick('Flora, a garden at dusk: dark leaf, petal-white text, rose, lavender, sunflower.', ['#0b0810', '#110c16', '#0e0a13', '#1e1626'], '#ece0ea', '#a898aa', '#f08ab0', '#a85a7a', '#f49cbe',
   '#7cc46a', '#9aaee8', '#b49aee', '#e8504a', '#f4a03a', '#7ad0d8', '#f08ab0', '#f4e070', '#f4c430', '#f4c430', ['rgba(240, 138, 176, .06) 50% 0', 'rgba(124, 196, 106, .035) 20% 100%'], 'invert(.9) sepia(.4) hue-rotate(280deg) saturate(1.1)')
-T['crystallum'] = quick('Crystallum, a crystal cave: geode violet, quartz-white text, amethyst, rose quartz, clear quartz.', ['#08060e', '#0d0a16', '#0b0812', '#1a1428'], '#e8e2f4', '#a49ab8', '#c494ff', '#7e5ab8', '#cea6ff',
-  '#7fe0c8', '#9ac0f0', '#c494ff', '#f07890', '#f0b878', '#b8e4f0', '#f0a0bc', '#f0e0ff', '#f0a0bc', '#b8e4f0', ['rgba(196, 148, 255, .07) 55% 100%', 'rgba(240, 160, 188, .04) 15% 0'], 'invert(.92) sepia(.3) hue-rotate(230deg) saturate(1.3)')
 T['cortex'] = quick('Cortex, neurons in Brainbow colours: tissue-dark navy, pale text, fluorescent green, magenta, cyan.', ['#04050a', '#070910', '#05070d', '#10131f'], '#dfe4ee', '#8e98ae', '#7cf07a', '#3a9a44', '#90f48e',
   '#5fe8ff', '#9ab0ff', '#b48aff', '#ff5f8a', '#ffd84a', '#5fe8ff', '#ff5fb0', '#e8f0d8', '#ff5fb0', '#ff7ac0', ['rgba(124, 240, 122, .045) 30% 0', 'rgba(255, 95, 176, .045) 75% 0'], 'invert(.92) sepia(.3) hue-rotate(80deg) saturate(1.2)')
 T['medicina'] = quick('Medicina, a patient monitor: screen-dark teal, clinical white text, trace green, heart red.', ['#030807', '#060d0c', '#050b0a', '#0d1b19'], '#dfeae6', '#8aa49c', '#6cffa8', '#2a9a5a', '#7effb4',
@@ -129,7 +114,7 @@ T['waterlilies'] = quick('Water Lilies, after Monet: pond blue at dusk, pale tex
   '#6ab884', '#8aa8e0', '#b4a0e0', '#e0706a', '#f0c080', '#8ac0d0', '#f0a0c0', '#f4e070', '#6ab884', '#7ac894', ['rgba(240, 160, 192, .05) 40% 0', 'rgba(106, 184, 132, .04) 80% 100%'], 'invert(.92) sepia(.3) hue-rotate(200deg) saturate(1.1)')
 T['klimt'] = quick('Klimt, after the golden phase (1907-08): black lacquer, ivory text, gold leaf, with small squares of red, blue and green.', ['#090705', '#0e0b08', '#0c0906', '#1c1610'], '#ece2cc', '#a8987a', '#e0b850', '#9a7a30', '#ecc86a',
   '#5aa878', '#5a8ad0', '#b090c0', '#c8402f', '#e8a050', '#88b8c0', '#d890a0', '#f0d070', '#c8402f', '#f0d070', ['rgba(224, 184, 80, .06) 50% 0', 'rgba(224, 184, 80, .04) 50% 100%'], 'invert(.9) sepia(.6) saturate(1.2)')
-ORDER = ['kairos', 'aion', 'chronos', 'silva', 'mons', 'torrens', 'bibliotheca', 'mars', 'ignis', 'aurora', 'castellum', 'shire', 'spelunca', 'earthrise', 'palebluedot', 'deepfield', 'pluto', 'jupiter', 'solarpunk', 'urbs', 'flora', 'crystallum', 'cortex', 'medicina', 'leonardo', 'newton', 'einstein', 'starrynight', 'scream', 'greatwave', 'waterlilies', 'klimt']
+ORDER = ['kairos', 'aion', 'chronos', 'silva', 'mons', 'torrens', 'bibliotheca', 'mars', 'aurora', 'shire', 'earthrise', 'palebluedot', 'deepfield', 'pluto', 'jupiter', 'solarpunk', 'urbs', 'flora', 'cortex', 'medicina', 'leonardo', 'newton', 'einstein', 'starrynight', 'scream', 'greatwave', 'waterlilies', 'klimt']
 def block(k):
     note, s = T[k]; a = rgb(s['acc']); w = rgb(s['warn']); t = rgb(s['text']); bg0 = rgb(s['bg'][0])
     g = ',\n             '.join(f'radial-gradient(ellipse 60% 300px at {pos}, {col}, transparent 70%)' for col, pos in (x.rsplit(' ', 2)[0] and (x[:x.index(')') + 1], x[x.index(')') + 2:]) for x in s['glows']))
@@ -212,9 +197,9 @@ SHARED = '''
 '''
 HEAD = '''
 /* ---------- the pixel themes ----------
-   Kairos, Aion and Chronos are named for the three Greek words for time; Silva, Mons, Torrens, Spelunca,
-   Aurora, Ignis and Mars are landscapes; Bibliotheca, Castellum and Shire are places; Earthrise, Pale Blue Dot,
-   Deep Field, Pluto and Jupiter follow famous NASA images; Solarpunk, Urbs, Flora, Crystallum, Cortex and Medicina
+   Kairos, Aion and Chronos are named for the three Greek words for time; Silva, Mons, Torrens,
+   Aurora and Mars are landscapes; Bibliotheca and Shire are places; Earthrise, Pale Blue Dot,
+   Deep Field, Pluto and Jupiter follow famous NASA images; Solarpunk, Urbs, Flora, Cortex and Medicina
    are subjects; Leonardo, Newton and Einstein follow their notebooks and work; and five follow paintings in the public domain. Each has its own pixel-art
    landscape, colour sigil and colour band. The text stays in the Istari type. */
 '''

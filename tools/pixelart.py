@@ -162,25 +162,6 @@ def mars():
         x, y = r.randrange(W), r.randint(41, 47)
         c.px(x, y, '#5a2618'); c.px(x, y - 1, '#a5502f')
     return c
-# ---------------- Ignis: flames, glowing logs, embers rising ----------------
-def ignis():
-    c = C(); r = random.Random(51)
-    layers = [('#5e130f', 25, .8), ('#a82416', 28, .75), ('#e0481c', 31, .66), ('#ff8a2a', 34, .56), ('#ffc046', 37, .44), ('#ffeab0', 40, .3)]
-    for i, (col, base, amp) in enumerate(layers):
-        hs = []
-        for x in range(W):
-            v = sum(abs(math.sin(6.283 * k * x / W + p)) ** 3 * a for k, p, a in [(7, i * 1.3, 1), (13, i * 2.1, .7), (23, i * .7, .5), (41, i * 3.3, .3)])
-            hs.append(base - amp * v * 9 + (i * 1.5))
-        fill_below(c, hs, col, mix(col, layers[max(0, i - 1)][0], .5), 2)
-    for y in range(42, H):  # logs
-        for x in range(W):
-            band = (x // 37 + (y > 44)) % 2
-            c.px(x, y, '#2a1712' if band else '#1f110d')
-            if (math.sin(x * .9 + y * 2.3) + math.sin(x * .27)) > 1.55: c.px(x, y, '#ff6a2a')
-    for _ in range(70):
-        y = int(r.random() ** 1.3 * 26); x = r.randrange(W)
-        c.px(x, y, r.choice(['#ff8a3d', '#ffd36b', '#ff5a2a']), 255 if y > 12 else 190)
-    return c
 # ---------------- Aurora: curtains of the northern lights over snow and pines ----------------
 def aurora():
     c = C(); sky(c, 0, 34, ['#070d1c', '#0b1528', '#13213a'], (0, 10))
@@ -339,56 +320,6 @@ def aion():
         for dx, dy in ((k, 0), (-k, 0), (0, k), (0, -k)): c.px(193 + dx, 23 + dy, '#e0f0ff', int(220 * (1 - k / 6)))
     return c
 
-# ---------------- Castellum: a castle on its hill at dusk, pennants, lit windows, a village below ----------------
-def castellum():
-    c = C(W2); sky(c, 0, 34, ['#1c1430', '#3c2448', '#8a4a50', '#e09a5a'], (0, 12))
-    stars(c, 18, (1, 12), ['#f2e6d8'], 141, 0); disc(c, 320, 7, 3, '#f6ecd0')
-    far = ridge2(c, 142, 33, 4, [1, 2, 3, 6]); fill_below(c, far, '#3a2c4a')
-    hill = [40 - 12 * math.exp(-((x - 170) / 46) ** 2) + 1.2 * math.sin(6.283 * 3 * x / c.w) for x in range(c.w)]
-    fill_below(c, hill, '#241a30')
-    stone, shade, roof = '#7a7088', '#544c66', '#3a3050'
-    def tower(x0, w, top, cone=True, flag='#d0442f'):
-        base = int(hill[x0 + w // 2]) + 2
-        for x in range(x0, x0 + w):
-            for y in range(top, base): c.px(x, y, stone if x < x0 + w // 2 else shade)
-        if cone:
-            for i in range(w // 2 + 3):
-                for x in range(x0 - 1 + i, x0 + w + 1 - i): c.px(x, top - 1 - i, '#8a3a40' if x < x0 + w // 2 else '#5e2630')
-            pt = top - (w // 2 + 3)
-            for y in range(pt - 5, pt): c.px(x0 + w // 2, y, '#2a2030')
-            for y in range(pt - 5, pt - 3):
-                for x in range(x0 + w // 2 + 1, x0 + w // 2 + 5 - (y - pt + 5)): c.px(x, y, flag)
-        else:
-            for x in range(x0 - 1, x0 + w + 1):
-                if (x - x0) % 2 == 0: c.px(x, top - 1, stone)
-        for y in range(top + 3, base - 3, 6): c.px(x0 + w // 2 - 1, y, '#ffcf6b'); c.px(x0 + w // 2 - 1, y + 1, '#e8a040')
-    wall_top = 25
-    for x in range(132, 210):
-        for y in range(wall_top, int(hill[x]) + 2): c.px(x, y, stone if (x // 9) % 2 else '#6e6680')
-        if x % 3 != 2: c.px(x, wall_top - 1, stone)
-        if x % 3 == 0: c.px(x, wall_top - 2, stone)
-    for x in range(164, 176):  # gate
-        for y in range(31, int(hill[x]) + 2):
-            if (x - 170) ** 2 / 36 + max(0, 33 - y) ** 2 / 4 <= 1 or y >= 33: c.px(x, y, '#140e1a')
-    for x in range(165, 176, 2):
-        for y in range(32, int(hill[x]) + 2): c.px(x, y, '#3a3044')
-    tower(126, 8, 15); tower(204, 8, 15); tower(150, 7, 18, False); tower(180, 7, 18, False); tower(163, 13, 8)
-    for x in range(140, 205, 7): c.px(x, 28, '#ffcf6b')
-    r = random.Random(143)
-    for hx0 in (40, 58, 74, 250, 268, 290, 350):  # cottages
-        base = int(hill[hx0 % c.w]) + 1 if 100 < hx0 < 240 else 41
-        for x in range(hx0, hx0 + 9):
-            for y in range(base - 4, base + 1): c.px(x, y, '#3a2e3a')
-        for i in range(5):
-            for x in range(hx0 - 1 + i, hx0 + 10 - i): c.px(x, base - 5 - i, '#5a2e2e')
-        c.px(hx0 + 3, base - 2, '#ffcf6b')
-        for k in range(6): c.ditherpx(hx0 + 7 + k // 3, base - 11 - k, '#8a7a8a', .6 - k * .08)
-    fill_below(c, [43 + math.sin(6.283 * 2 * i / c.w) for i in range(c.w)], '#16101e')
-    for x in range(0, c.w, 5):
-        for y in range(41, 44): c.px(x, y, '#2a2030')
-    for x in range(c.w): c.px(x, 42, '#2a2030')
-    return c
-
 # ---------------- Shire: round doors in green hills, chimney smoke, a great tree, golden hour ----------------
 def shire():
     c = C(W2); sky(c, 0, 30, ['#1a2a44', '#4a6a8a', '#d8a870', '#f4d39a'], (0, 12))
@@ -433,49 +364,6 @@ def shire():
     for _ in range(40):
         x = r.randrange(c.w); y = int(near[x]) + r.randint(2, 7)
         if y < 43: c.px(x, y, r.choice(['#f4d040', '#e85a5a', '#f8f0e0', '#c87ad8']))
-    return c
-
-# ---------------- Spelunca: a cave, stalactites, glowworms, crystals, a still pool ----------------
-def spelunca():
-    c = C(W2); r = random.Random(161)
-    ceil = ridge2(c, 162, 5, 2, [2, 3, 5, 9])
-    for x in range(c.w):
-        for y in range(0, int(ceil[x]) + 1): c.px(x, y, '#2a2434' if y < ceil[x] - 1 else '#3c3448')
-    x = 0
-    while x < c.w:  # stalactites
-        L = r.choice([3, 4, 5, 7, 9, 12, 15]); w = 1 + L // 5; top = int(ceil[x])
-        for i in range(L):
-            hw = max(0, round(w * (1 - i / L)))
-            for dx in range(-hw, hw + 1): c.px(x + dx, top + i, '#3c3448' if dx < 0 else '#2a2434')
-        c.px(x, top + L, '#7fe8ff', 160)
-        x += r.randint(3, 9)
-    for _ in range(70):  # glowworms on the ceiling
-        x = r.randrange(c.w); y = r.randint(int(ceil[x % c.w]) + 1, 20)
-        c.px(x, y, '#9ff0ff', r.choice([255, 200, 140]))
-        if r.random() < .3: c.px(x, y + 1, '#2f7a90', 140); c.px(x, y + 2, '#2f7a90', 90)
-    floor = ridge2(c, 163, 40, 2, [2, 3, 7])
-    fill_below(c, floor, '#221c2c', '#342c40', 1)
-    x = 2
-    while x < c.w:  # stalagmites
-        L = r.choice([3, 4, 6, 8, 11]); w = 1 + L // 4; base = int(floor[x])
-        for i in range(L):
-            hw = max(0, round(w * (1 - i / L)))
-            for dx in range(-hw, hw + 1): c.px(x + dx, base - i, '#3c3448' if dx < 0 else '#262030')
-        x += r.randint(6, 16)
-    for cx, col, hi in ((96, '#b48aff', '#e6d6ff'), (210, '#7ff0ff', '#e0fcff'), (330, '#b48aff', '#e6d6ff')):  # crystals
-        base = int(floor[cx]) + 1
-        for ox, h0 in ((-4, 5), (-1, 9), (2, 7), (5, 4)):
-            for i in range(h0):
-                for dx in (0, 1): c.px(cx + ox + dx, base - i, hi if dx == 0 else col)
-            c.px(cx + ox, base - h0, hi)
-        for y in range(base - 16, base + 2):
-            for x2 in range(cx - 14, cx + 15):
-                d = math.hypot(x2 - cx, (y - base + 4) * 1.3)
-                if 5 < d < 14 and c.get(x2, y)[3] == 0: c.ditherpx(x2, y, mix(col, '#000000', .6), .4 * (1 - d / 14))
-    for y in range(43, H):  # the pool, with reflections of the glowworms
-        for x in range(c.w):
-            c.px(x, y, '#0d2230' if y > 43 else '#1d4a58')
-            if r.random() < .03: c.px(x, y, '#5fc8e0', 150)
     return c
 
 # ---------------- Earthrise (Apollo 8, 1968): the half-lit Earth above the grey lunar horizon ----------------
@@ -760,41 +648,6 @@ def flora():
         x, y = r.randrange(W), r.randint(22, 44); glowdot(c, x, y, '#eaf59a', '#4a5a22', 1)
     return c
 
-# ---------------- Crystallum: a dark cave, one glowing cluster of amethyst and quartz ----------------
-def crystallum():
-    c = C(); r = random.Random(331)
-    ceil = ridge(332, 6, 3, [2, 3, 5, 9])
-    for x in range(W):
-        for y in range(0, int(ceil[x]) + 1): c.px(x, y, '#0e0a16')
-    x = 0
-    while x < W:
-        L = r.choice([2, 3, 4, 6, 9]); top = int(ceil[x])
-        for i in range(L):
-            hw = max(0, round((1 + L // 4) * (1 - i / L)))
-            for d in range(-hw, hw + 1): c.px(x + d, top + i, '#0e0a16')
-        x += r.randint(4, 10)
-    halo(c, 300, 36, 46, '#5a3a9a', .55, .45); halo(c, 300, 38, 22, '#a07ae0', .45, .6)
-    floor = ridge(333, 42, 2, [2, 3, 7]); fill_below(c, floor, '#0e0a16')
-    def prism(cx, base, h0, w, lean, light, mid, dark):
-        for k in range(h0):
-            y = base - k; xc = cx + lean * k
-            half = w if k < h0 - w else w - (k - (h0 - w))
-            for d in range(-half, half + 1):
-                c.px(round(xc + d), y, light if d < 0 else (mid if d == 0 else dark))
-        c.px(round(cx + lean * (h0 - 1)), base - h0 + 1, '#ffffff')
-    AM = ('#e4c8ff', '#b088f0', '#6a40b0'); QZ = ('#f4fcff', '#c0e4f4', '#7aa4c4')
-    for cx, h0, w, lean, kind in ((284, 14, 2, -.3, AM), (291, 22, 3, -.12, AM), (299, 30, 3, 0, QZ), (307, 24, 3, .15, AM), (314, 16, 2, .3, QZ), (320, 10, 2, .45, AM), (278, 8, 2, -.5, QZ)):
-        prism(cx, int(floor[cx]) + 1, h0, w, lean, *kind)
-    for cx in (30, 60, 110, 170, 210, 360):  # dim crystals elsewhere, as silhouettes with a lit tip
-        h0 = r.randint(4, 8); base = int(floor[cx]) + 1
-        for k in range(h0):
-            hw = 1 if k < h0 - 1 else 0
-            for d in range(-hw, hw + 1): c.px(cx + d, base - k, '#1c1428')
-        c.px(cx, base - h0 + 1, '#8a6ac8')
-    for _ in range(22):  # motes in the light
-        x, y = 300 + r.randint(-40, 40), r.randint(10, 40); c.px(x, y, '#e8d8ff', r.choice([120, 180, 230]))
-    return c
-
 # ---------------- Cortex: one large neuron, its dendrites, an axon carrying a spike, faint neurons beyond ----------------
 def cortex():
     c = C(); r = random.Random(341)
@@ -953,13 +806,10 @@ SIG = {
  'torrens': (['...ww......', '..wbbw.....', '.wbtbbw..w.', 'wbttttbwwbw', 'bttttttbbtb', 'tttttttttt.', 'TTTTTTTTTT.'], {'w': '#f2fbfb', 'b': '#9fe0e0', 't': '#3d9fb0', 'T': '#226878'}),
  'bibliotheca': (['.rr.gg.bb..', '.rr.gg.bb.o', '.yy.yy.yy.o', '.rr.gg.bb.o', '.rr.gg.bb.o', '.rr.gg.bb.o', '.yy.yy.yy.o', '.rr.gg.bb.o', 'wwwwwwwwwww'], {'r': '#9a2c2c', 'g': '#2f6a46', 'b': '#2f4a8a', 'y': '#e0b850', 'o': '#b08a46', 'w': '#8a5a34'}),
  'mars': (['...rrrr...', '..rRRrrr..', '.rRrrrrdr.', 'rrrrrddrrr', 'rrrdddrrrr', 'rrrrrrrrdr', '.rdrrrrrr.', '..rrrrdr..', '...rrrr...'], {'r': '#d4643a', 'R': '#f0a070', 'd': '#8f3a24'}),
- 'ignis': (['....r.....', '....rr....', '...rrr.r..', '..rroor.r.', '..roooorr.', '.rooyyoor.', '.royyyyor.', '.royywyor.', '..rooooor.', '...rrrrr..'], {'r': '#d0381c', 'o': '#ff8a2a', 'y': '#ffc846', 'w': '#fff2c0'}),
  'aurora': (['p.......p..', 'pp....pp...', '.gp..gp...p', '.gg.gg...pp', '..ggg....g.', '..gg.g..gg.', '.g...gggg..', 'g.....gg...'], {'p': '#a487ff', 'g': '#5fe4b4'}),
  'kairos': (['...y...', '...y...', '..yYy..', 'yyYWYyy', '..yYy..', '...y...', '...y...'], {'y': '#ffcf6b', 'Y': '#ffe7a8', 'W': '#ffffff'}),
  'aion': (['...ppp...', '.pp...tt.', '.p.....t.', 'p.......t', 'p...w...t', 'p.......t', '.t.....p.', '.tt...pp.', '...ttt...'], {'p': '#ff8fd0', 't': '#5fd8d0', 'w': '#ffffff'}),
- 'castellum': (['f....f....f', 'ff...ff...ff', 'f....f....f', 's.s.sss.s.s', 'sssssssssss', 'sssywsssyws', 'sssssssssss', 'sssss.sssss', 'ssss...ssss'], {'f': '#d0442f', 's': '#8a8098', 'y': '#ffcf6b', 'w': '#544c66'}),
  'shire': (['...ggggg...', '..ggGGGgg..', '.ggbbbbbgg.', 'ggbyyyyybgg', 'ggbyyyyybgg', 'ggbyyyoybgg', 'ggbyyyyybgg', 'GGGGGGGGGGG'], {'g': '#5b9455', 'G': '#7cb468', 'b': '#b8a888', 'y': '#2f6a3a', 'o': '#f0d060'}),
- 'spelunca': (['sssssssssss', '.sss.ss.ss.', '.ss...s..s.', '..s......s.', '.....c.....', '....ccC....', '...cccCC...', 'gggggggggggg'], {'s': '#4a4058', 'c': '#7ff0ff', 'C': '#e0fcff', 'g': '#342c40'}),
  'earthrise': (['...bbb...', '..bwbbb..', '.bbbwgbb.', '.bbbbbbb.', '..bbwbb..', '...bbb...', '.........', 'ggggggggg', 'GGGGGGGGG'], {'b': '#3a6fc4', 'w': '#f4f6ff', 'g': '#c8c6be', 'G': '#7a7872'}),
  'palebluedot': (['o......t...', '.o......t..', '..o..b...t.', '...o.....t.', '....o.....t', '.....o.....', '......o....'], {'o': '#8a6a4a', 't': '#7a5a40', 'b': '#cfe2ff'}),
  'deepfield': (['....y....', '.y..y..y.', '..y.y.y..', '...yWy...', 'yyyWWWyyy', '...yWy...', '..y.y.y..', '.y..y..y.', '....y....'], {'y': '#ffe6a8', 'W': '#ffffff'}),
@@ -968,7 +818,6 @@ SIG = {
  'solarpunk': (['...y.y.y...', '....yyy....', '..yyYYYyy..', '....yyy....', '...y.y.y...', '.....g.....', '..ppppppp..', '..pPpPpPp..', '.....g.....', '....ggg....'], {'y': '#f4c840', 'Y': '#fff2b0', 'g': '#5aae5a', 'p': '#2f5aa8', 'P': '#6a9ae0'}),
  'urbs': (['....r......', '....b......', '...bbb.....', '..bwbwb.bb.', '..bbbbb.bwb', 'bb.bwbwbbbb', 'bwbbbbbbwbb', 'bbbwbwbbbbb', 'bwbbbbbwbwb'], {'b': '#2a3050', 'w': '#ffc860', 'r': '#ff4a4a'}),
  'flora': (['..p...p..', '.ppp.ppp.', '..ppypp..', '.ppyyypp.', '..ppypp..', '.ppp.ppp.', '..p.g.p..', '...lg....', '....gl...', '....g....'], {'p': '#f08ab0', 'y': '#f4c430', 'g': '#3d8a3a', 'l': '#5aa84a'}),
- 'crystallum': (['....W....', '...lmd...', '..llmdd..', '..llmdd..', '..llmdd..', '..llmdd..', '.l.lmd.d.', 'll.lmd.dd', 'lmdlmdlmd'], {'W': '#ffffff', 'l': '#d8b4ff', 'm': '#a070e0', 'd': '#6a3aa8'}),
  'cortex': (['p...p...p..', '.p..p..p...', '..p.p.p....', '...pPp.....', 'pppPWPppp..', '...pPp.....', '..p...p....', '.p.....p...', 'p.......ccc'], {'p': '#ff5fb0', 'P': '#ffa0d0', 'W': '#ffffff', 'c': '#5fe8ff'}),
  'medicina': (['f.......b', '.frrrrrb.', '..f...b..', '...fyb...', '....f....', '...bgf...', '..b...f..', '.bggggff.', 'b.......f'], {'f': '#8af0e0', 'b': '#1f8a90', 'r': '#e86a8a', 'y': '#f0c060', 'g': '#6ac8f0'}),
  'leonardo': (['.....s.....', '.....s.....', '....sss....', '...sssss...', '..sssssss..', '..s.s.s.s..', '.sssssssss.', '.sssssssss.', 'ddddddddddd'], {'s': '#d07a50', 'd': '#6a3a28'}),
@@ -999,22 +848,22 @@ BANDS = {
  'torrens': ['#164a5a', '#3d9fb0', '#8fd4d6', '#eaf7f6'], 'bibliotheca': ['#6b1d22', '#23402e', '#1f2a48', '#c9a24c'],
  'mars': ['#7b3a26', '#b45a35', '#d9844f', '#c8b49a'],
  'solarpunk': ['#2f6a4a', '#5aae5a', '#2f5aa8', '#f4c840'], 'urbs': ['#1c2238', '#7ad8ff', '#ff5fa8', '#ffc860'],
- 'flora': ['#2a4a34', '#9a7ad8', '#f08ab0', '#f4c430'], 'crystallum': ['#6a3aa8', '#a070e0', '#f0a0bc', '#b8e4f0'],
+ 'flora': ['#2a4a34', '#9a7ad8', '#f08ab0', '#f4c430'],
  'cortex': ['#b48aff', '#ff5fb0', '#5fe8ff', '#7cf07a'], 'medicina': ['#0c2220', '#2a9a5a', '#6cffa8', '#ff4a5a'],
  'leonardo': ['#3a2a18', '#7a6040', '#d07a50', '#d8bc8c'], 'newton': ['#ff3a3a', '#ffe23a', '#5ad84a', '#5a4ad8'],
  'einstein': ['#1f2c26', '#9ac8f0', '#f4e27a', '#f2efe2'], 'starrynight': ['#0e1e4a', '#2a5aa8', '#9ac0e0', '#f4e070'],
  'scream': ['#1a3a7a', '#c83a2a', '#f08a2a', '#f4c860'], 'greatwave': ['#1a3a6a', '#2a5aa8', '#9ab4d0', '#f4f0e4'],
  'waterlilies': ['#2a3a6a', '#3a7a4a', '#f0a0c0', '#f4e070'], 'klimt': ['#5a3a10', '#a88030', '#e0b850', '#f0d070'],
- 'castellum': ['#3a2c4a', '#8a3a40', '#e09a5a', '#ffcf6b'], 'shire': ['#4a7a54', '#7cb468', '#d8b040', '#f4d39a'],
- 'spelunca': ['#342c40', '#b48aff', '#7ff0ff', '#e0fcff'], 'earthrise': ['#5a5854', '#c8c6be', '#2f5fb0', '#f4f6ff'],
+ 'shire': ['#4a7a54', '#7cb468', '#d8b040', '#f4d39a'],
+ 'earthrise': ['#5a5854', '#c8c6be', '#2f5fb0', '#f4f6ff'],
  'palebluedot': ['#3a2a24', '#6a4430', '#8a6a4a', '#cfe2ff'], 'deepfield': ['#8a5a9a', '#c86a3a', '#ffb070', '#fff4d8'],
- 'pluto': ['#0a0c14', '#2a4a8a', '#5a8ad0', '#9ac8ff'], 'jupiter': ['#8a5a3c', '#b8805a', '#c0563a', '#efe4cc'], 'ignis': ['#a82416', '#e0481c', '#ff8a2a', '#ffeab0'],
+ 'pluto': ['#0a0c14', '#2a4a8a', '#5a8ad0', '#9ac8ff'], 'jupiter': ['#8a5a3c', '#b8805a', '#c0563a', '#efe4cc'],
  'aurora': ['#22324a', '#9a7bff', '#58e0b0', '#dfe8f2'], 'kairos': ['#3a2357', '#7a4a8f', '#ffcf6b', '#fff6dc'],
  'aion': ['#2a1838', '#9a64ff', '#ff6eaa', '#46cec8'], 'chronos': ['#6f8eb0', '#a9c6e0', '#e8c27a', '#ffb85c'],
 }
-SCENES = dict(silva=silva, mons=mons, torrens=torrens, bibliotheca=bibliotheca, mars=mars, ignis=ignis, aurora=aurora, kairos=kairos, aion=aion, chronos=chronos,
-              castellum=castellum, shire=shire, spelunca=spelunca, earthrise=earthrise, palebluedot=palebluedot, deepfield=deepfield, pluto=pluto, jupiter=jupiter,
-              solarpunk=solarpunk, urbs=urbs, flora=flora, crystallum=crystallum, cortex=cortex, medicina=medicina, leonardo=leonardo, newton=newton, einstein=einstein)
+SCENES = dict(silva=silva, mons=mons, torrens=torrens, bibliotheca=bibliotheca, mars=mars, aurora=aurora, kairos=kairos, aion=aion, chronos=chronos,
+              shire=shire, earthrise=earthrise, palebluedot=palebluedot, deepfield=deepfield, pluto=pluto, jupiter=jupiter,
+              solarpunk=solarpunk, urbs=urbs, flora=flora, cortex=cortex, medicina=medicina, leonardo=leonardo, newton=newton, einstein=einstein)
 out = {}
 uri = lambda b: 'url("data:image/png;base64,' + base64.b64encode(b).decode() + '")'
 sheet = Image.new('RGBA', (W2 * 2 + 40 + 60, (H * 2 + 8) * len(SCENES)), (20, 20, 24, 255))

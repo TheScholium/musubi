@@ -80,7 +80,7 @@ Settings → General → *Theme* shows the current theme. Click it, or *Explore 
 | **Ithryn Luin** | the Blue Wizards, who went into the East | lapis night, moonlit silver text, a star-blue pigment, star-gold for examples | eight-point star |
 | **Aiwendil** | Radagast, friend of birds, in the forest at Rhosgobel | moss-dark ground, lichen text, a fern-gold pigment, russet for warnings | leaf |
 
-**Pixel-art themes.** Thirty-two themes add pixel art to the Istari type. Body text stays in EB Garamond and Cormorant, and nothing is drawn behind it. Each theme has a pixel-art banner across the top of every note, behind the title; the note title, top headings, `[[links]]` and `**bold**` are set in coloured pixel type (Silkscreen, SIL OFL 1.1) with a hard pixel shadow; a colour sigil stands before each second-level heading and as the section break; a pixel colour band runs under the title; the landscape also runs along the foot of the graph and fills the theme's picker card.
+**Pixel-art themes.** Twenty-eight themes add pixel art to the Istari type. Body text stays in EB Garamond and Cormorant, and nothing is drawn behind it. Each theme has a pixel-art banner across the top of every note, behind the title; the note title, top headings, `[[links]]` and `**bold**` are set in coloured pixel type (Silkscreen, SIL OFL 1.1) with a hard pixel shadow; a colour sigil stands before each second-level heading and as the section break; a pixel colour band runs under the title; the landscape also runs along the foot of the graph and fills the theme's picker card.
 
 | Group | Theme | Banner | Sigil |
 |---|---|---|---|
@@ -90,12 +90,9 @@ Settings → General → *Theme* shows the current theme. Click it, or *Explore 
 | Landscapes | **Silva** | pines, mist, fireflies, a crescent moon | pine |
 | | **Mons** | alpine ranges at dawn, snow caps, alpenglow | peak |
 | | **Torrens** | a forested gorge, rapids round boulders, a red kayak | wave |
-| | **Spelunca** | stalactites, glowworms, crystals, a still pool | crystal |
 | | **Aurora** | the northern lights over snow and pines | aurora |
-| | **Ignis** | flames, glowing logs, rising embers | flame |
 | | **Mars** | rust dunes, craters, Phobos and Deimos | Mars |
 | Places | **Bibliotheca** | candlelit shelves of gilt-tooled spines | books |
-| | **Castellum** | a castle with pennants and its village at dusk | towers |
 | | **Shire** | round doors in green hills, chimney smoke, a great tree | round door |
 | After NASA images | **Earthrise** (Apollo 8, 1968) | the half-lit Earth above the grey lunar horizon | Earth |
 | | **Pale Blue Dot** (Voyager 1, 1990) | bands of scattered sunlight and one pale blue pixel | the dot |
@@ -105,7 +102,6 @@ Settings → General → *Theme* shows the current theme. Click it, or *Explore 
 | Subjects | **Solarpunk** | garden towers at dusk, a low sun, turbines on the far hills, lanterns | sun and panel |
 | | **Urbs** | a city across a river at night, a tower with a red light, reflections | tower |
 | | **Flora** | a night meadow of flower silhouettes, a dandelion clock against the moon, fireflies | flower |
-| | **Crystallum** | a dark cave and one glowing cluster of amethyst and quartz | prism |
 | | **Cortex** | one large neuron, its dendrites, an axon carrying a spike, faint neurons beyond | neuron |
 | | **Medicina** | a DNA double helix in soft light, cells drifting beyond | helix |
 | Minds and masterpieces | **Leonardo** | Florence at dusk, the dome and the bell tower, a flying machine | dome |
@@ -219,7 +215,7 @@ node build.mjs       # bundles CodeMirror, inlines fonts and libraries, writes d
 | `src/pdfreader.js` | The PDF reader (pdf.js) |
 | `src/anchors.js` | Bold anchors and the theme list |
 | `src/tour.js` | Onboarding tour with full cleanup, add-link dialog, migration from version 1 |
-| `src/style.css` | The Istari design system for the whole interface: Istari, Istari Paper (also used for print), Mithrandir, Ithryn Luin, Aiwendil, and thirty-two pixel-art themes |
+| `src/style.css` | The Istari design system for the whole interface: Istari, Istari Paper (also used for print), Mithrandir, Ithryn Luin, Aiwendil, and twenty-eight pixel-art themes |
 | `vendor/` | CodeMirror bundle entry and the Istari fonts (OFL) |
 
 ## Tests
@@ -234,7 +230,7 @@ python3 test/test_attach.py    # attachments: location setting, paste and drop, 
 python3 test/test_v26.py       # icon tabs, custom note types, Ctrl/⌘ comma, the knot mark, the philosophy essay and its footnotes (36 checks)
 python3 test/test_archive.py   # a note from the Archive Supernote plugin in folder mode: fields kept, file not rewritten, stable ID, ink image recoloured (7 checks)
 python3 test/test_sandbox.py  # runs inside a sandboxed srcdoc iframe, as an embedded artifact does (6 checks)
-python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list, the 2.8 themes and theme picker, the pixel-art themes (124 checks)
+python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list, the 2.8 themes and theme picker, the pixel-art themes (125 checks)
 ```
 
 ## Privacy
