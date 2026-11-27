@@ -737,7 +737,7 @@ These follow the Obsidian plugin LaTeX Suite. Change them in Settings, Mathemati
 const ABOUT_MD = `
 **Musubi** is a free and open-source note platform for Zettelkasten work in mathematics, physics and philosophy. It is one HTML file. It needs no server, no account and no network.
 
-- Version 2.12.1. MIT License. Web app: https://thescholium.github.io/musubi/
+- Version 2.13.0. MIT License. Web app: https://thescholium.github.io/musubi/
 - Set in the Istari design system, with thirty-seven themes (Istari and Istari Paper; Mithrandir, Ithryn Luin, Aiwendil; and thirty-two pixel-art themes): EB Garamond, Cormorant Garamond, JetBrains Mono and Silkscreen (SIL Open Font License 1.1), embedded in the file.
 - Bundled libraries: CodeMirror 6 and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0), pdf.js (Apache-2.0). Default snippets from Obsidian LaTeX Suite (MIT).
 - Your notes are plain Markdown with YAML front matter. You can read them in any editor, and they work in Obsidian.
@@ -1248,7 +1248,7 @@ async function boot() {
   document.documentElement.classList.add('ready');
   pwaLaunchAction();
   updateFolderBanner();
-  window.musubi = { app, vault, store, ed, panes, openPdfTab, openStats, openTagManager, plotHtml, listBlocks, applyTheme, setMode, renderPreview, openSettings, renderSidebar, refreshLists, renderMarkdown, extractCards, openNote, createNote, searchNotes, parseNote, serializeNote, importFiles, makeZip, readZip, parseBibtex, dueQueue, graphData, useFolderHandle, folderRescan, startTour, endTour, seedVault, addLinkDialog, lsSnippets, lsParseSource, openReview, openPhilosophy, updateFolderBanner, saveAsset, assetUrl, findAsset, attachmentPath };
+  window.musubi = { app, applyCustomTypes, vault, store, ed, panes, openPdfTab, openStats, openTagManager, plotHtml, listBlocks, applyTheme, setMode, renderPreview, openSettings, renderSidebar, refreshLists, renderMarkdown, extractCards, openNote, createNote, searchNotes, parseNote, serializeNote, importFiles, makeZip, readZip, parseBibtex, dueQueue, graphData, useFolderHandle, folderRescan, startTour, endTour, seedVault, addLinkDialog, lsSnippets, lsParseSource, openReview, openPhilosophy, updateFolderBanner, saveAsset, assetUrl, findAsset, attachmentPath };
   if (app.settings.tour && app.settings.tour.active) resumeTour();
   else if (tourDue()) startTour({ firstRun: true });
 }

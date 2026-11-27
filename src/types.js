@@ -113,13 +113,13 @@ function renderTypesPane() {
         h('button', { class: 'link-btn danger', title: 'Delete for good; its notes move to another type', onclick: () => remove(id) }, 'delete')));
     const out = [el];
     if (custom && open === id) {
-      const color = PIGMENT[custom.color] || PIGMENT.ash;
+      const color = pigmentVar(custom.color);
       out.push(h('div', { class: 'tl-picks' },
         h('div', { class: 'shape-picks', role: 'radiogroup', 'aria-label': 'Shape' }, ...TYPE_SHAPES.map(([k, l]) => h('button', {
           class: 'shape-btn' + (custom.shape === k ? ' on' : ''), title: l, 'aria-label': l, role: 'radio', 'aria-checked': String(custom.shape === k),
           onclick: () => { custom.shape = k; typesChanged(); draw(); } }, h('span', { class: 'dot shape-' + k, style: '--tc:' + color })))),
-        h('div', { class: 'color-picks', role: 'radiogroup', 'aria-label': 'Colour' }, ...ISTARI_PIGMENTS.map(([k, l, c]) => h('button', {
-          class: 'swatch' + (custom.color === k ? ' on' : ''), title: l, 'aria-label': l, role: 'radio', 'aria-checked': String(custom.color === k), style: 'background:' + c,
+        h('div', { class: 'color-picks', role: 'radiogroup', 'aria-label': 'Colour' }, ...ISTARI_PIGMENTS.map(([k, l]) => h('button', {
+          class: 'swatch' + (custom.color === k ? ' on' : ''), title: l, 'aria-label': l, role: 'radio', 'aria-checked': String(custom.color === k), style: 'background:' + pigmentVar(k),
           onclick: () => { custom.color = k; typesChanged(); draw(); } }))),
         h('code', { class: 'type-id', title: 'Notes store this in their front matter' }, 'type: ' + id)));
     }

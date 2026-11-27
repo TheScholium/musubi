@@ -269,6 +269,16 @@ with sync_playwright() as p:
     h2 = E("document.querySelector('#preview h2') ? getComputedStyle(document.querySelector('#preview h2'), '::before').backgroundImage : 'none'")
     check(h2 == 'none' or 'data:image/png' in h2, 'headings carry the colour sigil')
     E("musubi.setMode('live')")
+    # 2.13.0: every theme maps the Istari pigments of note types to its own colours
+    E("musubi.applyCustomTypes([{ id: 'lemma', label: 'Lemma', shape: 'star', color: 'gold' }])")
+    tc = {}
+    for tid in ('dark', 'light', 'chronos', 'silva'):
+        E(f"musubi.app.settings.theme = '{tid}'; musubi.applyTheme()")
+        tc[tid] = E("getComputedStyle(document.documentElement).getPropertyValue('--t-lemma').trim()")
+    check(tc['dark'] == '#c4a24d' and len(set(tc.values())) == 4, 'a custom type takes each theme\'s own gold')
+    pigs = E("['gold','ochre','vermilion','oxblood','rose','plum','slate','sky','verdigris','moss','parchment','bone','ash'].map(k => getComputedStyle(document.documentElement).getPropertyValue('--pg-' + k).trim())")
+    check(len(set(pigs)) == 13, 'the thirteen pigments stay distinct in a theme')
+    E("musubi.applyCustomTypes(musubi.app.settings.customTypes || [])")
     E("musubi.app.settings.theme = 'mithrandir'; musubi.applyTheme()")
     check(not E("'pixel' in document.documentElement.dataset") and 'Cormorant' in E("getComputedStyle(document.querySelector('.inline-title')).fontFamily"), 'a serif theme has no pixel art or pixel type')
     E("musubi.app.settings.theme = 'pluto'; musubi.applyTheme(); musubi.openSettings('general')"); pg.wait_for_timeout(400)

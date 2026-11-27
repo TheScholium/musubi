@@ -121,6 +121,8 @@ The five painting themes show the real works, which are in the public domain: ea
 
 The landscapes are drawn at 384 x 48 pixels by `tools/pixelart.py` and tile without a seam; `tools/pixel-themes.py` writes the colour blocks into `src/style.css`.
 
+**Symbol colours follow the theme.** Every theme maps the 13 Istari pigments that note types use (gold, ochre, vermilion, oxblood, rose, plum, slate, sky, verdigris, moss, parchment, bone, ash) to its own colours, by role: gold is the theme's main pigment, slate its blue, verdigris its green, and so on. Pigments that would come out too close are pushed apart, so the 13 stay distinct. Your own note types, and the colour picker for them, use these mapped colours. `tools/pigments.py` writes the mapping; run it after you change a theme's colours.
+
 The Istari themes share the same type, rules and layout; the note-type pigments, plots, graph, statistics and handwriting from Supernote follow the theme. *Follow the system* uses Istari Paper by day and the dark theme you chose by night. Printing always uses the Paper colours.
 
 *Bold anchors* make the first letters of each word bold, as a lead-in for the eye, in live preview and read view (light, medium or strong); code, mathematics and links do not change, and neither do the words in the file. Some readers with ADHD say it helps them keep their place. A 2024 controlled study (Acta Psychologica 247, 104304) found no difference in reading speed, so treat it as a comfort setting, not a speed aid.
@@ -232,7 +234,7 @@ python3 test/test_attach.py    # attachments: location setting, paste and drop, 
 python3 test/test_v26.py       # icon tabs, custom note types, Ctrl/⌘ comma, the knot mark, the philosophy essay and its footnotes (36 checks)
 python3 test/test_archive.py   # a note from the Archive Supernote plugin in folder mode: fields kept, file not rewritten, stable ID, ink image recoloured (7 checks)
 python3 test/test_sandbox.py  # runs inside a sandboxed srcdoc iframe, as an embedded artifact does (6 checks)
-python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list, the 2.8 themes and theme picker, the pixel-art themes (122 checks)
+python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list, the 2.8 themes and theme picker, the pixel-art themes (124 checks)
 ```
 
 ## Privacy

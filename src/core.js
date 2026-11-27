@@ -104,6 +104,7 @@ TYPE_SHAPE.structure = 'ring';
 
 /* ---------- note types made by the user ----------
    A custom type is { id, label, shape, color }: one of TYPE_SHAPES and one of the Istari pigments.
+   A pigment is drawn as var(--pg-<name>): every theme maps the 13 pigments to its own colours (tools/pigments.py).
    The id is fixed when the type is made (it is what notes store in front matter); the label can change. */
 const TYPE_SHAPES = [['circle', 'Circle'], ['ring', 'Ring'], ['square', 'Square'], ['diamond', 'Diamond'], ['triangle', 'Triangle'], ['star', 'Star'], ['moon', 'Moon'], ['sun', 'Sun']];
 const ISTARI_PIGMENTS = [
@@ -112,6 +113,7 @@ const ISTARI_PIGMENTS = [
   ['verdigris', 'Verdigris', '#6d9a90'], ['moss', 'Moss', '#8a9a62'], ['parchment', 'Parchment', '#c8b79a'], ['bone', 'Bone', '#ebe1c8'], ['ash', 'Ash', '#948b76'],
 ];
 const PIGMENT = Object.fromEntries(ISTARI_PIGMENTS.map(([k, , c]) => [k, c]));
+const pigmentVar = (k) => 'var(--pg-' + (PIGMENT[k] ? k : 'ash') + ')';
 const BUILTIN_TYPE_COUNT = NOTE_TYPES.length;
 const CUSTOM_FAMILY = ['custom', 'Your types', null, []];
 TYPE_FAMILIES.push(CUSTOM_FAMILY);
@@ -148,7 +150,7 @@ function applyCustomTypes(list) {
   for (const t of customTypesValid(list)) {
     const label = String(t.label || t.id).trim() || t.id;
     const shape = SHAPE_CSS[t.shape] ? t.shape : 'circle';
-    const color = PIGMENT[t.color] || PIGMENT.ash;
+    const color = pigmentVar(t.color);
     NOTE_TYPES.push([t.id, label]); TYPE_IDS.push(t.id); TYPE_LABEL[t.id] = label; TYPE_SHAPE[t.id] = shape; CUSTOM_FAMILY[3].push(t.id);
     css += `:root { --t-${t.id}: ${color}; } .t-${t.id} { --tc: var(--t-${t.id}); } .dot.t-${t.id} { ${SHAPE_CSS[shape]} }\n`;
   }

@@ -1,6 +1,6 @@
 {
   "name": "musubi",
-  "version": "2.12.1",
+  "version": "2.13.0",
   "description": "An offline, single-file Zettelkasten for mathematics, physics and philosophy.",
   "main": "dist/musubi.html",
   "scripts": {
