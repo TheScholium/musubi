@@ -1,5 +1,5 @@
 """Musubi 2.7: navigation arrows, tabs and split view, folder tree, block references, tag manager,
-plots from Python, review statistics, PDF reader, light theme and bold anchors, the 2.8 themes and the 2.9 cosmic themes.
+plots from Python, review statistics, PDF reader, light theme and bold anchors, the 2.8 themes and the pixel-art themes.
 Run: python3 test/test_v27.py (after node build.mjs)"""
 import base64, os, tempfile
 from playwright.sync_api import sync_playwright
@@ -244,20 +244,22 @@ with sync_playwright() as p:
     pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
     E("musubi.app.settings.theme = 'dark'; musubi.app.settings.themeNight = 'dark'; musubi.applyTheme()")
 
-    # ---------- 2.9.0: the cosmic pixel themes ----------
-    for tid, bg in [('kairos', 'rgb(7, 6, 12)'), ('aion', 'rgb(11, 7, 20)'), ('chronos', 'rgb(6, 10, 17)')]:
+    # ---------- 2.10.0: pixel-art themes in the Istari type ----------
+    for tid, bg in [('kairos', 'rgb(7, 6, 12)'), ('silva', 'rgb(11, 18, 15)'), ('bibliotheca', 'rgb(17, 11, 8)'), ('aurora', 'rgb(7, 11, 22)')]:
         E(f"musubi.app.settings.theme = '{tid}'; musubi.applyTheme()")
         check(E("document.documentElement.dataset.theme") == tid and E("getComputedStyle(document.body).backgroundColor") == bg, f'the {tid} theme applies its ground')
-        check(E("'pixel' in document.documentElement.dataset"), f'the {tid} theme turns on the pixel rules')
-        check('Pixelify Sans' in E("getComputedStyle(document.body).fontFamily"), f'the {tid} theme sets text in Pixelify Sans')
-    check(E("document.fonts.check('16px \"Silkscreen\"') && document.fonts.check('16px \"Pixelify Sans\"')"), 'the pixel fonts are embedded in the file')
-    check(E("getComputedStyle(document.querySelector('.prose') || document.body).fontVariantLigatures") == 'none', 'the pixel themes turn off ligatures')
-    check('data:image/svg+xml' in E("getComputedStyle(document.querySelector('.note-scroll')).backgroundImage"), 'a starfield is drawn behind the page')
+        check(E("'pixel' in document.documentElement.dataset") and 'EB Garamond' in E("getComputedStyle(document.body).fontFamily"), f'the {tid} theme turns on pixel art and keeps the Istari type')
+        check('data:image' not in E("getComputedStyle(document.querySelector('.note-scroll')).backgroundImage"), f'the {tid} theme draws no picture behind the text')
+        check('data:image/png' in E("getComputedStyle(document.querySelector('.sb-listwrap'), '::after').backgroundImage"), f'the {tid} theme draws its landscape at the foot of the sidebar')
+    E("musubi.setMode('read')"); pg.wait_for_timeout(300)
+    h2 = E("document.querySelector('#preview h2') ? getComputedStyle(document.querySelector('#preview h2'), '::before').backgroundImage : 'none'")
+    check(h2 == 'none' or 'data:image/png' in h2, 'headings carry the colour sigil')
+    E("musubi.setMode('live')")
     E("musubi.app.settings.theme = 'mithrandir'; musubi.applyTheme()")
-    check(not E("'pixel' in document.documentElement.dataset") and 'EB Garamond' in E("getComputedStyle(document.body).fontFamily"), 'a serif theme turns the pixel rules off again')
-    E("musubi.openSettings('general')"); pg.wait_for_timeout(400)
-    check(E("document.querySelectorAll('.theme-picker .tp-card').length") == 8, 'the picker shows eight themes')
-    check('Silkscreen' in E("getComputedStyle(document.querySelector('.tp-card[data-id=\"aion\"] .tp-h')).fontFamily") and 'Cormorant' in E("getComputedStyle(document.querySelector('.tp-card[data-id=\"dark\"] .tp-h')).fontFamily"), 'each card shows the type of its own theme')
+    check(not E("'pixel' in document.documentElement.dataset") and E("getComputedStyle(document.querySelector('.sb-listwrap'), '::after').content") in ('none', 'normal'), 'a serif theme has no pixel art')
+    E("musubi.app.settings.theme = 'ignis'; musubi.applyTheme(); musubi.openSettings('general')"); pg.wait_for_timeout(400)
+    check(E("document.querySelectorAll('.theme-picker .tp-card').length") == 15 and E("document.querySelectorAll('.theme-picker .tp-group').length") == 4, 'the picker shows fifteen themes in four groups')
+    check('data:image/png' in E("getComputedStyle(document.querySelector('.tp-card[data-id=\"mons\"] .tp-swatch')).backgroundImage") and 'data:image' not in E("getComputedStyle(document.querySelector('.tp-card[data-id=\"ithryn\"] .tp-swatch')).backgroundImage"), 'each card shows its own landscape, or none')
     pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
     E("musubi.app.settings.theme = 'dark'; musubi.applyTheme()")
 

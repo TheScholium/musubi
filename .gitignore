@@ -4,3 +4,4 @@ dist/
 test/shots/
 __pycache__/
 .DS_Store
+tools/out/

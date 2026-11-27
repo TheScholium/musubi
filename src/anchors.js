@@ -74,16 +74,23 @@ function boldAnchorExt() {
   }, { decorations: (v) => v.decorations });
 }
 
-/* Theme: Istari (dark), Istari Paper (light), the three other Istari (dark), the three cosmic pixel themes, or the system setting. */
+/* Theme: Istari (dark), Istari Paper (light), the three other Istari (dark), the pixel-art themes, or the system setting. */
 const THEMES = [
-  { id: 'dark', attr: 'istari', name: 'Istari', epithet: 'Warm ink and one gold pigment' },
-  { id: 'light', attr: 'istari-light', name: 'Istari Paper', epithet: 'Dark ink on parchment', light: true },
-  { id: 'mithrandir', attr: 'mithrandir', name: 'Mithrandir', epithet: 'Storm-grey, lit by an ember' },
-  { id: 'ithryn', attr: 'ithryn', name: 'Ithryn Luin', epithet: 'Lapis night and starlight' },
-  { id: 'aiwendil', attr: 'aiwendil', name: 'Aiwendil', epithet: 'Moss, lichen and fern-gold' },
-  { id: 'kairos', attr: 'kairos', name: 'Kairos', epithet: 'Pixel deep space, stellar gold', pixel: true },
-  { id: 'aion', attr: 'aion', name: 'Aion', epithet: 'Pixel nebula, pink and teal', pixel: true },
-  { id: 'chronos', attr: 'chronos', name: 'Chronos', epithet: 'Pixel ice, Saturn amber', pixel: true },
+  { id: 'dark', attr: 'istari', name: 'Istari', epithet: 'Warm ink and one gold pigment', group: 'Istari' },
+  { id: 'light', attr: 'istari-light', name: 'Istari Paper', epithet: 'Dark ink on parchment', light: true, group: 'Istari' },
+  { id: 'mithrandir', attr: 'mithrandir', name: 'Mithrandir', epithet: 'Storm-grey, lit by an ember', group: 'The Istari order' },
+  { id: 'ithryn', attr: 'ithryn', name: 'Ithryn Luin', epithet: 'Lapis night and starlight', group: 'The Istari order' },
+  { id: 'aiwendil', attr: 'aiwendil', name: 'Aiwendil', epithet: 'Moss, lichen and fern-gold', group: 'The Istari order' },
+  { id: 'kairos', attr: 'kairos', name: 'Kairos', epithet: 'A protostar, stellar gold', pixel: true, group: 'Pixel art: time' },
+  { id: 'aion', attr: 'aion', name: 'Aion', epithet: 'Nebula pillars, pink and teal', pixel: true, group: 'Pixel art: time' },
+  { id: 'chronos', attr: 'chronos', name: 'Chronos', epithet: 'Saturn over an ice moon', pixel: true, group: 'Pixel art: time' },
+  { id: 'silva', attr: 'silva', name: 'Silva', epithet: 'Pines, mist and fireflies', pixel: true, group: 'Pixel art: landscapes' },
+  { id: 'mons', attr: 'mons', name: 'Mons', epithet: 'Alpine ranges at dawn', pixel: true, group: 'Pixel art: landscapes' },
+  { id: 'torrens', attr: 'torrens', name: 'Torrens', epithet: 'Whitewater through a gorge', pixel: true, group: 'Pixel art: landscapes' },
+  { id: 'bibliotheca', attr: 'bibliotheca', name: 'Bibliotheca', epithet: 'Candlelit shelves, gilt spines', pixel: true, group: 'Pixel art: landscapes' },
+  { id: 'mars', attr: 'mars', name: 'Mars', epithet: 'Rust dunes, two small moons', pixel: true, group: 'Pixel art: landscapes' },
+  { id: 'ignis', attr: 'ignis', name: 'Ignis', epithet: 'Flames and rising embers', pixel: true, group: 'Pixel art: landscapes' },
+  { id: 'aurora', attr: 'aurora', name: 'Aurora', epithet: 'Northern lights over snow', pixel: true, group: 'Pixel art: landscapes' },
 ];
 const themeQuery = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: light)') : null;
 function themeInfo(attr) { return THEMES.find((t) => t.attr === attr) || THEMES[0]; }
