@@ -252,13 +252,17 @@ with sync_playwright() as p:
     E("musubi.app.settings.theme = 'dark'; musubi.app.settings.themeNight = 'dark'; musubi.applyTheme()")
 
     # ---------- 2.11.0: pixel-art themes: banners behind the title, coloured pixel type ----------
-    for tid, bg in [('kairos', 'rgb(7, 6, 12)'), ('silva', 'rgb(11, 18, 15)'), ('castellum', 'rgb(17, 12, 23)'), ('earthrise', 'rgb(9, 9, 11)')]:
+    for tid, bg in [('kairos', 'rgb(7, 6, 12)'), ('silva', 'rgb(11, 18, 15)'), ('castellum', 'rgb(17, 12, 23)'), ('earthrise', 'rgb(9, 9, 11)'), ('starrynight', 'rgb(8, 16, 31)'), ('einstein', 'rgb(7, 9, 18)')]:
         E(f"musubi.app.settings.theme = '{tid}'; musubi.applyTheme()")
         check(E("document.documentElement.dataset.theme") == tid and E("getComputedStyle(document.body).backgroundColor") == bg, f'the {tid} theme applies its ground')
         check(E("'pixel' in document.documentElement.dataset") and 'EB Garamond' in E("getComputedStyle(document.body).fontFamily"), f'the {tid} theme keeps the Istari type for body text')
         check('data:image/png' in E("getComputedStyle(document.querySelector('.note-scroll'), '::before').backgroundImage"), f'the {tid} theme draws its banner across the top of the note')
         check('Silkscreen' in E("getComputedStyle(document.querySelector('.inline-title')).fontFamily"), f'the {tid} theme sets the note title in pixel type')
     check(E("getComputedStyle(document.querySelector('.sb-listwrap'), '::after').content") in ('none', 'normal'), 'the sidebar has no landscape')
+    E("musubi.app.settings.theme = 'greatwave'; musubi.applyTheme()")
+    check(E("'art' in document.documentElement.dataset") and 'no-repeat' in E("getComputedStyle(document.querySelector('.note-scroll'), '::before').backgroundRepeat"), 'a painting theme shows the painting once, at the right')
+    E("musubi.app.settings.theme = 'silva'; musubi.applyTheme()")
+    check(not E("'art' in document.documentElement.dataset"), 'a landscape theme is not a painting theme')
     check(E("document.fonts.check('16px \"Silkscreen\"')"), 'the pixel font is embedded in the file')
     E("musubi.setMode('read')"); pg.wait_for_timeout(300)
     check(E("[...document.querySelectorAll('#preview a.wl, #preview strong')].every(e => getComputedStyle(e).fontFamily.includes('Silkscreen'))"), 'links and bold text are in pixel type')
@@ -269,7 +273,8 @@ with sync_playwright() as p:
     check(not E("'pixel' in document.documentElement.dataset") and 'Cormorant' in E("getComputedStyle(document.querySelector('.inline-title')).fontFamily"), 'a serif theme has no pixel art or pixel type')
     E("musubi.app.settings.theme = 'pluto'; musubi.applyTheme(); musubi.openSettings('general')"); pg.wait_for_timeout(400)
     pg.click('.tp-explore'); pg.wait_for_timeout(400)
-    check(E("document.querySelectorAll('.theme-picker .tp-card').length") == 23 and E("document.querySelectorAll('.theme-picker .tp-group').length") == 6, 'the picker shows twenty-three themes in six groups')
+    check(E("document.querySelectorAll('.theme-picker .tp-card').length") == 37 and E("document.querySelectorAll('.theme-picker .tp-group').length") == 8, 'the gallery shows thirty-seven themes in eight groups')
+    check(E("[...document.querySelectorAll('.theme-picker .tp-card[data-id]')].filter(c => ['starrynight','einstein','cortex','klimt'].includes(c.dataset.id)).every(c => getComputedStyle(c.querySelector('.tp-swatch')).backgroundImage.includes('data:image/png'))"), 'the new themes have their landscapes')
     check('data:image/png' in E("getComputedStyle(document.querySelector('.tp-card[data-id=\"shire\"] .tp-swatch')).backgroundImage") and 'data:image' not in E("getComputedStyle(document.querySelector('.tp-card[data-id=\"ithryn\"] .tp-swatch')).backgroundImage"), 'each card shows its own landscape, or none')
     pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
     pg.keyboard.press('Escape'); pg.wait_for_timeout(200)

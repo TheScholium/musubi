@@ -99,6 +99,20 @@ const THEMES = [
   { id: 'deepfield', attr: 'deepfield', name: 'Deep Field', epithet: 'JWST, 2022', pixel: true, group: 'Pixel art: after NASA images' },
   { id: 'pluto', attr: 'pluto', name: 'Pluto', epithet: 'New Horizons, 2015', pixel: true, group: 'Pixel art: after NASA images' },
   { id: 'jupiter', attr: 'jupiter', name: 'Jupiter', epithet: 'Juno, from 2016', pixel: true, group: 'Pixel art: after NASA images' },
+  { id: 'solarpunk', attr: 'solarpunk', name: 'Solarpunk', epithet: 'Garden towers at dusk, a low sun', pixel: true, group: 'Pixel art: subjects' },
+  { id: 'urbs', attr: 'urbs', name: 'Urbs', epithet: 'A city across a river at night', pixel: true, group: 'Pixel art: subjects' },
+  { id: 'flora', attr: 'flora', name: 'Flora', epithet: 'A night meadow, a dandelion moon', pixel: true, group: 'Pixel art: subjects' },
+  { id: 'crystallum', attr: 'crystallum', name: 'Crystallum', epithet: 'One glowing cluster in a cave', pixel: true, group: 'Pixel art: subjects' },
+  { id: 'cortex', attr: 'cortex', name: 'Cortex', epithet: 'One neuron and its spike', pixel: true, group: 'Pixel art: subjects' },
+  { id: 'medicina', attr: 'medicina', name: 'Medicina', epithet: 'A DNA helix in soft light', pixel: true, group: 'Pixel art: subjects' },
+  { id: 'leonardo', attr: 'leonardo', name: 'Leonardo', epithet: 'Florence at dusk, a flying machine', pixel: true, group: 'Pixel art: minds and masterpieces' },
+  { id: 'newton', attr: 'newton', name: 'Newton', epithet: 'An apple tree under the moon', pixel: true, group: 'Pixel art: minds and masterpieces' },
+  { id: 'einstein', attr: 'einstein', name: 'Einstein', epithet: 'An Einstein ring, curved spacetime', pixel: true, group: 'Pixel art: minds and masterpieces' },
+  { id: 'starrynight', art: true, attr: 'starrynight', name: 'Starry Night', epithet: 'Van Gogh, 1889', pixel: true, group: 'Pixel art: minds and masterpieces' },
+  { id: 'scream', art: true, attr: 'scream', name: 'The Scream', epithet: 'Munch, 1893', pixel: true, group: 'Pixel art: minds and masterpieces' },
+  { id: 'greatwave', art: true, attr: 'greatwave', name: 'Great Wave', epithet: 'Hokusai, c. 1831', pixel: true, group: 'Pixel art: minds and masterpieces' },
+  { id: 'waterlilies', art: true, attr: 'waterlilies', name: 'Water Lilies', epithet: 'Monet, 1906', pixel: true, group: 'Pixel art: minds and masterpieces' },
+  { id: 'klimt', art: true, attr: 'klimt', name: 'Klimt', epithet: 'The Tree of Life, 1905-11', pixel: true, group: 'Pixel art: minds and masterpieces' },
 ];
 const themeQuery = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: light)') : null;
 function themeInfo(attr) { return THEMES.find((t) => t.attr === attr) || THEMES[0]; }

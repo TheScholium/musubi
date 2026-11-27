@@ -80,7 +80,7 @@ Settings → General → *Theme* shows the current theme. Click it, or *Explore 
 | **Ithryn Luin** | the Blue Wizards, who went into the East | lapis night, moonlit silver text, a star-blue pigment, star-gold for examples | eight-point star |
 | **Aiwendil** | Radagast, friend of birds, in the forest at Rhosgobel | moss-dark ground, lichen text, a fern-gold pigment, russet for warnings | leaf |
 
-**Pixel-art themes.** Eighteen themes add pixel art to the Istari type. Body text stays in EB Garamond and Cormorant, and nothing is drawn behind it. Each theme has a pixel-art banner across the top of every note, behind the title; the note title, top headings, `[[links]]` and `**bold**` are set in coloured pixel type (Silkscreen, SIL OFL 1.1) with a hard pixel shadow; a colour sigil stands before each second-level heading and as the section break; a pixel colour band runs under the title; the landscape also runs along the foot of the graph and fills the theme's picker card.
+**Pixel-art themes.** Thirty-two themes add pixel art to the Istari type. Body text stays in EB Garamond and Cormorant, and nothing is drawn behind it. Each theme has a pixel-art banner across the top of every note, behind the title; the note title, top headings, `[[links]]` and `**bold**` are set in coloured pixel type (Silkscreen, SIL OFL 1.1) with a hard pixel shadow; a colour sigil stands before each second-level heading and as the section break; a pixel colour band runs under the title; the landscape also runs along the foot of the graph and fills the theme's picker card.
 
 | Group | Theme | Banner | Sigil |
 |---|---|---|---|
@@ -102,6 +102,22 @@ Settings → General → *Theme* shows the current theme. Click it, or *Explore 
 | | **Deep Field** (JWST, 2022) | a galaxy cluster, lensed arcs, stars with eight-point spikes | spiked star |
 | | **Pluto** (New Horizons, 2015) | backlit mountains under layers of blue haze | haze |
 | | **Jupiter** (Juno) | the limb of the planet, its belts and the Great Red Spot | Jupiter |
+| Subjects | **Solarpunk** | garden towers at dusk, a low sun, turbines on the far hills, lanterns | sun and panel |
+| | **Urbs** | a city across a river at night, a tower with a red light, reflections | tower |
+| | **Flora** | a night meadow of flower silhouettes, a dandelion clock against the moon, fireflies | flower |
+| | **Crystallum** | a dark cave and one glowing cluster of amethyst and quartz | prism |
+| | **Cortex** | one large neuron, its dendrites, an axon carrying a spike, faint neurons beyond | neuron |
+| | **Medicina** | a DNA double helix in soft light, cells drifting beyond | helix |
+| Minds and masterpieces | **Leonardo** | Florence at dusk, the dome and the bell tower, a flying machine | dome |
+| | **Newton** | an apple tree under a full moon, a falling apple, the manor with a lit window | apple |
+| | **Einstein** | an Einstein ring: a galaxy lensing the light behind it, over curved spacetime | ring |
+| | **Starry Night** (van Gogh, 1889) | the painting: the cypress, the swirls, the stars and the moon | star |
+| | **The Scream** (Munch, 1893) | the painting: the figure, the railing, the fjord | bands |
+| | **Great Wave** (Hokusai, c. 1831) | the print: the wave, its claws of foam, the boats, Fuji | wave |
+| | **Water Lilies** (Monet, 1906) | the painting: lily pads, willow, the reflected sky | lily |
+| | **Klimt** (*The Tree of Life*, 1905-11) | the frieze: the spiralling branches and the embrace | gold square |
+
+The five painting themes show the real works, which are in the public domain: each is cropped to a wide band, reduced to 400 x 76 pixels and 36 colours by `tools/paintings.py`, and shown at 3x across the full width of the banner, with a scrim under the title so it stays readable. The sources and their provenance are in `tools/paintings/SOURCES.md`. The three scientists appear through their work, not as portraits.
 
 The landscapes are drawn at 384 x 48 pixels by `tools/pixelart.py` and tile without a seam; `tools/pixel-themes.py` writes the colour blocks into `src/style.css`.
 
@@ -201,7 +217,7 @@ node build.mjs       # bundles CodeMirror, inlines fonts and libraries, writes d
 | `src/pdfreader.js` | The PDF reader (pdf.js) |
 | `src/anchors.js` | Bold anchors and the theme list |
 | `src/tour.js` | Onboarding tour with full cleanup, add-link dialog, migration from version 1 |
-| `src/style.css` | The Istari design system for the whole interface: Istari, Istari Paper (also used for print), Mithrandir, Ithryn Luin, Aiwendil, and eighteen pixel-art themes |
+| `src/style.css` | The Istari design system for the whole interface: Istari, Istari Paper (also used for print), Mithrandir, Ithryn Luin, Aiwendil, and thirty-two pixel-art themes |
 | `vendor/` | CodeMirror bundle entry and the Istari fonts (OFL) |
 
 ## Tests
@@ -216,7 +232,7 @@ python3 test/test_attach.py    # attachments: location setting, paste and drop, 
 python3 test/test_v26.py       # icon tabs, custom note types, Ctrl/⌘ comma, the knot mark, the philosophy essay and its footnotes (36 checks)
 python3 test/test_archive.py   # a note from the Archive Supernote plugin in folder mode: fields kept, file not rewritten, stable ID, ink image recoloured (7 checks)
 python3 test/test_sandbox.py  # runs inside a sandboxed srcdoc iframe, as an embedded artifact does (6 checks)
-python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list, the 2.8 themes and theme picker, the pixel-art themes (111 checks)
+python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list, the 2.8 themes and theme picker, the pixel-art themes (122 checks)
 ```
 
 ## Privacy

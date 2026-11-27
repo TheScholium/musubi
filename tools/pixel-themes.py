@@ -1,6 +1,9 @@
 """Writes the colour blocks of the pixel themes into src/style.css from tools/out/assets.json.
 Run from the repository root after python3 tools/pixelart.py. The shared pixel rules are kept by hand in style.css."""
 import json, re
+def mix(a, b, t):
+    a, b = a.lstrip('#'), b.lstrip('#'); A = [int(a[i:i + 2], 16) for i in (0, 2, 4)]; B = [int(b[i:i + 2], 16) for i in (0, 2, 4)]
+    return '#%02x%02x%02x' % tuple(round(A[i] + (B[i] - A[i]) * t) for i in range(3))
 A = json.load(open('tools/out/assets.json'))
 def rgb(h): h = h.lstrip('#'); return f'{int(h[0:2],16)}, {int(h[2:4],16)}, {int(h[4:6],16)}'
 T = {}
@@ -91,7 +94,42 @@ T['jupiter'] = ('Jupiter, after Juno: umber dark, cream zones, rust belts, the G
   ['#0a0705', '#100b08', '#0d0906', '#1e1610'], '#30241a', '#4a3828', '#efe4d0', '#fbf4e6', '#b4a08a', '#8c7a66', '#e89a6a', '#a85a3a', '#180a04', '#f0b890', '#eea878', '#f4c4a0',
   '#a0b890', '#9ab0d0', '#c0a0b0', '#d0563a', '#e8b878', '#9ac0d0', '#e0a0a0', '#f0b09a', '#d86048', '#efe4cc', '#d8b88e', '#d8b88e',
   ['#d0c0aa', '#e89a6a', '#b4a08a', '#efe4cc'], '#34281d', '#d6c8b2', '#544030', ['rgba(232, 154, 106, .055) 50% 0', 'rgba(216, 184, 142, .035) 20% 100%'], 'invert(.9) sepia(.55) saturate(1.1)', '#efd8a8'))
-ORDER = ['kairos', 'aion', 'chronos', 'silva', 'mons', 'torrens', 'bibliotheca', 'mars', 'ignis', 'aurora', 'castellum', 'shire', 'spelunca', 'earthrise', 'palebluedot', 'deepfield', 'pluto', 'jupiter']
+
+def quick(note, bg, text, muted, acc, dim, link, verd, slate, plum, red, orange, cyan, pink, lit, hi, bold, glows, ink):
+    """a colour set from a few key colours; the rest is derived"""
+    t = text; m = muted
+    return (note, spec([bg[0], bg[1], bg[2], bg[3]], mix(bg[3], t, .1), mix(bg[3], t, .2), t, mix(t, '#ffffff', .45), m, mix(m, bg[1], .3), acc, dim, mix(bg[0], '#000000', .4),
+        mix(acc, '#ffffff', .25), link, mix(link, '#ffffff', .3), verd, slate, plum, red, orange, cyan, pink, mix(red, '#ffffff', .4), red, lit, hi, hi,
+        [mix(t, m, .4), acc, m, lit], mix(bg[3], t, .12), mix(t, bg[1], .1), mix(bg[3], t, .25), glows, ink, bold))
+T['solarpunk'] = quick('Solarpunk: deep garden green, warm cream text, sun gold, leaf green, panel blue.', ['#06100c', '#0a1712', '#08130f', '#132620'], '#e2e8d8', '#97a894', '#f4c840', '#a8862c', '#f6d466',
+  '#6cc46a', '#7aa8e0', '#b49ad0', '#e0704e', '#f0a050', '#6ac8c8', '#e898b0', '#f4dc8a', '#6cc46a', '#7cd47a', ['rgba(244, 200, 64, .06) 75% 0', 'rgba(108, 196, 106, .04) 20% 100%'], 'invert(.9) sepia(.35) hue-rotate(40deg) saturate(1.1)')
+T['urbs'] = quick('Urbs, a city at night: tower-dark navy, window-light text, sodium amber, neon pink and cyan.', ['#05060c', '#090b14', '#070910', '#12162a'], '#dcdfea', '#8e94b0', '#ffb04a', '#b07428', '#ffbe68',
+  '#6ae0c0', '#7ad8ff', '#c49aff', '#ff5f7a', '#ffb04a', '#7ad8ff', '#ff5fa8', '#ffe0a0', '#ff5fa8', '#ff6ab4', ['rgba(255, 176, 74, .05) 50% 0', 'rgba(255, 95, 168, .04) 85% 100%'], 'invert(.92) sepia(.3) hue-rotate(190deg) saturate(1.1)')
+T['flora'] = quick('Flora, a garden at dusk: dark leaf, petal-white text, rose, lavender, sunflower.', ['#0b0810', '#110c16', '#0e0a13', '#1e1626'], '#ece0ea', '#a898aa', '#f08ab0', '#a85a7a', '#f49cbe',
+  '#7cc46a', '#9aaee8', '#b49aee', '#e8504a', '#f4a03a', '#7ad0d8', '#f08ab0', '#f4e070', '#f4c430', '#f4c430', ['rgba(240, 138, 176, .06) 50% 0', 'rgba(124, 196, 106, .035) 20% 100%'], 'invert(.9) sepia(.4) hue-rotate(280deg) saturate(1.1)')
+T['crystallum'] = quick('Crystallum, a crystal cave: geode violet, quartz-white text, amethyst, rose quartz, clear quartz.', ['#08060e', '#0d0a16', '#0b0812', '#1a1428'], '#e8e2f4', '#a49ab8', '#c494ff', '#7e5ab8', '#cea6ff',
+  '#7fe0c8', '#9ac0f0', '#c494ff', '#f07890', '#f0b878', '#b8e4f0', '#f0a0bc', '#f0e0ff', '#f0a0bc', '#b8e4f0', ['rgba(196, 148, 255, .07) 55% 100%', 'rgba(240, 160, 188, .04) 15% 0'], 'invert(.92) sepia(.3) hue-rotate(230deg) saturate(1.3)')
+T['cortex'] = quick('Cortex, neurons in Brainbow colours: tissue-dark navy, pale text, fluorescent green, magenta, cyan.', ['#04050a', '#070910', '#05070d', '#10131f'], '#dfe4ee', '#8e98ae', '#7cf07a', '#3a9a44', '#90f48e',
+  '#5fe8ff', '#9ab0ff', '#b48aff', '#ff5f8a', '#ffd84a', '#5fe8ff', '#ff5fb0', '#e8f0d8', '#ff5fb0', '#ff7ac0', ['rgba(124, 240, 122, .045) 30% 0', 'rgba(255, 95, 176, .045) 75% 0'], 'invert(.92) sepia(.3) hue-rotate(80deg) saturate(1.2)')
+T['medicina'] = quick('Medicina, a patient monitor: screen-dark teal, clinical white text, trace green, heart red.', ['#030807', '#060d0c', '#050b0a', '#0d1b19'], '#dfeae6', '#8aa49c', '#6cffa8', '#2a9a5a', '#7effb4',
+  '#6cffa8', '#88c0f0', '#b8a0e0', '#ff4a5a', '#ffc070', '#7ae0e8', '#ff8aa0', '#e8fff0', '#ff4a5a', '#ff6a78', ['rgba(108, 255, 168, .04) 50% 0', 'rgba(255, 74, 90, .03) 90% 0'], 'invert(.92) sepia(.3) hue-rotate(100deg) saturate(1.2)')
+T['leonardo'] = quick("Leonardo, his notebooks: dark vellum, sepia text, red chalk, walnut ink.", ['#0c0806', '#120d09', '#0f0a07', '#20170f'], '#e8dcc6', '#a8957a', '#d07a50', '#8a4a2a', '#d8885e',
+  '#9ab08a', '#9aa8c0', '#b090a0', '#c8504a', '#d8a060', '#8ab0b0', '#c88a90', '#d8bc8c', '#d8bc8c', '#e0c494', ['rgba(208, 122, 80, .05) 50% 0', 'rgba(216, 188, 140, .035) 20% 100%'], 'invert(.9) sepia(.6) saturate(.9)')
+T['newton'] = quick("Newton, Opticks and the Principia: a darkened room, candle-white text, sunbeam gold, the colours of the spectrum.", ['#07060a', '#0b0a10', '#09080d', '#16141e'], '#e8e4da', '#a29cac', '#ffd86a', '#a8882e', '#ffe08a',
+  '#5ad84a', '#3a8aff', '#9a4ae0', '#ff3a3a', '#ff8a2a', '#6ac8f0', '#e88ab0', '#fff8e0', '#ff3a3a', '#ff6a5a', ['rgba(255, 216, 106, .05) 40% 0', 'rgba(154, 74, 224, .04) 85% 100%'], 'invert(.92) sepia(.25) saturate(1.1)')
+T['einstein'] = quick("Einstein, an Einstein ring: deep space, starlight text, the ring's blue, the lensing galaxy's gold.", ['#04050b', '#070912', '#05070e', '#10141f'], '#e2e6f2', '#8e96ae', '#8ab0ff', '#3a5aa8', '#9abcff',
+  '#8ad8b8', '#8ab0ff', '#b8a8f0', '#f08070', '#f0c080', '#9ac8f0', '#e8a8c8', '#cfe2ff', '#f4dca0', '#f4dca0', ['rgba(138, 176, 255, .05) 75% 0', 'rgba(244, 220, 160, .03) 85% 0'], 'invert(.92) sepia(.3) hue-rotate(190deg) saturate(1.1)')
+T['starrynight'] = quick('Starry Night, after van Gogh (1889): night blue, moon-pale text, star yellow, cypress green.', ['#050814', '#08101f', '#060c1a', '#101c34'], '#e0e6f2', '#8e9cba', '#f4d640', '#a89030', '#f8e06a',
+  '#7ab890', '#7aa8f0', '#a89ae0', '#f07a5a', '#f4b040', '#9ac0e0', '#e8a0b0', '#fff6b0', '#9ac0e0', '#9ac0e0', ['rgba(244, 214, 64, .055) 85% 0', 'rgba(90, 138, 200, .06) 40% 0'], 'invert(.92) sepia(.3) hue-rotate(190deg) saturate(1.3)')
+T['scream'] = quick('The Scream, after Munch (1893): fjord-dark blue, pale text, the burning orange of the sky, red.', ['#060812', '#0a0e1c', '#080b17', '#141a30'], '#e8e2dc', '#9e9aac', '#f4a040', '#b06a24', '#f6b05e',
+  '#8ab890', '#6a98d8', '#b49ac8', '#e04a3a', '#f4a040', '#88b8d0', '#e8a098', '#f4c860', '#e05a2a', '#f07a4a', ['rgba(240, 138, 42, .065) 50% 0', 'rgba(26, 58, 122, .08) 50% 100%'], 'invert(.9) sepia(.45) hue-rotate(-10deg) saturate(1.3)')
+T['greatwave'] = quick('Great Wave, after Hokusai (c. 1831): Prussian blue, foam-white text, the cream of the boats, a pale sky.', ['#04070e', '#070c17', '#050913', '#0f1828'], '#e4e8ee', '#909cb0', '#9ab8e0', '#4a6aa0', '#b0c8ec',
+  '#7ab8a8', '#9ab8e0', '#a8a0d0', '#e07060', '#e8c890', '#9ab4d0', '#e0a8b0', '#f4f0e4', '#e8c890', '#f4f0e4', ['rgba(154, 180, 208, .05) 30% 0', 'rgba(232, 200, 144, .03) 80% 100%'], 'invert(.92) sepia(.2) hue-rotate(190deg) saturate(1.1)')
+T['waterlilies'] = quick('Water Lilies, after Monet: pond blue at dusk, pale text, lily pink, pad green, lilac.', ['#06080e', '#0a0e17', '#080b13', '#141b2a'], '#e2e6f0', '#929cb4', '#f0a0c0', '#a85a7e', '#f4b0cc',
+  '#6ab884', '#8aa8e0', '#b4a0e0', '#e0706a', '#f0c080', '#8ac0d0', '#f0a0c0', '#f4e070', '#6ab884', '#7ac894', ['rgba(240, 160, 192, .05) 40% 0', 'rgba(106, 184, 132, .04) 80% 100%'], 'invert(.92) sepia(.3) hue-rotate(200deg) saturate(1.1)')
+T['klimt'] = quick('Klimt, after the golden phase (1907-08): black lacquer, ivory text, gold leaf, with small squares of red, blue and green.', ['#090705', '#0e0b08', '#0c0906', '#1c1610'], '#ece2cc', '#a8987a', '#e0b850', '#9a7a30', '#ecc86a',
+  '#5aa878', '#5a8ad0', '#b090c0', '#c8402f', '#e8a050', '#88b8c0', '#d890a0', '#f0d070', '#c8402f', '#f0d070', ['rgba(224, 184, 80, .06) 50% 0', 'rgba(224, 184, 80, .04) 50% 100%'], 'invert(.9) sepia(.6) saturate(1.2)')
+ORDER = ['kairos', 'aion', 'chronos', 'silva', 'mons', 'torrens', 'bibliotheca', 'mars', 'ignis', 'aurora', 'castellum', 'shire', 'spelunca', 'earthrise', 'palebluedot', 'deepfield', 'pluto', 'jupiter', 'solarpunk', 'urbs', 'flora', 'crystallum', 'cortex', 'medicina', 'leonardo', 'newton', 'einstein', 'starrynight', 'scream', 'greatwave', 'waterlilies', 'klimt']
 def block(k):
     note, s = T[k]; a = rgb(s['acc']); w = rgb(s['warn']); t = rgb(s['text']); bg0 = rgb(s['bg'][0])
     g = ',\n             '.join(f'radial-gradient(ellipse 60% 300px at {pos}, {col}, transparent 70%)' for col, pos in (x.rsplit(' ', 2)[0] and (x[:x.index(')') + 1], x[x.index(')') + 2:]) for x in s['glows']))
@@ -176,7 +214,8 @@ HEAD = '''
 /* ---------- the pixel themes ----------
    Kairos, Aion and Chronos are named for the three Greek words for time; Silva, Mons, Torrens, Spelunca,
    Aurora, Ignis and Mars are landscapes; Bibliotheca, Castellum and Shire are places; Earthrise, Pale Blue Dot,
-   Deep Field, Pluto and Jupiter follow famous NASA images. Each has its own pixel-art
+   Deep Field, Pluto and Jupiter follow famous NASA images; Solarpunk, Urbs, Flora, Crystallum, Cortex and Medicina
+   are subjects; Leonardo, Newton and Einstein follow their notebooks and work; and five follow paintings in the public domain. Each has its own pixel-art
    landscape, colour sigil and colour band. The text stays in the Istari type. */
 '''
 css = HEAD + ''.join(block(k) for k in ORDER) + '\n'

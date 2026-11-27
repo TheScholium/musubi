@@ -599,6 +599,353 @@ def jupiter():
     for k, x in enumerate(range(90, 170, 16)): ellipse(c, x, 43, 2, 1, '#fbf6ea')
     return c
 
+
+# ---------------- a 3x5 pixel font for chalk equations and monitor read-outs ----------------
+GLYPH = {
+ 'E': ['xxx', 'x..', 'xx.', 'x..', 'xxx'], '=': ['...', 'xxx', '...', 'xxx', '...'], 'm': ['...', 'xx.', 'xxx', 'x.x', 'x.x'],
+ 'c': ['...', 'xxx', 'x..', 'x..', 'xxx'], '2': ['xx.', '..x', '.x.', 'x..', 'xxx'], 'R': ['xx.', 'x.x', 'xx.', 'x.x', 'x.x'],
+ '-': ['...', '...', 'xxx', '...', '...'], 'g': ['...', 'xxx', 'x.x', 'xxx', '..x'], '8': ['xxx', 'x.x', 'xxx', 'x.x', 'xxx'],
+ 'p': ['....', 'xxxx', '.x.x', '.x.x', '.x.x'], 'x': ['...', 'x.x', '.x.', 'x.x', 'x.x'], 'u': ['...', 'x.x', 'x.x', 'xxx', 'x..'], 'v': ['...', 'x.x', 'x.x', 'x.x', '.x.'], 'G': ['xxx', 'x..', 'x.x', 'x.x', 'xxx'], 'T': ['xxx', '.x.', '.x.', '.x.', '.x.'],
+ '1': ['.x.', 'xx.', '.x.', '.x.', 'xxx'], '/': ['..x', '..x', '.x.', 'x..', 'x..'], '7': ['xxx', '..x', '.x.', '.x.', '.x.'],
+ 'B': ['xx.', 'x.x', 'xx.', 'x.x', 'xx.'], 'P': ['xx.', 'x.x', 'xx.', 'x..', 'x..'], 'M': ['x.x', 'xxx', 'xxx', 'x.x', 'x.x'],
+ 'd': ['..x', '..x', 'xxx', 'x.x', 'xxx'], 's': ['...', 'xxx', 'xx.', '..x', 'xxx'], 't': ['.x.', 'xxx', '.x.', '.x.', '.xx'],
+ 'h': ['x..', 'x..', 'xxx', 'x.x', 'x.x'],
+ '+': ['...', '.x.', 'xxx', '.x.', '...'], '(': ['.x', 'x.', 'x.', 'x.', '.x'], ')': ['x.', '.x', '.x', '.x', 'x.'], ' ': ['..', '..', '..', '..', '..'],
+}
+def text(c, x, y, s, col, a=255, sub=False):
+    for ch in s:
+        g = GLYPH.get(ch, GLYPH[' '])
+        for yy, row in enumerate(g):
+            for xx, v in enumerate(row):
+                if v == 'x': c.px(x + xx, y + yy + (2 if sub else 0), col, a)
+        x += len(g[0]) + 1
+    return x
+def line(c, x0, y0, x1, y1, col, a=255):
+    n = int(max(abs(x1 - x0), abs(y1 - y0))) + 1
+    for k in range(n + 1):
+        t = k / max(1, n); c.px(round(x0 + (x1 - x0) * t), round(y0 + (y1 - y0) * t), col, a)
+def circle(c, cx, cy, r, col, a=255, ry=None):
+    ry = ry or r; n = int(6.3 * max(r, ry)) + 8
+    for k in range(n): t = k / n * 6.283; c.px(round(cx + math.cos(t) * r), round(cy + math.sin(t) * ry), col, a)
+def building(c, x0, w, top, base, col, win, lit=.5, seed=0, step=3):
+    r = random.Random(seed)
+    for x in range(x0, x0 + w):
+        for y in range(top, base): c.px(x, y, col)
+    for y in range(top + 2, base - 1, step):
+        for x in range(x0 + 1, x0 + w - 1, 2):
+            if r.random() < lit: c.px(x, y, r.choice(win))
+
+# The scenes below follow Silva and Chronos: a smooth dusk or night sky, two or three silhouette layers,
+# one focal object kept out of the title band (about x 80-230 at 3x), a soft glow, and few colours.
+def halo(c, cx, cy, r, col, k=.6, sy=1.0):
+    for y in range(int(cy - r * sy) - 1, int(cy + r * sy) + 2):
+        for x in range(int(cx - r) - 1, int(cx + r) + 2):
+            d = math.hypot(x - cx, (y - cy) / sy) / r
+            if d < 1: c.ditherpx(x, y, col, k * (1 - d) ** 1.6)
+def blob(c, cx, cy, rx, ry, col):
+    for y in range(int(cy - ry) - 1, int(cy + ry) + 2):
+        for x in range(int(cx - rx) - 1, int(cx + rx) + 2):
+            if ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1: c.px(x, y, col)
+def moon(c, cx, cy, r, col, glow):
+    halo(c, cx, cy, r * 3.2, glow, .45); disc(c, cx, cy, r, col)
+    for k in range(4): c.px(cx - r // 2 + k, cy - 1 + (k % 2), mix(col, '#000000', .12))
+
+# ---------------- Solarpunk: garden towers at dusk, a low sun, turbines on the far hills, lanterns ----------------
+def solarpunk():
+    c = C(); r = random.Random(301)
+    sky(c, 0, 38, ['#0c1820', '#173038', '#3a5a50', '#a88850', '#e8b868'], (0, 12))
+    stars(c, 10, (1, 9), ['#e8f0e0'], 302, 0)
+    halo(c, 304, 30, 26, '#f4c870', .5, .6); disc(c, 304, 31, 6, '#ffe2a0')
+    far = ridge(303, 33, 3, [1, 2, 3]); fill_below(c, far, '#2c4a44')
+    for tx in (20, 52, 250, 336, 362):  # turbines on the far hills
+        base = int(far[tx]); hy = base - 11
+        for y in range(hy, base): c.px(tx, y, '#3e5e56')
+        for k in range(3):
+            a0 = .4 + k * 2.094
+            for d in range(1, 6): c.px(round(tx + math.cos(a0) * d), round(hy + math.sin(a0) * d), '#3e5e56')
+    def tower(x0, w, top, base, col, leaf, lit):
+        for x in range(x0, x0 + w):
+            for y in range(top, base): c.px(x, y, col)
+        blob(c, x0 + w / 2, top - 1, w / 2 + 2, 3, leaf)
+        for y in range(top + 5, base - 2, 6):
+            blob(c, x0 - 1, y, 2.5, 1.6, leaf); blob(c, x0 + w, y + 2, 2.5, 1.6, leaf)
+            for k in range(r.randint(1, 3)):
+                vx = x0 + r.randrange(w)
+                for vy in range(y, y + r.randint(2, 5)): c.px(vx, vy, leaf)
+        for y in range(top + 3, base - 2, 3):
+            for x in range(x0 + 2, x0 + w - 1, 3):
+                if r.random() < lit: c.px(x, y, '#ffd890')
+    for x0, w, top in ((8, 9, 18), (30, 7, 24), (236, 10, 14), (262, 8, 22), (340, 11, 17), (366, 7, 25)):
+        tower(x0, w, top, 40, '#1e3634', '#24423a', .15)
+    for x0, w, top in ((0, 12, 26), (60, 10, 30), (226, 13, 22), (284, 9, 28), (318, 12, 24), (372, 10, 31)):
+        tower(x0, w, top, H, '#0f1c1c', '#13281e', .3)
+    fill_below(c, [44 + math.sin(6.283 * 3 * i / W) for i in range(W)], '#0a1410')
+    for x0 in range(5, W, 13): blob(c, x0, 43, 4, 3, '#0c1a12')
+    for _ in range(14):
+        x, y = r.randrange(W), r.randint(30, 44); glowdot(c, x, y, '#ffe08a', '#6a5a2a', 1)
+    return c
+
+# ---------------- Urbs: a city across a river at night, a tower with a red light, reflections ----------------
+def urbs():
+    c = C(); r = random.Random(311)
+    sky(c, 0, 34, ['#05070e', '#0b1020', '#171c32', '#2c2840'], (0, 12))
+    stars(c, 14, (1, 12), ['#d8dcf0'], 312, 0)
+    moon(c, 344, 9, 4, '#efe8d6', '#4a4a64')
+    lit = {}
+    def skyline(seed, lo, hi, base, col, wincol, p, gap=(0, 2)):
+        rr = random.Random(seed); x = 0
+        while x < W:
+            w = rr.randint(5, 13); top = rr.randint(lo, hi)
+            for xx in range(x, min(W, x + w)):
+                for y in range(top, base): c.px(xx, y, col)
+            for y in range(top + 2, base - 1, 3):
+                for xx in range(x + 1, min(W, x + w) - 1, 2):
+                    if rr.random() < p: c.px(xx, y, wincol); lit[xx] = wincol
+            x += w + rr.randint(*gap)
+    skyline(313, 16, 26, 38, '#1a1f34', '#3e4668', .12)
+    for x in range(W):  # haze at the foot of the far skyline
+        for y in range(32, 38): c.ditherpx(x, y, '#2a2c44', .35 * (y - 31) / 6)
+    skyline(314, 22, 32, 40, '#0d1122', '#d8a85a', .14)
+    tx = 300  # the tower
+    for x in range(tx - 4, tx + 5):
+        for y in range(8, 40): c.px(x, y, '#0d1122')
+    for y in range(2, 8): c.px(tx, y, '#0d1122')
+    c.px(tx, 1, '#ff4a4a'); halo(c, tx, 1, 3, '#ff4a4a', .5)
+    for y in range(11, 39, 3):
+        for x in range(tx - 3, tx + 4, 2):
+            if r.random() < .45: c.px(x, y, '#ffd890'); lit[x] = '#ffd890'
+    for x in range(W): c.px(x, 40, '#05070e')
+    for y in range(41, H):  # the river: still water with broken reflections
+        for x in range(W):
+            c.px(x, y, '#060914')
+            if x in lit and (y + x) % 3 != 0 and r.random() < .6: c.px(x, y, mix(lit[x], '#060914', .35 + (y - 41) * .07))
+            if abs(x - 344) < 2 and (y % 2 == 0): c.px(x, y, '#8a8678')
+    return c
+
+# ---------------- Flora: a night meadow, tall flower silhouettes, a dandelion against the moon, fireflies ----------------
+def flora():
+    c = C(); r = random.Random(321)
+    sky(c, 0, 38, ['#08081a', '#16142e', '#2e2444', '#5a3a54'], (0, 12))
+    stars(c, 20, (1, 18), ['#e8e0f4'], 322, 0)
+    moon(c, 300, 15, 9, '#f2e8d2', '#5a4a6a')
+    far = ridge(323, 34, 2, [1, 2, 3]); fill_below(c, far, '#1a1828')
+    D = '#0b0a14'
+    def stem(x, top, base, bend):
+        for y in range(top, base + 1): c.px(round(x + bend * ((base - y) / max(1, base - top)) ** 2), y, D)
+    x = 0
+    while x < W:  # grasses
+        h0 = r.randint(4, 12); b = r.choice([-2, -1, 1, 2]); stem(x, H - h0, H - 1, b); x += r.randint(1, 3)
+    for fx in range(4, W, r.randint(9, 15)):
+        kind = r.choice(['foxglove', 'lace', 'daisy', 'grass']); base = H - 1
+        if 270 < fx < 330: continue
+        if kind == 'foxglove':
+            top = base - r.randint(18, 26); stem(fx, top, base, 0)
+            for y in range(top + 2, top + 14, 2): c.px(fx - 1, y, D); c.px(fx + 1, y + 1, D); c.px(fx - 2, y + 1, D)
+        elif kind == 'lace':
+            top = base - r.randint(14, 22); stem(fx, top, base, r.choice([-2, 2]))
+            for k in range(-4, 5): c.px(fx + k, top - (2 if abs(k) < 3 else 1), D)
+            for k in range(-3, 4, 2): c.px(fx + k, top - 3, '#d8d0e0' if r.random() < .4 else D)
+        elif kind == 'daisy':
+            top = base - r.randint(10, 16); stem(fx, top, base, 1)
+            for d in ((0, -1), (1, 0), (-1, 0), (0, 1)): c.px(fx + 1 + d[0], top - 1 + d[1], '#e8e0ee')
+            c.px(fx + 1, top - 1, '#e8c060')
+    dx, dtop = 300, 21  # the dandelion clock, in front of the moon
+    stem(dx, dtop, H - 1, -3)
+    for k in range(28):
+        a = k / 28 * 6.283; rr = 5 + (k % 2)
+        line(c, dx, dtop, dx + math.cos(a) * (rr - 2), dtop + math.sin(a) * (rr - 2), D)
+        c.px(round(dx + math.cos(a) * rr), round(dtop + math.sin(a) * rr), D)
+    for k in range(6): c.px(dx + 9 + k * 3, dtop - 6 - k * 2 + (k % 2), D)
+    for _ in range(16):
+        x, y = r.randrange(W), r.randint(22, 44); glowdot(c, x, y, '#eaf59a', '#4a5a22', 1)
+    return c
+
+# ---------------- Crystallum: a dark cave, one glowing cluster of amethyst and quartz ----------------
+def crystallum():
+    c = C(); r = random.Random(331)
+    ceil = ridge(332, 6, 3, [2, 3, 5, 9])
+    for x in range(W):
+        for y in range(0, int(ceil[x]) + 1): c.px(x, y, '#0e0a16')
+    x = 0
+    while x < W:
+        L = r.choice([2, 3, 4, 6, 9]); top = int(ceil[x])
+        for i in range(L):
+            hw = max(0, round((1 + L // 4) * (1 - i / L)))
+            for d in range(-hw, hw + 1): c.px(x + d, top + i, '#0e0a16')
+        x += r.randint(4, 10)
+    halo(c, 300, 36, 46, '#5a3a9a', .55, .45); halo(c, 300, 38, 22, '#a07ae0', .45, .6)
+    floor = ridge(333, 42, 2, [2, 3, 7]); fill_below(c, floor, '#0e0a16')
+    def prism(cx, base, h0, w, lean, light, mid, dark):
+        for k in range(h0):
+            y = base - k; xc = cx + lean * k
+            half = w if k < h0 - w else w - (k - (h0 - w))
+            for d in range(-half, half + 1):
+                c.px(round(xc + d), y, light if d < 0 else (mid if d == 0 else dark))
+        c.px(round(cx + lean * (h0 - 1)), base - h0 + 1, '#ffffff')
+    AM = ('#e4c8ff', '#b088f0', '#6a40b0'); QZ = ('#f4fcff', '#c0e4f4', '#7aa4c4')
+    for cx, h0, w, lean, kind in ((284, 14, 2, -.3, AM), (291, 22, 3, -.12, AM), (299, 30, 3, 0, QZ), (307, 24, 3, .15, AM), (314, 16, 2, .3, QZ), (320, 10, 2, .45, AM), (278, 8, 2, -.5, QZ)):
+        prism(cx, int(floor[cx]) + 1, h0, w, lean, *kind)
+    for cx in (30, 60, 110, 170, 210, 360):  # dim crystals elsewhere, as silhouettes with a lit tip
+        h0 = r.randint(4, 8); base = int(floor[cx]) + 1
+        for k in range(h0):
+            hw = 1 if k < h0 - 1 else 0
+            for d in range(-hw, hw + 1): c.px(cx + d, base - k, '#1c1428')
+        c.px(cx, base - h0 + 1, '#8a6ac8')
+    for _ in range(22):  # motes in the light
+        x, y = 300 + r.randint(-40, 40), r.randint(10, 40); c.px(x, y, '#e8d8ff', r.choice([120, 180, 230]))
+    return c
+
+# ---------------- Cortex: one large neuron, its dendrites, an axon carrying a spike, faint neurons beyond ----------------
+def cortex():
+    c = C(); r = random.Random(341)
+    for _ in range(9):  # far neurons, small and dim
+        nx, ny = r.randrange(W), r.randint(4, 44)
+        if 80 < nx < 240: continue
+        for k in range(4):
+            a = r.random() * 6.283; x, y = nx, ny
+            for s in range(r.randint(4, 8)):
+                x += math.cos(a); y += math.sin(a); a += r.uniform(-.3, .3); c.px(round(x), round(y), '#1c2a48')
+        c.px(nx, ny, '#2e4472')
+    def branch(x, y, a, L, depth, col):
+        for k in range(int(L)):
+            x += math.cos(a); y += math.sin(a) * .9; a += r.uniform(-.18, .18)
+            c.px(round(x), round(y), col)
+        if depth > 0:
+            for da in (-.5, .45): branch(x, y, a + da, L * .66, depth - 1, mix(col, '#05060c', .22))
+    sx, sy = 304, 22
+    halo(c, sx, sy, 34, '#1a4a6a', .5, .7)
+    for k in range(7): branch(sx, sy, -1.9 + k * .62 + r.uniform(-.1, .1), r.randint(8, 12), 3, '#6ad8f0')
+    ax = []  # the axon runs left, under the title band, with myelin and a node-to-node spike
+    x, y = sx - 4, sy + 3
+    while x > -40:
+        y += .25 * math.sin(x * .05); x -= 1; ax.append((round(x), round(y)))
+    for i, (x, y) in enumerate(ax):
+        seg = (i // 7) % 2 == 0
+        c.px(x, y, '#3a8ab0' if seg else '#1e4a64')
+        if seg: c.px(x, y - 1, '#1e4a64'); c.px(x, y + 1, '#1e4a64')
+    px0, py0 = ax[150]
+    halo(c, px0, py0, 7, '#ff6ab4', .55); c.px(px0, py0, '#ffffff'); c.px(px0 + 1, py0, '#ffd0e8')
+    disc(c, sx, sy, 3.2, '#9ae8ff', '#3a9ac0', (-1, -1)); c.px(sx - 1, sy - 1, '#ffffff')
+    return c
+
+# ---------------- Medicina: a DNA double helix in soft light, cells drifting beyond ----------------
+def medicina():
+    c = C(); r = random.Random(351)
+    for _ in range(10):  # cells, far and dim
+        x, y, rr = r.randrange(W), r.randint(4, 44), r.randint(3, 6)
+        if 80 < x < 240: continue
+        circle(c, x, y, rr, '#14303a'); c.px(x + 1, y, '#1e4650'); c.px(x, y + 1, '#1e4650')
+    hx = 300
+    halo(c, hx, 24, 30, '#164a4a', .5, .9)
+    pairs = ['#e86a8a', '#f0c060', '#6ac8f0', '#a8e06a']
+    for y in range(-2, H + 2):  # back strand first, then rungs, then the front strand
+        t = y / 7.5
+        x1 = hx + 9 * math.sin(t); x2 = hx + 9 * math.sin(t + math.pi)
+        z1 = math.cos(t)
+        back, front = ((x1, x2) if z1 < 0 else (x2, x1))
+        c.px(round(back), y, '#1f5a60'); c.px(round(back) + 1, y, '#1f5a60')
+        if y % 3 == 0:
+            lo, hi = sorted((x1, x2)); col = pairs[(y // 3) % 4]
+            for x in range(round(lo) + 2, round(hi) - 1): c.px(x, y, mix(col, '#05080a', .35 + .25 * abs(math.cos(t))))
+        c.px(round(front), y, '#8af0e0'); c.px(round(front) + 1, y, '#5ac8c0')
+    return c
+
+# ---------------- Leonardo: Florence at dusk, the dome and the bell tower, a flying machine in the sky ----------------
+def leonardo():
+    c = C(); r = random.Random(361)
+    sky(c, 0, 36, ['#140e18', '#2c1e28', '#6a4038', '#c8844e', '#e8b070'], (0, 12))
+    stars(c, 8, (1, 8), ['#f2e6d4'], 362, 0)
+    far = ridge(363, 30, 4, [1, 2, 3, 5]); fill_below(c, far, '#4a3034')
+    mid = ridge(364, 35, 3, [1, 2, 4]); fill_below(c, mid, '#2e1e22')
+    for cx0 in (24, 46, 66, 244, 360, 374):  # cypresses on the hills
+        base = int(mid[cx0]) + 1; h0 = r.randint(9, 14)
+        for k in range(h0):
+            hw = round(1.6 * math.sin(math.pi * (k + 1) / (h0 + 1)))
+            for d in range(-hw, hw + 1): c.px(cx0 + d, base - k, '#1a1014')
+    city = '#1e1416'
+    for x in range(250, 372):  # terracotta roofs
+        top = 38 - (2 if (x // 6) % 3 == 0 else 0) - (1 if (x // 4) % 2 else 0)
+        for y in range(top, 42): c.px(x, y, city)
+    dx, dy = 306, 38  # the dome on its drum, with the lantern
+    for x in range(dx - 9, dx + 10):
+        for y in range(dy - 6, dy): c.px(x, y, city)
+    for y in range(dy - 20, dy - 5):
+        hw = 9 * math.sqrt(max(0, 1 - ((dy - 6 - y) / 14) ** 2))
+        for x in range(round(dx - hw), round(dx + hw) + 1): c.px(x, y, city)
+    for k in (-5, 0, 5): 
+        for y in range(dy - 18, dy - 6): c.px(dx + round(k * (1 - (dy - 6 - y) / 16)), y, '#3a2626')
+    for y in range(dy - 25, dy - 19): c.px(dx, y, city); c.px(dx - 1, y, city) if y > dy - 22 else None
+    for x in range(326, 331):  # the bell tower
+        for y in range(16, 42): c.px(x, y, city)
+    for y in (20, 26): c.px(328, y, '#e8a050')
+    for x in range(250, 372): c.px(x, 42, city)
+    fill_below(c, [42 + math.sin(6.283 * 2 * i / W) for i in range(W)], '#140c0e')
+    for k in range(r.randint(3, 4)): c.px(r.randint(252, 370), r.randint(38, 41), '#f0b060')
+    fx, fy = 262, 11  # the ornithopter: a body and two ribbed wings
+    for d in range(-2, 3): c.px(fx + d, fy, '#2a1a1c')
+    for side in (-1, 1):
+        for k in range(1, 12):
+            y = fy - round(3 * math.sin(math.pi * k / 12)); c.px(fx + side * (2 + k), y, '#2a1a1c')
+            if k % 3 == 0:
+                for j in range(1, 3): c.px(fx + side * (2 + k), y + j, '#2a1a1c')
+    return c
+
+# ---------------- Newton: an orchard under a full moon, the apple tree, a falling apple, the manor ----------------
+def newton():
+    c = C(); r = random.Random(371)
+    sky(c, 0, 36, ['#05070f', '#0b1022', '#16203a', '#22304a'], (0, 10))
+    stars(c, 26, (1, 22), ['#e6eaf6', '#cfd8f0'], 372, .05)
+    moon(c, 340, 11, 6, '#f4eedc', '#3a4462')
+    far = ridge(373, 34, 2, [1, 2, 3]); fill_below(c, far, '#141c26')
+    fill_below(c, [41 + math.sin(6.283 * 2 * i / W) for i in range(W)], '#0b1014')
+    hx0 = 22  # the manor: a gabled house with chimneys and one lit window
+    for x in range(hx0, hx0 + 30):
+        for y in range(30, 42): c.px(x, y, '#0e1418')
+    for i in range(7):
+        for x in range(hx0 - 1 + i, hx0 + 31 - i): c.px(x, 29 - i, '#0e1418')
+    for xc in (hx0 + 5, hx0 + 24):
+        for y in range(20, 26): c.px(xc, y, '#0e1418'); c.px(xc + 1, y, '#0e1418')
+    for wx in (hx0 + 6, hx0 + 22):
+        c.px(wx, 34, '#ffd27a'); c.px(wx + 1, 34, '#ffd27a'); c.px(wx, 35, '#e8a850'); c.px(wx + 1, 35, '#e8a850')
+    tx, tb = 290, 42  # the apple tree
+    for y in range(tb - 13, tb + 1):
+        c.px(tx, y, '#0a0f10'); c.px(tx + 1, y, '#0a0f10')
+        if y > tb - 4: c.px(tx - 1, y, '#0a0f10'); c.px(tx + 2, y, '#0a0f10')
+    for ox, oy, rr in ((0, -21, 11), (-9, -17, 8), (10, -17, 8), (-4, -25, 7), (6, -26, 6)):
+        for y in range(tb + oy - rr, tb + oy + rr + 1):
+            for x in range(tx + ox - rr - 3, tx + ox + rr + 4):
+                d = math.hypot((x - tx - ox) / 1.25, y - tb - oy)
+                if d <= rr - .5 or (d <= rr + .7 and B4[y % 4, x % 4] < .5): c.px(x, y, '#0d1416')
+    for ax, ay in ((280, 21), (297, 18), (288, 26), (303, 24), (276, 16)):  # apples catch the moonlight
+        c.px(ax, ay, '#b8302a'); c.px(ax + 1, ay, '#801c18'); c.px(ax, ay - 1, '#f07060')
+    c.px(318, 33, '#c8382e'); c.px(318, 32, '#f07a68')  # one falls
+    for k in (1, 3, 5): c.px(318, 32 - k, '#3a4462')
+    return c
+
+# ---------------- Einstein: an Einstein ring, a galaxy lensing the light behind it, over curved spacetime ----------------
+def einstein():
+    c = C(); r = random.Random(381)
+    stars(c, 60, (0, 44), ['#e6eeff', '#cfe0ff', '#ffe8c8'], 382, .06)
+    gx, gy = 300, 18
+    for row in range(6):  # a faint grid in perspective, dipping under the lens
+        y0 = 30 + row * 3
+        for x in range(W):
+            d = abs(x - gx); dip = 5 * math.exp(-(d / 30) ** 2) * (1 - row / 8)
+            c.px(x, round(y0 + dip + row * .4), '#1e2a48' if row < 3 else '#16203a')
+    for k in range(-24, 25, 6):
+        for row in range(18):
+            yy = 30 + row; xx = gx + k * (1 + row / 14)
+            d = abs(xx - gx); dip = 5 * math.exp(-(d / 30) ** 2)
+            c.px(round(xx), round(yy + dip * (1 - row / 18)), '#1a2440')
+    halo(c, gx, gy, 20, '#2a3a6a', .5, .8)
+    for k in range(220):  # the ring, brighter on two arcs
+        a = k / 220 * 6.283; b = .55 + .45 * abs(math.sin(a * 1 + .6))
+        x = gx + 11 * math.cos(a); y = gy + 9 * math.sin(a)
+        c.px(round(x), round(y), mix('#3a5aa8', '#cfe2ff', b))
+        if b > .8: c.px(round(x + math.cos(a)), round(y + math.sin(a)), '#7a9ad8', 180)
+    halo(c, gx, gy, 6, '#f4dca0', .7); disc(c, gx, gy, 2, '#fff4d8'); c.px(gx, gy, '#ffffff')
+    return c
+
 # ---------------- colour sigils (one character per pixel) ----------------
 SIG = {
  'silva': (['....g....', '...ggg...', '..gGggg..', '...ggg...', '..gGgggg.', '.ggggGgg.', '...ggg...', '.gggGgggg', 'ggggggGgg', '....t....', '....t....'], {'g': '#5f9e5a', 'G': '#9fd27a', 't': '#8a5a34'}),
@@ -618,6 +965,20 @@ SIG = {
  'deepfield': (['....y....', '.y..y..y.', '..y.y.y..', '...yWy...', 'yyyWWWyyy', '...yWy...', '..y.y.y..', '.y..y..y.', '....y....'], {'y': '#ffe6a8', 'W': '#ffffff'}),
  'pluto': (['.bbbbbbbbb.', 'b.........b', '.lllllllll.', 'l.........l', 'dddd.d.dddd', 'ddddddddddd', 'ddddddddddd'], {'b': '#5a8ad0', 'l': '#9ac8ff', 'd': '#4a6aa8'}),
  'jupiter': (['...cccc...', '..tttttt..', '.cccccccc.', 'rrrrrrrrrr', 'cccccRRccc', 'tttttRRttt', '.cccccccc.', '..rrrrrr..', '...cccc...'], {'c': '#efe4cc', 't': '#d8b88e', 'r': '#b8805a', 'R': '#c0563a'}),
+ 'solarpunk': (['...y.y.y...', '....yyy....', '..yyYYYyy..', '....yyy....', '...y.y.y...', '.....g.....', '..ppppppp..', '..pPpPpPp..', '.....g.....', '....ggg....'], {'y': '#f4c840', 'Y': '#fff2b0', 'g': '#5aae5a', 'p': '#2f5aa8', 'P': '#6a9ae0'}),
+ 'urbs': (['....r......', '....b......', '...bbb.....', '..bwbwb.bb.', '..bbbbb.bwb', 'bb.bwbwbbbb', 'bwbbbbbbwbb', 'bbbwbwbbbbb', 'bwbbbbbwbwb'], {'b': '#2a3050', 'w': '#ffc860', 'r': '#ff4a4a'}),
+ 'flora': (['..p...p..', '.ppp.ppp.', '..ppypp..', '.ppyyypp.', '..ppypp..', '.ppp.ppp.', '..p.g.p..', '...lg....', '....gl...', '....g....'], {'p': '#f08ab0', 'y': '#f4c430', 'g': '#3d8a3a', 'l': '#5aa84a'}),
+ 'crystallum': (['....W....', '...lmd...', '..llmdd..', '..llmdd..', '..llmdd..', '..llmdd..', '.l.lmd.d.', 'll.lmd.dd', 'lmdlmdlmd'], {'W': '#ffffff', 'l': '#d8b4ff', 'm': '#a070e0', 'd': '#6a3aa8'}),
+ 'cortex': (['p...p...p..', '.p..p..p...', '..p.p.p....', '...pPp.....', 'pppPWPppp..', '...pPp.....', '..p...p....', '.p.....p...', 'p.......ccc'], {'p': '#ff5fb0', 'P': '#ffa0d0', 'W': '#ffffff', 'c': '#5fe8ff'}),
+ 'medicina': (['f.......b', '.frrrrrb.', '..f...b..', '...fyb...', '....f....', '...bgf...', '..b...f..', '.bggggff.', 'b.......f'], {'f': '#8af0e0', 'b': '#1f8a90', 'r': '#e86a8a', 'y': '#f0c060', 'g': '#6ac8f0'}),
+ 'leonardo': (['.....s.....', '.....s.....', '....sss....', '...sssss...', '..sssssss..', '..s.s.s.s..', '.sssssssss.', '.sssssssss.', 'ddddddddddd'], {'s': '#d07a50', 'd': '#6a3a28'}),
+ 'newton': (['....tl...', '...lt....', '.rrrtrr..', 'rRrrrrrr.', 'rRrrrrrrr', 'rrrrrrrrr', 'rrrrrrrrd', '.rrrrrrd.', '..rrrdd..'], {'t': '#5a3a24', 'l': '#5aae5a', 'r': '#d0382e', 'R': '#ff8a7a', 'd': '#8a1e18'}),
+ 'einstein': (['...bbbbb...', '.bb.....bb.', 'b.........b', 'B....y....B', 'B...yWy...B', 'B....y....B', 'b.........b', '.bb.....bb.', '...bbbbb...'], {'b': '#5a7ad0', 'B': '#cfe2ff', 'y': '#f4dca0', 'W': '#ffffff'}),
+ 'starrynight': (['..yyyyy..', '.yYYYYYy.', 'yYbbbbbYy', 'yYbWWWbYy', 'yYbWbWbYy', 'yYbWWbbYy', 'yYbbbbbYy', '.yYYYYYy.', '..yyyyy..'], {'y': '#c8b850', 'Y': '#f4e070', 'b': '#2a5aa8', 'W': '#fff6b0'}),
+ 'scream': (['yyyyyyyyyyy', 'ooooooooooo', 'rrrrrrrrrrr', 'yyyyyyyyyyy', 'ooooo.hhh.o', 'bbbbbbhkhbb', 'bbbbbbahabb', 'BBBBBBBbBBB'], {'y': '#f4b040', 'o': '#f08a2a', 'r': '#c83a2a', 'b': '#2a5a8a', 'B': '#1a3a7a', 'h': '#d8c890', 'k': '#2a2a1a', 'a': '#c8b880'}),
+ 'greatwave': (['...wwww....', '..wbbbbw...', '.wbb..bww..', 'wbb....w...', 'wbb........', 'wbbb....f..', '.bbbb..fff.', 'bbbbbbbbbbb'], {'w': '#f4f0e4', 'b': '#1a3a7a', 'f': '#f4f0e4'}),
+ 'waterlilies': (['....p.....', '...pyp....', '....p.....', '.gggggggg.', 'gggggg.ggg', 'GGGGG..GGG', '.GGGGGGGG.'], {'p': '#f0a0c0', 'y': '#f4e070', 'g': '#3a7a4a', 'G': '#2a5a3a'}),
+ 'klimt': (['ggggggggg', 'gkkgggkkg', 'gkWgggWkg', 'ggggsgggg', 'gggs.sggg', 'ggs.s.sgg', 'gggs.sggg', 'ggggsgggg', 'ggggggggg'], {'g': '#e0b850', 'k': '#1a1410', 'W': '#d8d0c0', 's': '#5a3a10'}),
  'chronos': (['.....ccccc.....', '...ccCCCCCcc...', 'aa.cCCCCCCCc.aa', '.aaa.......aaa.', '..aaaAAAAAaaa..', '...c.......c...', '....ccccccc....', '......ccc......'], {'c': '#e8c27a', 'C': '#f4dca0', 'a': '#ffb85c', 'A': '#ffd892'}),
 }
 def sigil(name):
@@ -637,6 +998,13 @@ BANDS = {
  'silva': ['#1b3127', '#3e6b45', '#7fb26a', '#e2f58a'], 'mons': ['#3d4562', '#8a5466', '#d99a76', '#eef2fa'],
  'torrens': ['#164a5a', '#3d9fb0', '#8fd4d6', '#eaf7f6'], 'bibliotheca': ['#6b1d22', '#23402e', '#1f2a48', '#c9a24c'],
  'mars': ['#7b3a26', '#b45a35', '#d9844f', '#c8b49a'],
+ 'solarpunk': ['#2f6a4a', '#5aae5a', '#2f5aa8', '#f4c840'], 'urbs': ['#1c2238', '#7ad8ff', '#ff5fa8', '#ffc860'],
+ 'flora': ['#2a4a34', '#9a7ad8', '#f08ab0', '#f4c430'], 'crystallum': ['#6a3aa8', '#a070e0', '#f0a0bc', '#b8e4f0'],
+ 'cortex': ['#b48aff', '#ff5fb0', '#5fe8ff', '#7cf07a'], 'medicina': ['#0c2220', '#2a9a5a', '#6cffa8', '#ff4a5a'],
+ 'leonardo': ['#3a2a18', '#7a6040', '#d07a50', '#d8bc8c'], 'newton': ['#ff3a3a', '#ffe23a', '#5ad84a', '#5a4ad8'],
+ 'einstein': ['#1f2c26', '#9ac8f0', '#f4e27a', '#f2efe2'], 'starrynight': ['#0e1e4a', '#2a5aa8', '#9ac0e0', '#f4e070'],
+ 'scream': ['#1a3a7a', '#c83a2a', '#f08a2a', '#f4c860'], 'greatwave': ['#1a3a6a', '#2a5aa8', '#9ab4d0', '#f4f0e4'],
+ 'waterlilies': ['#2a3a6a', '#3a7a4a', '#f0a0c0', '#f4e070'], 'klimt': ['#5a3a10', '#a88030', '#e0b850', '#f0d070'],
  'castellum': ['#3a2c4a', '#8a3a40', '#e09a5a', '#ffcf6b'], 'shire': ['#4a7a54', '#7cb468', '#d8b040', '#f4d39a'],
  'spelunca': ['#342c40', '#b48aff', '#7ff0ff', '#e0fcff'], 'earthrise': ['#5a5854', '#c8c6be', '#2f5fb0', '#f4f6ff'],
  'palebluedot': ['#3a2a24', '#6a4430', '#8a6a4a', '#cfe2ff'], 'deepfield': ['#8a5a9a', '#c86a3a', '#ffb070', '#fff4d8'],
@@ -645,7 +1013,8 @@ BANDS = {
  'aion': ['#2a1838', '#9a64ff', '#ff6eaa', '#46cec8'], 'chronos': ['#6f8eb0', '#a9c6e0', '#e8c27a', '#ffb85c'],
 }
 SCENES = dict(silva=silva, mons=mons, torrens=torrens, bibliotheca=bibliotheca, mars=mars, ignis=ignis, aurora=aurora, kairos=kairos, aion=aion, chronos=chronos,
-              castellum=castellum, shire=shire, spelunca=spelunca, earthrise=earthrise, palebluedot=palebluedot, deepfield=deepfield, pluto=pluto, jupiter=jupiter)
+              castellum=castellum, shire=shire, spelunca=spelunca, earthrise=earthrise, palebluedot=palebluedot, deepfield=deepfield, pluto=pluto, jupiter=jupiter,
+              solarpunk=solarpunk, urbs=urbs, flora=flora, crystallum=crystallum, cortex=cortex, medicina=medicina, leonardo=leonardo, newton=newton, einstein=einstein)
 out = {}
 uri = lambda b: 'url("data:image/png;base64,' + base64.b64encode(b).decode() + '")'
 sheet = Image.new('RGBA', (W2 * 2 + 40 + 60, (H * 2 + 8) * len(SCENES)), (20, 20, 24, 255))
@@ -657,5 +1026,7 @@ for i, (k, f) in enumerate(SCENES.items()):
     si = Image.fromarray(s.a).resize((s.w * 4, s.h * 4), Image.NEAREST); sheet.alpha_composite(si, (W2 * 2 + 10, y0 + 6))
     sheet.paste(Image.fromarray(b.a).resize((96, 8), Image.NEAREST), (W2 * 2 + 10, y0 + 56))
 sheet.save('tools/out/sheet.png')
+for k in ('starrynight', 'scream', 'greatwave', 'waterlilies', 'klimt'):  # painting themes: banners come from tools/paintings.py
+    out[k] = {'sigil': uri(sigil(k).png()), 'band': uri(band(BANDS[k]).png())}
 json.dump(out, open('tools/out/assets.json', 'w'))
-print({k: len(v['vista']) for k, v in out.items()})
+print({k: len(v.get('vista', '')) for k, v in out.items()})
