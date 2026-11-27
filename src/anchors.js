@@ -74,12 +74,23 @@ function boldAnchorExt() {
   }, { decorations: (v) => v.decorations });
 }
 
-/* Theme: dark (Istari), light (Istari Paper), or the system setting. */
+/* Theme: Istari (dark), Istari Paper (light), the three other Istari (dark), or the system setting. */
+const THEMES = [
+  { id: 'dark', attr: 'istari', name: 'Istari', epithet: 'Warm ink and one gold pigment' },
+  { id: 'light', attr: 'istari-light', name: 'Istari Paper', epithet: 'Dark ink on parchment', light: true },
+  { id: 'mithrandir', attr: 'mithrandir', name: 'Mithrandir', epithet: 'Storm-grey, lit by an ember' },
+  { id: 'ithryn', attr: 'ithryn', name: 'Ithryn Luin', epithet: 'Lapis night and starlight' },
+  { id: 'aiwendil', attr: 'aiwendil', name: 'Aiwendil', epithet: 'Moss, lichen and fern-gold' },
+];
 const themeQuery = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: light)') : null;
+function themeInfo(attr) { return THEMES.find((t) => t.attr === attr) || THEMES[0]; }
 function resolvedTheme() {
   const t = (app.settings && app.settings.theme) || 'dark';
-  if (t === 'light') return 'istari-light';
-  if (t === 'auto' && themeQuery && themeQuery.matches) return 'istari-light';
-  return 'istari';
+  if (t === 'auto') {
+    if (themeQuery && themeQuery.matches) return 'istari-light';
+    const night = THEMES.find((x) => x.id === app.settings.themeNight && !x.light);
+    return night ? night.attr : 'istari';
+  }
+  return (THEMES.find((x) => x.id === t) || THEMES[0]).attr;
 }
 if (themeQuery && themeQuery.addEventListener) themeQuery.addEventListener('change', () => { if (app.settings.theme === 'auto') applyTheme(); });

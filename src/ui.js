@@ -66,7 +66,7 @@ const DEFAULT_SETTINGS = {
   templates: DEFAULT_TEMPLATES, recent: [], seeded: false, onboarded: false, tourSeen: 0, tour: null,
   attachLocation: 'folder', attachFolder: 'assets', attachSubfolder: 'assets',
   retiredTypes: [], deletedTypes: [], hotkeys: {},
-  theme: 'dark', indentWidth: 'normal', indentGuides: true, boldAnchors: false, anchorStrength: 'medium', folderTree: false,
+  theme: 'dark', themeNight: 'dark', indentWidth: 'normal', indentGuides: true, boldAnchors: false, anchorStrength: 'medium', folderTree: false,
   tabs: null, split: false, splitRatio: 0.5,
   lsEnabled: true, lsDefaults: true, lsAutofraction: true, lsTabout: true, lsMatrix: true, lsEnlarge: true, lsEnlargeSpace: true, lsAutoDelete: true, lsSnippets: '', lsVariables: '',
 };
@@ -101,7 +101,8 @@ function applyTheme() {
   const s = app.settings; const root = document.documentElement;
   root.dataset.theme = resolvedTheme();
   root.dataset.anchors = s.boldAnchors ? (s.anchorStrength || 'medium') : 'off';
-  const cs = document.querySelector('meta[name="color-scheme"]'); if (cs) cs.content = root.dataset.theme === 'istari-light' ? 'light' : 'dark';
+  const cs = document.querySelector('meta[name="color-scheme"]'); if (cs) cs.content = themeInfo(root.dataset.theme).light ? 'light' : 'dark';
+  const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.content = getComputedStyle(root).getPropertyValue('--ist-bg-1').trim() || '#12100e';
   root.dataset.indent = s.indentWidth || 'normal'; root.dataset.guides = s.indentGuides === false ? 'off' : 'on';
   root.dataset.width = s.width;
   root.style.setProperty('--reading-size', s.fontSize + 'px');

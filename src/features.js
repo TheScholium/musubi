@@ -476,10 +476,42 @@ function openSettings(tab = 'general') {
     el.addEventListener('change', () => { s[key] = el.checked; saveSettings(); onchange && onchange(); });
     return h('label', { class: 'check' }, el, label);
   };
+  const themePicker = () => {
+    const grid = h('div', { class: 'theme-picker', role: 'radiogroup', 'aria-label': 'Theme' });
+    const auto = h('input', { type: 'checkbox' });
+    const paint = () => {
+      auto.checked = s.theme === 'auto';
+      const cur = s.theme === 'auto' ? (s.themeNight || 'dark') : s.theme;
+      grid.querySelectorAll('.tp-card').forEach((c) => { const on = c.dataset.id === cur; c.classList.toggle('on', on); c.setAttribute('aria-checked', String(on)); });
+    };
+    const commit = () => { saveSettings(); applyTheme(); paint(); };
+    for (const t of THEMES) {
+      grid.appendChild(h('button', {
+        class: 'tp-card', type: 'button', role: 'radio', 'data-id': t.id, title: t.name + ': ' + t.epithet,
+        onclick: () => {
+          if (t.light) s.theme = 'light';
+          else { s.themeNight = t.id; if (s.theme !== 'auto') s.theme = t.id; }
+          commit();
+        },
+      },
+      h('div', { class: 'tp-swatch', 'data-theme': t.attr },
+        h('span', { class: 'tp-sigil' }), h('span', { class: 'tp-h' }, 'Theorem'),
+        h('span', { class: 'tp-dots' }, ...['--t-definition', '--t-law', '--t-objection'].map((v) => h('i', { style: { background: 'var(' + v + ')' } }))),
+        h('i', { class: 'tp-l' }), h('i', { class: 'tp-l' })),
+      h('div', { class: 'tp-meta' }, h('span', { class: 'tp-name' }, t.name), h('span', { class: 'tp-epithet' }, t.epithet))));
+    }
+    auto.addEventListener('change', () => {
+      if (auto.checked) { if (s.theme !== 'light') s.themeNight = s.theme; s.theme = 'auto'; }
+      else s.theme = s.themeNight || 'dark';
+      commit();
+    });
+    paint();
+    return h('div', { class: 'check-col' }, grid, h('label', { class: 'check tp-auto' }, auto, 'Follow the system: Istari Paper by day'));
+  };
   const row = (label, control, help) => h('div', { class: 'set-row' }, h('div', { class: 'set-label' }, h('b', null, label), help ? h('div', { class: 'muted small' }, help) : null), h('div', { class: 'set-ctl' }, control));
   const renderers = {
     general: () => [
-      row('Theme', sel('theme', [['dark', 'Istari (dark)'], ['light', 'Istari Paper (light)'], ['auto', 'Follow the system']], applyTheme), 'Istari Paper is the same design on parchment: dark ink and a deeper gold.'),
+      row('Theme', themePicker(), 'Five themes in one design system. Mithrandir, Ithryn Luin and Aiwendil are named for the other Istari: each has its own ground, pigment, heading sigil and light behind the page. With the system setting, Musubi uses Istari Paper by day and the dark theme you choose by night.'),
       row('Bold anchors', h('div', { class: 'check-col' },
         chk('boldAnchors', 'Make the first letters of each word bold', () => { applyTheme(); ed.setAnchors(); renderPreview(); }),
         sel('anchorStrength', [['light', 'Light (about a third of each word)'], ['medium', 'Medium (about two fifths)'], ['strong', 'Strong (about half)']], () => { applyTheme(); ed.setAnchors(); renderPreview(); })),
@@ -686,8 +718,8 @@ These follow the Obsidian plugin LaTeX Suite. Change them in Settings, Mathemati
 const ABOUT_MD = `
 **Musubi** is a free and open-source note platform for Zettelkasten work in mathematics, physics and philosophy. It is one HTML file. It needs no server, no account and no network.
 
-- Version 2.7.2. MIT License. Web app: https://thescholium.github.io/musubi/
-- Set in the Istari design system: EB Garamond, Cormorant Garamond and JetBrains Mono (SIL Open Font License 1.1), embedded in the file.
+- Version 2.8.0. MIT License. Web app: https://thescholium.github.io/musubi/
+- Set in the Istari design system, with five themes (Istari, Istari Paper, Mithrandir, Ithryn Luin, Aiwendil): EB Garamond, Cormorant Garamond and JetBrains Mono (SIL Open Font License 1.1), embedded in the file.
 - Bundled libraries: CodeMirror 6 and Lezer (MIT), KaTeX and mhchem (MIT), marked (MIT), DOMPurify (Apache-2.0 or MPL-2.0), pdf.js (Apache-2.0). Default snippets from Obsidian LaTeX Suite (MIT).
 - Your notes are plain Markdown with YAML front matter. You can read them in any editor, and they work in Obsidian.
 

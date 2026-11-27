@@ -1,5 +1,5 @@
 """Musubi 2.7: navigation arrows, tabs and split view, folder tree, block references, tag manager,
-plots from Python, review statistics, PDF reader, light theme and bold anchors.
+plots from Python, review statistics, PDF reader, light theme and bold anchors, and the 2.8 themes.
 Run: python3 test/test_v27.py (after node build.mjs)"""
 import base64, os, tempfile
 from playwright.sync_api import sync_playwright
@@ -217,6 +217,32 @@ with sync_playwright() as p:
     if E("!!document.querySelector('.ov-dialog .btn-danger')"): pg.click('.ov-dialog .btn-danger'); pg.wait_for_timeout(400)
     check(E("[musubi.app.settings.retiredTypes.length, musubi.app.settings.deletedTypes.length, musubi.app.settings.customTypes.length]") == [0, 0, 0], 'reset to defaults clears all type changes')
     pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
+
+    # ---------- 2.8.0: the three Istari themes and the theme picker ----------
+    E("musubi.app.settings.theme = 'dark'; musubi.applyTheme()")
+    check(E("getComputedStyle(document.body).backgroundColor") == 'rgb(18, 16, 14)', 'Istari keeps its own ground')
+    base = E("getComputedStyle(document.documentElement).getPropertyValue('--ornament')")
+    seen = {}
+    for tid, bg in [('mithrandir', 'rgb(18, 19, 22)'), ('ithryn', 'rgb(11, 15, 28)'), ('aiwendil', 'rgb(15, 19, 15)')]:
+        E(f"musubi.app.settings.theme = '{tid}'; musubi.applyTheme()")
+        check(E("document.documentElement.dataset.theme") == tid and E("getComputedStyle(document.body).backgroundColor") == bg, f'the {tid} theme applies its ground')
+        orn = E("getComputedStyle(document.documentElement).getPropertyValue('--ornament')")
+        check(orn != base and orn not in seen.values(), f'the {tid} theme has its own heading sigil')
+        seen[tid] = orn
+        check(E("document.querySelector('meta[name=\"color-scheme\"]') ? document.querySelector('meta[name=\"color-scheme\"]').content : 'dark'") == 'dark', f'the {tid} theme is a dark scheme')
+    E("musubi.openSettings('general')"); pg.wait_for_timeout(400)
+    check(E("document.querySelectorAll('.theme-picker .tp-card').length") == 5, 'the picker shows five themes')
+    check(E("getComputedStyle(document.querySelector('.tp-card[data-id=\"ithryn\"] .tp-swatch')).backgroundColor") == 'rgb(11, 15, 28)', 'each card is drawn in its own theme')
+    pg.click('.tp-card[data-id="mithrandir"]'); pg.wait_for_timeout(200)
+    check(E("musubi.app.settings.theme") == 'mithrandir' and E("document.querySelector('.tp-card.on').dataset.id") == 'mithrandir', 'a card chooses the theme')
+    pg.click('.tp-auto input'); pg.wait_for_timeout(200)
+    check(E("musubi.app.settings.theme") == 'auto' and E("musubi.app.settings.themeNight") == 'mithrandir', 'following the system keeps the dark theme for the night')
+    pg.click('.tp-card[data-id="aiwendil"]'); pg.wait_for_timeout(200)
+    check(E("musubi.app.settings.theme") == 'auto' and E("musubi.app.settings.themeNight") == 'aiwendil', 'a dark card changes the night theme while following the system')
+    pg.click('.tp-card[data-id="light"]'); pg.wait_for_timeout(200)
+    check(E("musubi.app.settings.theme") == 'light' and E("document.documentElement.dataset.theme") == 'istari-light', 'the paper card stops following the system')
+    pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
+    E("musubi.app.settings.theme = 'dark'; musubi.app.settings.themeNight = 'dark'; musubi.applyTheme()")
 
     real = [e for e in errs if 'favicon' not in e]
     check(not real, 'no console errors' + (': ' + '; '.join(real[:4]) if real else ''))

@@ -29,7 +29,7 @@ async function assetBlob(name) {
 const pdfMarks = (name) => { const all = app.settings.pdfMarks || (app.settings.pdfMarks = {}); return all[name] || (all[name] = []); };
 const pdfPos = (name) => (app.settings.pdfPos || {})[name] || {};
 function savePdfPos(name, v) { const all = app.settings.pdfPos || (app.settings.pdfPos = {}); all[name] = Object.assign(all[name] || {}, v); saveSettings(); }
-const pdfDarkPages = () => { const v = app.settings.pdfDark; return v == null ? resolvedTheme() !== 'istari-light' : !!v; };
+const pdfDarkPages = () => { const v = app.settings.pdfDark; return v == null ? !themeInfo(resolvedTheme()).light : !!v; };
 
 /* The quote text: one line, with words broken at line ends joined again. */
 function cleanPdfText(s) {

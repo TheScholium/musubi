@@ -53,7 +53,7 @@ class ForceGraph {
     const v = (n) => cs.getPropertyValue(n).trim();
     const c = {};
     for (const t of TYPE_IDS) c[t] = v('--t-' + t) || '#948b76';
-    c.edge = v('--graph-line'); c.plainEdge = '#5b4f37'; c.text = v('--graph-text');
+    c.edge = v('--graph-line'); c.plainEdge = v('--graph-plain') || '#5b4f37'; c.text = v('--graph-text');
     c.bg = v('--ist-bg-0'); c.accent = v('--ist-gold');
     c.pro = v('--rel-pro'); c.con = v('--rel-con'); c.struct = v('--rel-struct'); c.seq = v('--rel-seq');
     c.muted = v('--ist-text-muted');

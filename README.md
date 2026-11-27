@@ -70,7 +70,19 @@ It is set in **Istari**, a dark, book-like design system: warm ink, parchment te
 **The interface**
 Indentation is drawn wider than two spaces, with a faint guide line at each level, as in a code editor; wrapped lines stay under their indent. The file keeps two spaces for each level, because four spaces before a paragraph make a code block in Markdown. Settings → General → *Indentation* sets the width and turns the guides off.
 
-Settings → General → *Theme*: **Istari** (dark), **Istari Paper** (light), or follow the system. *Bold anchors* make the first letters of each word bold, as a lead-in for the eye, in live preview and read view (light, medium or strong); code, mathematics and links do not change, and neither do the words in the file. Some readers with ADHD say it helps them keep their place. A 2024 controlled study (Acta Psychologica 247, 104304) found no difference in reading speed, so treat it as a comfort setting, not a speed aid.
+Settings → General → *Theme*: pick a card. Each card is drawn in its own theme.
+
+| Theme | Named for | Ground and pigment | Heading sigil |
+|---|---|---|---|
+| **Istari** | the order of wizards | warm ink, parchment text, one gold pigment | four-point star |
+| **Istari Paper** | (light) | dark ink on parchment, a deeper gold | four-point star |
+| **Mithrandir** | Gandalf, the Grey Pilgrim, who kept Narya, the Ring of Fire | storm-grey stone, ash-silver text, an ember pigment, a faint glow from below | flame |
+| **Ithryn Luin** | the Blue Wizards, who went into the East | lapis night, moonlit silver text, a star-blue pigment, star-gold for examples | eight-point star |
+| **Aiwendil** | Radagast, friend of birds, in the forest at Rhosgobel | moss-dark ground, lichen text, a fern-gold pigment, russet for warnings | leaf |
+
+All five use the same type, rules and layout; the note-type pigments, plots, graph, statistics and handwriting from Supernote follow the theme. *Follow the system* uses Istari Paper by day and the dark theme you chose by night. Printing always uses the Paper colours.
+
+*Bold anchors* make the first letters of each word bold, as a lead-in for the eye, in live preview and read view (light, medium or strong); code, mathematics and links do not change, and neither do the words in the file. Some readers with ADHD say it helps them keep their place. A 2024 controlled study (Acta Psychologica 247, 104304) found no difference in reading speed, so treat it as a comfort setting, not a speed aid.
 
 The sidebar tabs (notes, tags, inbox, maintain) are icons; the open tab shows its name. `Ctrl/⌘ ,` opens Settings. The welcome screen has a foldout essay, *Zettelkasten and the Musubi philosophy*: a history of slip boxes, commonplace books, brush notes, glosses and knotted cords from China, Korea, Japan, the Islamic world, West Africa, South Asia, the Andes and Europe; the case for the method in mathematics and physics; and why each part of Musubi works as it does, with 82 sources, and a section on the modern revival: Reddit, YouTube and forum testimony from mathematicians and physicists, and the method's return to China, Korea, Japan and India. The command palette opens it too.
 
@@ -162,9 +174,9 @@ node build.mjs       # bundles CodeMirror, inlines fonts and libraries, writes d
 | `src/plot.js` | The Python subset, numpy, math and pyplot, and the SVG renderer for plots |
 | `src/stats.js` | Review log and statistics |
 | `src/pdfreader.js` | The PDF reader (pdf.js) |
-| `src/anchors.js` | Bold anchors and the theme choice |
+| `src/anchors.js` | Bold anchors and the theme list |
 | `src/tour.js` | Onboarding tour with full cleanup, add-link dialog, migration from version 1 |
-| `src/style.css` | The Istari theme for the whole interface, with a Paper theme for print |
+| `src/style.css` | The Istari design system for the whole interface: Istari, Istari Paper (also used for print), Mithrandir, Ithryn Luin and Aiwendil |
 | `vendor/` | CodeMirror bundle entry and the Istari fonts (OFL) |
 
 ## Tests
@@ -179,7 +191,7 @@ python3 test/test_attach.py    # attachments: location setting, paste and drop, 
 python3 test/test_v26.py       # icon tabs, custom note types, Ctrl/⌘ comma, the knot mark, the philosophy essay and its footnotes (36 checks)
 python3 test/test_archive.py   # a note from the Archive Supernote plugin in folder mode: fields kept, file not rewritten, stable ID, ink image recoloured (7 checks)
 python3 test/test_sandbox.py  # runs inside a sandboxed srcdoc iframe, as an embedded artifact does (6 checks)
-python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list (69 checks)
+python3 test/test_v27.py      # arrows, tabs and split view, folder tree, block references, tag manager, plots, statistics, PDF reader, light theme and bold anchors, indent guides, hotkeys, inbox, note types list, the 2.8 themes and theme picker (85 checks)
 ```
 
 ## Privacy

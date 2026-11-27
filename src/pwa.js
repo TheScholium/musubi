@@ -15,7 +15,7 @@ function pwaInit() {
   const head = document.head;
   head.appendChild(h('link', { rel: 'manifest', href: 'manifest.webmanifest' }));
   head.appendChild(h('link', { rel: 'apple-touch-icon', href: 'icons/apple-touch-icon.png' }));
-  head.appendChild(h('meta', { name: 'theme-color', content: '#12100e' }));
+  head.appendChild(h('meta', { name: 'theme-color', content: getComputedStyle(document.documentElement).getPropertyValue('--ist-bg-1').trim() || '#12100e' }));
   head.appendChild(h('meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }));
   window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); PWA.prompt = e; });
   window.addEventListener('appinstalled', () => { PWA.prompt = null; toast('Musubi is installed. Open it from the Dock or the app list.'); });
